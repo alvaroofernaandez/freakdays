@@ -41,7 +41,7 @@
     "@vueuse/core": "^14.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "happy-dom": "^20.0.11",
+    "happy-dom": "^20.8.9",
     "lucide-vue-next": "^0.561.0",
     "prisma": "^6.0.0",
     "radix-vue": "^1.9.17",
