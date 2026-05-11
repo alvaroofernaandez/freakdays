@@ -1,0 +1,95 @@
+version: 1
+project: freak-days
+type: frontend-web
+
+context:
+  frontend_stack:
+    - nuxt-4
+    - vue-3
+    - typescript
+  backend_repo: freak-days-api
+  source_of_truth:
+    - AGENTS.md
+    - docs/architecture/supabase-to-clerk-nest-cutover.md
+    - README.md
+  migration:
+    from: supabase
+    to:
+      auth: clerk
+      backend: nestjs
+      storage: cloudflare-r2
+      email: resend
+
+workflow:
+  tracker: github-issues
+  flow: issue-task-risk-design-implement-validate-pr
+  branching:
+    model: trunk-based-light
+    permanent_branches:
+      - main
+    merge_strategy: squash
+  risk_labels:
+    - risk/low
+    - risk/medium
+    - risk/high
+    - risk/critical
+  progressive_disclosure:
+    L0: risk/low
+    L1: risk/medium
+    L2: risk/high
+    L3: risk/critical
+
+quality_gates:
+  pr_blocking:
+    - pnpm lint
+    - pnpm typecheck
+    - pnpm test
+  pr_non_blocking:
+    - manual-smoke
+    - staging-contract-smoke
+
+security:
+  tenant_isolation_required: true
+  critical_domains:
+    - auth
+    - multitenancy
+    - storage
+    - personal-data
+  no_client_secrets: true
+  mandatory_review_for_critical: true
+  tenant_context_key: orgId
+
+contracts:
+  policy: contract-first
+  owner_repo: freak-days-api
+  frontend_behavior:
+    - never-invent-undocumented-fields
+    - document-fe-be-impact-on-change
+
+storage:
+  provider: cloudflare-r2
+  browser_direct_privileged_calls: false
+  required_flow:
+    - request-signed-url
+    - upload-file
+    - confirm-upload-in-backend
+
+email:
+  provider: resend
+  browser_direct_send: false
+
+opencode:
+  global_skills_path: ~/.agents/skills
+  prefer_project_skills: true
+  auto_skill_routing: true
+  progressive_disclosure: true
+
+external_skills:
+  - find-skills
+  - frontend-design
+  - web-design-guidelines
+  - senior-security
+  - performance
+  - core-web-vitals
+  - playwright
+  - typescript
