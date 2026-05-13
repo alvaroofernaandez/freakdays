@@ -1,54 +1,21 @@
-import { getPrisma } from '../../../utils/prisma';
+/**
+ * POST /api/profile/:id/exp — proxies to NestJS POST /v1/profile/me/exp.
+ *
+ * S5.d of the supabase→clerk+nestjs migration.
+ *
+ * The `:id` URL param is no longer used: NestJS scopes by Clerk JWT subject.
+ * Level calculation lives in the NestJS profile service.
+ */
+import { defineEventHandler, readBody } from 'h3';
 
-function calculateLevel(exp: number): number {
-  return Math.floor(exp / 100) + 1;
-}
+import { createApiClient } from '../../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id');
+  const apiClient = createApiClient(event);
   const body = await readBody(event);
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'User ID is required',
-    });
-  }
-
-  if (typeof body.amount !== 'number') {
-    throw createError({
-      statusCode: 400,
-      message: 'Amount is required and must be a number',
-    });
-  }
-
-  try {
-    const prisma = await getPrisma();
-    const profile = await prisma.profile.findUnique({
-      where: { id },
-      select: { totalExp: true },
-    });
-
-    if (!profile) {
-      throw createError({
-        statusCode: 404,
-        message: 'Profile not found',
-      });
-    }
-
-    const newTotal = profile.totalExp + body.amount;
-    const newLevel = calculateLevel(newTotal);
-
-    await prisma.profile.update({
-      where: { id },
-      data: { totalExp: newTotal, level: newLevel },
-    });
-
-    return { newTotal, newLevel };
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error adding exp',
-    });
-  }
+  return apiClient('/v1/profile/me/exp', {
+    method: 'POST',
+    body,
+  });
 });

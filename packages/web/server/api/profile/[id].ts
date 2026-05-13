@@ -1,49 +1,19 @@
-import { getPrisma } from '../../utils/prisma';
+/**
+ * GET /api/profile/:id — proxies to NestJS GET /v1/profile/me.
+ *
+ * S5.d of the supabase→clerk+nestjs migration.
+ *
+ * The `:id` URL param is no longer used: NestJS scopes by Clerk JWT subject.
+ * The proxy keeps the legacy URL shape for client backward compatibility.
+ * Cross-user profile reads (someone viewing another user's profile) are a
+ * separate NestJS endpoint and out of scope here.
+ */
+import { defineEventHandler } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id');
+  const apiClient = createApiClient(event);
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'User ID is required',
-    });
-  }
-
-  try {
-    const prisma = await getPrisma();
-    const profile = await prisma.profile.findUnique({
-      where: { id },
-    });
-
-    if (!profile) {
-      throw createError({
-        statusCode: 404,
-        message: 'Profile not found',
-      });
-    }
-
-    return {
-      id: profile.id,
-      username: profile.username,
-      displayName: profile.displayName,
-      avatarUrl: profile.avatarUrl,
-      bannerUrl: profile.bannerUrl,
-      totalExp: profile.totalExp,
-      level: profile.level,
-      bio: profile.bio,
-      favoriteAnimeId: profile.favoriteAnimeId,
-      favoriteMangaId: profile.favoriteMangaId,
-      location: profile.location,
-      website: profile.website,
-      socialLinks: profile.socialLinks,
-    };
-  } catch (error: any) {
-    console.error('Error in profile API:', error);
-    throw createError({
-      statusCode: 500,
-      message: error?.message || 'Error fetching profile',
-      data: error,
-    });
-  }
+  return apiClient('/v1/profile/me');
 });
