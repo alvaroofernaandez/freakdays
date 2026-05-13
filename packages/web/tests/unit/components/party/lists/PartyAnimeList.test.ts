@@ -12,11 +12,10 @@ vi.mock('@/composables/useToast', () => ({
   }),
 }));
 
-vi.mock('@/composables/useSupabase', () => ({
-  useSupabase: () => ({
-    auth: {
-      getSession: vi.fn().mockResolvedValue({ data: { session: { access_token: 'token' } } }),
-    },
+vi.mock('@/composables/useAuthContext', () => ({
+  useAuthContext: () => ({
+    refresh: vi.fn().mockResolvedValue(undefined),
+    getAccessToken: () => 'token',
   }),
 }));
 

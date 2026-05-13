@@ -30,16 +30,6 @@ vi.mock('../../../app/composables/useWorkouts', () => ({
   }),
 }));
 
-vi.mock('../../../app/composables/useSupabase', () => ({
-  useSupabase: () => ({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn().mockResolvedValue({ data: [], error: null }),
-      })),
-    })),
-  }),
-}));
-
 vi.mock('../../../app/utils/greeting', () => ({
   getGreeting: () => 'Buenos días',
 }));

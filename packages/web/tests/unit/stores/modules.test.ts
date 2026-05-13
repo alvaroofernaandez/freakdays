@@ -221,32 +221,26 @@ describe('useModulesStore', () => {
   });
 
   describe('syncToDatabase', () => {
-    it('debe comportarse como no-op y marcar synced', async () => {
+    it('PUTs the current module state to /api/modules and marks synced', async () => {
       const store = useModulesStore();
-      const mockSupabase = {
-        from: vi.fn(),
-        upsert: vi.fn(),
-      };
+      const fetchMock = vi.fn().mockResolvedValue({ modules: [] });
+      vi.stubGlobal('$fetch', fetchMock);
 
       store.setModule('quests', true);
       store.setModule('anime', false);
 
-      await store.syncToDatabase(mockSupabase, 'user-123');
+      await store.syncToDatabase();
 
       expect(store.synced).toBe(true);
-      expect(mockSupabase.from).not.toHaveBeenCalled();
-      expect(mockSupabase.upsert).not.toHaveBeenCalled();
-    });
-
-    it('no lanza error aunque reciba dependencias legacy', async () => {
-      const store = useModulesStore();
-      const mockSupabase = {
-        from: vi.fn(),
-        upsert: vi.fn(),
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/modules',
+        expect.objectContaining({ method: 'PUT' }),
+      );
+      const body = fetchMock.mock.calls[0]?.[1]?.body as {
+        modules: Array<{ moduleId: string; enabled: boolean }>;
       };
-
-      await expect(store.syncToDatabase(mockSupabase, 'user-123')).resolves.toBeUndefined();
-      expect(store.synced).toBe(true);
+      expect(body.modules).toContainEqual({ moduleId: 'quests', enabled: true });
+      expect(body.modules).toContainEqual({ moduleId: 'anime', enabled: false });
     });
   });
 

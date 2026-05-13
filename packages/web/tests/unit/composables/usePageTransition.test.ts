@@ -7,9 +7,13 @@ const mockRoute = {
   path: '/test',
 };
 
-vi.mock('vue-router', () => ({
-  useRoute: () => mockRoute,
-}));
+vi.mock('vue-router', async () => {
+  const actual = await vi.importActual<typeof import('vue-router')>('vue-router');
+  return {
+    ...actual,
+    useRoute: () => mockRoute,
+  };
+});
 
 describe('usePageTransition', () => {
   beforeEach(() => {

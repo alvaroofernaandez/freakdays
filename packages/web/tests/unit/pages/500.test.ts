@@ -3,12 +3,13 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import Page500 from '../../../app/pages/500.vue';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    back: vi.fn(),
-  }),
-}));
+vi.mock('vue-router', async () => {
+  const actual = await vi.importActual<typeof import('vue-router')>('vue-router');
+  return {
+    ...actual,
+    useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
+  };
+});
 
 describe('500.vue', () => {
   beforeEach(() => {
