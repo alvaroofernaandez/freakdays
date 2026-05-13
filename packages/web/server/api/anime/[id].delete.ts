@@ -1,26 +1,22 @@
-import { getPrisma } from '../../utils/prisma';
+/**
+ * DELETE /api/anime/:id — proxies to NestJS DELETE /v1/anime/:id.
+ *
+ * S5.a of the supabase→clerk+nestjs migration.
+ */
+import { createError, defineEventHandler, getRouterParam } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
 
   if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'Anime ID is required',
-    });
+    throw createError({ statusCode: 400, statusMessage: 'Anime ID is required' });
   }
 
-  try {
-    const prisma = await getPrisma();
-    await prisma.animeEntry.delete({
-      where: { id },
-    });
+  const apiClient = createApiClient(event);
 
-    return { success: true };
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error deleting anime entry',
-    });
-  }
+  return apiClient(`/v1/anime/${id}`, {
+    method: 'DELETE',
+  });
 });
