@@ -1,95 +1,160 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install dev dev-web dev-api dev-down \
+.PHONY: help \
+        install approve-builds \
+        dev dev-web dev-api dev-down \
         build build-web build-api \
-        test test-web test-api test-watch test-coverage \
-        lint typecheck \
-        prisma-generate-web prisma-generate-api prisma-migrate-web prisma-migrate-api \
-        prisma-studio-web prisma-studio-api \
-        approve-builds
+        test test-web test-api test-watch \
+        coverage coverage-web coverage-api \
+        e2e e2e-install e2e-ui \
+        lint lint-fix typecheck \
+        format format-check \
+        audit audit-fix update-deps \
+        clean clean-all \
+        ci-local \
+        prisma-generate prisma-migrate prisma-studio prisma-deploy \
+        release release-dry
 
-# ── Colors ──────────────────────────────────────────────────────────────────
-CYAN  := \033[36m
-RESET := \033[0m
-BOLD  := \033[1m
+# Color helpers (internal — not displayed by the help target).
+CYAN   := \033[36m
+GREEN  := \033[32m
+YELLOW := \033[33m
+RESET  := \033[0m
+BOLD   := \033[1m
 
-help: ## Show available commands
+help: ## Show available commands grouped by section
 	@echo ""
 	@echo "$(BOLD)FreakDays Monorepo$(RESET)"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "  $(CYAN)%-26s$(RESET) %s\n", $$1, $$2}'
+	@awk 'BEGIN {FS = ":.*?## "} \
+		/^# ── [A-Z]/ {sub(/# ── /,"",$$0); sub(/ ─+$$/,"",$$0); printf "\n$(BOLD)$(YELLOW)%s$(RESET)\n", $$0} \
+		/^[a-zA-Z0-9_-]+:.*?## .*$$/ {printf "  $(CYAN)%-22s$(RESET) %s\n", $$1, $$2}' \
+		$(MAKEFILE_LIST)
 	@echo ""
 
-# ── Install ──────────────────────────────────────────────────────────────────
-install: ## Install all dependencies (monorepo)
-	pnpm install
+# ── Install ─────────────────────────────────────────────────────────────────
+install: ## Install all dependencies (frozen lockfile via pnpm install)
+	pnpm install --frozen-lockfile
 
-approve-builds: ## Approve build scripts for Prisma + NestJS (run once after install)
+approve-builds: ## Approve build scripts (run once after a fresh install)
 	pnpm approve-builds
 
-# ── Dev ───────────────────────────────────────────────────────────────────────
-dev: ## Start full stack (API + frontend, coordinated)
+# ── Dev ─────────────────────────────────────────────────────────────────────
+dev: ## Start the full stack (API + web, coordinated)
 	pnpm dev
 
-dev-web: ## Start frontend only (Nuxt)
+dev-web: ## Start the web (Nuxt) dev server only
 	pnpm dev:web
 
-dev-api: ## Start backend only (NestJS)
+dev-api: ## Start the API (NestJS) dev server only
 	pnpm dev:api
 
 dev-down: ## Stop local Docker services (PostgreSQL)
 	pnpm dev:down
 
-# ── Build ─────────────────────────────────────────────────────────────────────
+# ── Build ───────────────────────────────────────────────────────────────────
 build: ## Build all packages
 	pnpm build
 
-build-web: ## Build frontend (Nuxt)
+build-web: ## Build the web package
 	pnpm --filter freak-days build
 
-build-api: ## Build backend (NestJS)
+build-api: ## Build the API package
 	pnpm --filter freak-days-api build
 
-# ── Test ──────────────────────────────────────────────────────────────────────
-test: ## Run all tests
+# ── Test ────────────────────────────────────────────────────────────────────
+test: ## Run all unit tests (web + api)
 	pnpm test
 
-test-web: ## Run frontend tests (Vitest)
+test-web: ## Run web unit tests (vitest)
 	pnpm --filter freak-days test
 
-test-api: ## Run backend tests (Jest)
+test-api: ## Run API unit tests (jest)
 	pnpm --filter freak-days-api test
 
-test-watch: ## Run frontend tests in watch mode
+test-watch: ## Run web tests in watch mode
 	pnpm --filter freak-days test:watch
 
-test-coverage: ## Run frontend tests with coverage report
+# ── Coverage ────────────────────────────────────────────────────────────────
+coverage: ## Run coverage for both packages
+	pnpm test:coverage
+
+coverage-web: ## Run web coverage (vitest)
 	pnpm --filter freak-days test:coverage
 
-# ── Quality ───────────────────────────────────────────────────────────────────
-lint: ## Lint all packages
+coverage-api: ## Run API coverage (jest)
+	pnpm --filter freak-days-api test:coverage
+
+# ── E2E (Playwright) ────────────────────────────────────────────────────────
+e2e: ## Run Playwright E2E suite (builds web first)
+	pnpm --filter freak-days build
+	pnpm --filter freak-days e2e
+
+e2e-install: ## Install Playwright browsers + system deps
+	pnpm --filter freak-days e2e:install
+
+e2e-ui: ## Open Playwright UI mode for interactive debugging
+	pnpm --filter freak-days e2e:ui
+
+# ── Quality ─────────────────────────────────────────────────────────────────
+lint: ## Lint all packages (ESLint)
 	pnpm lint
 
-typecheck: ## Type-check frontend (Nuxt + TypeScript)
+lint-fix: ## Lint and auto-fix where possible
+	pnpm --filter freak-days lint:fix
+
+typecheck: ## Type-check all packages
 	pnpm typecheck
 
-# ── Prisma — Web (Supabase) ───────────────────────────────────────────────────
-prisma-generate-web: ## Generate Prisma client for frontend
-	pnpm --filter freak-days prisma:generate
+format: ## Format the whole repo (Prettier --write)
+	pnpm format
 
-prisma-migrate-web: ## Run Prisma migrations for frontend DB
-	pnpm --filter freak-days prisma:migrate
+format-check: ## Check formatting without writing (CI uses this)
+	pnpm format:check
 
-prisma-studio-web: ## Open Prisma Studio for frontend DB
-	pnpm --filter freak-days prisma:studio
+# ── Security & Dependencies ─────────────────────────────────────────────────
+audit: ## Run pnpm audit at moderate level (matches CI)
+	pnpm audit --audit-level=moderate
 
-# ── Prisma — API (PostgreSQL) ─────────────────────────────────────────────────
-prisma-generate-api: ## Generate Prisma client for backend
+audit-fix: ## Try to auto-fix known vulnerabilities
+	pnpm audit --fix
+
+update-deps: ## Interactive dependency update across the workspace
+	pnpm update -i -r --latest
+
+# ── Cleanup ─────────────────────────────────────────────────────────────────
+clean: ## Remove build outputs and cache directories
+	rm -rf packages/*/.output packages/*/.nuxt packages/*/dist packages/*/coverage \
+	       packages/*/playwright-report packages/*/test-results
+
+clean-all: clean ## clean + nuke node_modules and lockfile (NUCLEAR — re-runs pnpm install)
+	rm -rf node_modules packages/*/node_modules
+	pnpm install --frozen-lockfile
+
+# ── CI parity ───────────────────────────────────────────────────────────────
+ci-local: install format-check lint typecheck test coverage build ## Run the full CI suite locally (mirrors .github/workflows/ci.yml)
+
+# ── Prisma (API only — web Prisma removed in S6) ────────────────────────────
+prisma-generate: ## Regenerate the API Prisma client
 	pnpm --filter freak-days-api prisma:generate
 
-prisma-migrate-api: ## Run Prisma migrations for backend DB
+prisma-migrate: ## Run API Prisma migrations in dev
 	pnpm --filter freak-days-api prisma:migrate:dev
 
-prisma-studio-api: ## Open Prisma Studio for backend DB
+prisma-studio: ## Open Prisma Studio against the API database
 	pnpm --filter freak-days-api prisma:studio
+
+prisma-deploy: ## Apply pending migrations to a production database
+	pnpm --filter freak-days-api prisma:migrate:deploy
+
+# ── Release ─────────────────────────────────────────────────────────────────
+# NOTE: Changesets-based release automation lands in Phase 8.
+# These targets are placeholders pointing at the manual flow for now.
+release: ## Placeholder — Phase 8 introduces Changesets-driven releases
+	@echo "$(YELLOW)Release automation (Changesets) is scheduled for Phase 8.$(RESET)"
+	@echo "Until then, releases are manual: tag + GitHub release."
+	@exit 1
+
+release-dry: ## Placeholder — dry-run for the future release flow
+	@echo "$(YELLOW)Release automation (Changesets) is scheduled for Phase 8.$(RESET)"
+	@exit 1
