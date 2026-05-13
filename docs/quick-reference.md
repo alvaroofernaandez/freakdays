@@ -7,24 +7,24 @@ Referencia rápida de patrones comunes, snippets de código y soluciones a probl
 ### Verificar Autenticación
 
 ```typescript
-const authStore = useAuthStore()
-if (!authStore.userId) return []
+const authStore = useAuthStore();
+if (!authStore.userId) return [];
 ```
 
 ### Cargar Datos con Loading
 
 ```typescript
-const items = ref([])
-const isLoading = ref(false)
+const items = ref([]);
+const isLoading = ref(false);
 
 async function loadItems() {
-  isLoading.value = true
+  isLoading.value = true;
   try {
-    items.value = await api.fetchItems()
+    items.value = await api.fetchItems();
   } catch (error) {
-    toast.error('Error al cargar')
+    toast.error('Error al cargar');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 ```
@@ -33,10 +33,10 @@ async function loadItems() {
 
 ```typescript
 try {
-  await operation()
-  toast.success('Éxito')
+  await operation();
+  toast.success('Éxito');
 } catch (error) {
-  errorHandler.handleError(error)
+  errorHandler.handleError(error);
 }
 ```
 
@@ -47,10 +47,10 @@ const { data, error } = await supabase
   .from('table_name')
   .select('*')
   .eq('user_id', authStore.userId)
-  .order('created_at', { ascending: false })
+  .order('created_at', { ascending: false });
 
-if (error) throw error
-return data ?? []
+if (error) throw error;
+return data ?? [];
 ```
 
 ### Insert en Supabase
@@ -63,10 +63,10 @@ const { data, error } = await supabase
     field: value,
   })
   .select()
-  .single()
+  .single();
 
-if (error) throw error
-return data
+if (error) throw error;
+return data;
 ```
 
 ### Update en Supabase
@@ -76,9 +76,9 @@ const { error } = await supabase
   .from('table_name')
   .update({ field: newValue })
   .eq('id', id)
-  .eq('user_id', authStore.userId)
+  .eq('user_id', authStore.userId);
 
-if (error) throw error
+if (error) throw error;
 ```
 
 ### Delete en Supabase
@@ -88,9 +88,9 @@ const { error } = await supabase
   .from('table_name')
   .delete()
   .eq('id', id)
-  .eq('user_id', authStore.userId)
+  .eq('user_id', authStore.userId);
 
-if (error) throw error
+if (error) throw error;
 ```
 
 ## 🎨 Componentes UI Comunes
@@ -138,11 +138,7 @@ if (error) throw error
 ### Estado Vacío
 
 ```vue
-<Empty
-  title="No hay elementos"
-  description="Añade tu primer elemento"
-  :icon="Plus"
-/>
+<Empty title="No hay elementos" description="Añade tu primer elemento" :icon="Plus" />
 ```
 
 ### Skeleton Loader
@@ -162,32 +158,39 @@ if (error) throw error
 
 ```typescript
 const filtered = computed(() => {
-  return items.value.filter(item => item.active)
-})
+  return items.value.filter((item) => item.active);
+});
 ```
 
 ### Computed con Parámetros
 
 ```typescript
 const getItem = computed(() => (id: string) => {
-  return items.value.find(item => item.id === id)
-})
+  return items.value.find((item) => item.id === id);
+});
 ```
 
 ### Watch Simple
 
 ```typescript
-watch(() => route.query.filter, (newFilter) => {
-  loadItems(newFilter)
-})
+watch(
+  () => route.query.filter,
+  (newFilter) => {
+    loadItems(newFilter);
+  },
+);
 ```
 
 ### Watch con Inmediato
 
 ```typescript
-watch(() => props.item, (newItem) => {
-  form.value = { ...newItem }
-}, { immediate: true })
+watch(
+  () => props.item,
+  (newItem) => {
+    form.value = { ...newItem };
+  },
+  { immediate: true },
+);
 ```
 
 ## 📱 Responsive Design
@@ -212,20 +215,20 @@ watch(() => props.item, (newItem) => {
 ### Navegación Programática
 
 ```typescript
-navigateTo('/anime')
-navigateTo({ path: '/anime', query: { filter: 'watching' } })
+navigateTo('/anime');
+navigateTo({ path: '/anime', query: { filter: 'watching' } });
 ```
 
 ### Query Params
 
 ```typescript
-const route = useRoute()
-const filter = computed(() => route.query.filter as string)
+const route = useRoute();
+const filter = computed(() => route.query.filter as string);
 
 function updateFilter(newFilter: string) {
   navigateTo({
-    query: { ...route.query, filter: newFilter }
-  })
+    query: { ...route.query, filter: newFilter },
+  });
 }
 ```
 
@@ -234,17 +237,17 @@ function updateFilter(newFilter: string) {
 ### Verificar si está Autenticado
 
 ```typescript
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 if (!authStore.isAuthenticated) {
-  navigateTo('/login')
+  navigateTo('/login');
 }
 ```
 
 ### Obtener User ID
 
 ```typescript
-const authStore = useAuthStore()
-const userId = authStore.userId
+const authStore = useAuthStore();
+const userId = authStore.userId;
 ```
 
 ## 📊 Estadísticas
@@ -255,10 +258,10 @@ const userId = authStore.userId
 const stats = computed(() => {
   return {
     total: items.value.length,
-    active: items.value.filter(i => i.status === 'active').length,
-    completed: items.value.filter(i => i.status === 'completed').length,
-  }
-})
+    active: items.value.filter((i) => i.status === 'active').length,
+    completed: items.value.filter((i) => i.status === 'completed').length,
+  };
+});
 ```
 
 ## 🎨 Estilos Comunes
@@ -293,15 +296,15 @@ const stats = computed(() => {
 
 ```typescript
 if (import.meta.dev) {
-  console.log('Debug:', data)
+  console.log('Debug:', data);
 }
 ```
 
 ### Ver Estado del Store
 
 ```typescript
-const store = useModulesStore()
-console.log('Store state:', store.$state)
+const store = useModulesStore();
+console.log('Store state:', store.$state);
 ```
 
 ## 📝 Imports Comunes
@@ -309,28 +312,28 @@ console.log('Store state:', store.$state)
 ### Vue
 
 ```typescript
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue';
 ```
 
 ### Composables
 
 ```typescript
-import { useSupabase } from '@/composables/useSupabase'
-import { useAuthStore } from '~~/stores/auth'
-import { useToast } from '@/composables/useToast'
+import { useSupabase } from '@/composables/useSupabase';
+import { useAuthStore } from '~~/stores/auth';
+import { useToast } from '@/composables/useToast';
 ```
 
 ### Componentes UI
 
 ```typescript
-import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 ```
 
 ### Iconos
 
 ```typescript
-import { Plus, Trash2, Edit2 } from 'lucide-vue-next'
+import { Plus, Trash2, Edit2 } from 'lucide-vue-next';
 ```
 
 ## ✅ Checklist Rápido
@@ -349,5 +352,3 @@ Antes de commitear:
 ---
 
 **Última actualización**: Enero 2025
-
-

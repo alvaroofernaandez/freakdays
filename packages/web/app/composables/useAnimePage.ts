@@ -1,10 +1,6 @@
-import type {
-  AnimeEntry,
-  AnimeStatus,
-  CreateAnimeDTO,
-} from "@/composables/useAnime";
-import type { AnimeSearchResult } from "@/composables/useAnimeSearch";
-import { parseJikanAnimeToDTO } from "@/utils/anime-parser";
+import type { AnimeEntry, AnimeStatus, CreateAnimeDTO } from '@/composables/useAnime';
+import type { AnimeSearchResult } from '@/composables/useAnimeSearch';
+import { parseJikanAnimeToDTO } from '@/utils/anime-parser';
 
 export function useAnimePage() {
   const route = useRoute();
@@ -23,42 +19,40 @@ export function useAnimePage() {
     fetcher: () => animeApi.fetchAnimeList(),
   });
 
-  const activeView = ref<"list" | "marketplace">("list");
-  const activeTab = ref<"all" | AnimeStatus>("all");
+  const activeView = ref<'list' | 'marketplace'>('list');
+  const activeTab = ref<'all' | AnimeStatus>('all');
   const selectedAnimeForAdd = ref<AnimeSearchResult | null>(null);
   const addingAnime = ref(false);
 
   const newAnime = ref<CreateAnimeDTO>({
-    title: "",
-    status: "watching",
+    title: '',
+    status: 'watching',
     total_episodes: undefined,
     score: undefined,
     cover_url: undefined,
   });
 
   const filteredAnime = computed(() => {
-    if (activeTab.value === "all") {
+    if (activeTab.value === 'all') {
       return animeList.value || [];
     }
     return (animeList.value || []).filter((a) => a.status === activeTab.value);
   });
 
   const stats = computed(() => ({
-    watching: (animeList.value || []).filter((a) => a.status === "watching")
-      .length,
-    completed: (animeList.value || []).filter((a) => a.status === "completed")
-      .length,
+    watching: (animeList.value || []).filter((a) => a.status === 'watching').length,
+    completed: (animeList.value || []).filter((a) => a.status === 'completed').length,
     total: (animeList.value || []).length,
   }));
 
-  function setActiveView(view: "list" | "marketplace") {
+  function setActiveView(view: 'list' | 'marketplace') {
     activeView.value = view;
     const query: Record<string, string | string[]> = {
       ...route.query,
     } as Record<string, string | string[]>;
 
-    if (view === "marketplace") {
-      query.view = "marketplace";
+    if (view === 'marketplace') {
+      query.view = 'marketplace';
     } else {
       delete query.view;
       delete query.q;
@@ -71,19 +65,19 @@ export function useAnimePage() {
     const currentQuery: Record<string, string | string[]> = {
       ...route.query,
     } as Record<string, string | string[]>;
-    const trimmedQuery = query?.trim() || "";
+    const trimmedQuery = query?.trim() || '';
 
     if (trimmedQuery) {
       currentQuery.q = trimmedQuery;
-      currentQuery.view = "marketplace";
-      if (activeView.value !== "marketplace") {
-        activeView.value = "marketplace";
+      currentQuery.view = 'marketplace';
+      if (activeView.value !== 'marketplace') {
+        activeView.value = 'marketplace';
       }
     } else {
       delete currentQuery.q;
     }
 
-    const currentQ = (route.query.q as string) || "";
+    const currentQ = (route.query.q as string) || '';
     if (currentQ !== trimmedQuery) {
       router.replace({ query: currentQuery });
     }
@@ -103,7 +97,7 @@ export function useAnimePage() {
       const animeData = parseJikanAnimeToDTO(selectedAnimeForAdd.value, status);
 
       if (!animeData.title || !animeData.title.trim()) {
-        toast.error("El título del anime es requerido");
+        toast.error('El título del anime es requerido');
         return;
       }
 
@@ -111,19 +105,17 @@ export function useAnimePage() {
 
       if (created) {
         await reloadAnime();
-        setActiveView("list");
+        setActiveView('list');
         activeTab.value = status;
         statusModal.close();
         selectedAnimeForAdd.value = null;
-        toast.success("Anime añadido correctamente");
+        toast.success('Anime añadido correctamente');
       } else {
-        toast.error("No se pudo añadir el anime");
+        toast.error('No se pudo añadir el anime');
       }
     } catch (error: any) {
       const errorMessage =
-        error?.message ||
-        error?.error?.message ||
-        "Error al añadir el anime. Inténtalo de nuevo.";
+        error?.message || error?.error?.message || 'Error al añadir el anime. Inténtalo de nuevo.';
       toast.error(errorMessage);
     } finally {
       addingAnime.value = false;
@@ -137,8 +129,8 @@ export function useAnimePage() {
     if (created) {
       await reloadAnime();
       newAnime.value = {
-        title: "",
-        status: "watching",
+        title: '',
+        status: 'watching',
         total_episodes: undefined,
         score: undefined,
         cover_url: undefined,
@@ -155,7 +147,7 @@ export function useAnimePage() {
     if (success) {
       await reloadAnime();
       if (anime.totalEpisodes && newEp === anime.totalEpisodes) {
-        await animeApi.updateStatus(anime.id, "completed");
+        await animeApi.updateStatus(anime.id, 'completed');
         await reloadAnime();
       }
     }
@@ -180,8 +172,8 @@ export function useAnimePage() {
 
   onMounted(() => {
     const view = route.query.view as string;
-    if (view === "marketplace") {
-      setActiveView("marketplace");
+    if (view === 'marketplace') {
+      setActiveView('marketplace');
     }
   });
 

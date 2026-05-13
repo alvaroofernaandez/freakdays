@@ -19,18 +19,14 @@ export class OrganizationsService {
     private readonly identityContext: IdentityContextService,
   ) {}
 
-  async getMyOrganizations(
-    clerkUserId: string,
-  ): Promise<OrganizationMembershipSummary[]> {
+  async getMyOrganizations(clerkUserId: string): Promise<OrganizationMembershipSummary[]> {
     const user = await this.identityContext.getActiveUserByClerkIdOrThrow(clerkUserId);
     const memberships = await this.findActiveMemberships(user.id);
 
     return this.sortMemberships(this.mapMemberships(memberships));
   }
 
-  async bootstrapPersonalOrganization(
-    clerkUserId: string,
-  ): Promise<OrganizationMembershipSummary> {
+  async bootstrapPersonalOrganization(clerkUserId: string): Promise<OrganizationMembershipSummary> {
     const user = await this.ensureUserForBootstrap(clerkUserId);
     const memberships = await this.findActiveMemberships(user.id);
     const primaryMembership = this.sortMemberships(this.mapMemberships(memberships))[0];
@@ -54,10 +50,7 @@ export class OrganizationsService {
       userProfile?.lastName ?? null,
       user.id,
     );
-    const organizationSlug = await this.buildUniquePersonalSlug(
-      organizationName,
-      user.id,
-    );
+    const organizationSlug = await this.buildUniquePersonalSlug(organizationName, user.id);
 
     const organization = await this.prisma.$transaction(async (tx) => {
       const createdOrganization = await tx.organization.create({
@@ -203,12 +196,12 @@ export class OrganizationsService {
     return `Aventura de ${suffix}`;
   }
 
-  private async buildUniquePersonalSlug(
-    organizationName: string,
-    userId: string,
-  ): Promise<string> {
+  private async buildUniquePersonalSlug(organizationName: string, userId: string): Promise<string> {
     const baseName = this.slugify(organizationName);
-    const userToken = userId.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 6);
+    const userToken = userId
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toLowerCase()
+      .slice(0, 6);
     const suffix = userToken.length > 0 ? userToken : 'usr';
     const baseSlug = `${baseName}-${suffix}`;
 

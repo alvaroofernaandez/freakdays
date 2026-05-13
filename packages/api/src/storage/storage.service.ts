@@ -18,12 +18,8 @@ export class StorageService {
   constructor(private readonly configService: ConfigService) {
     const accountId = this.configService.get<string>('R2_ACCOUNT_ID')?.trim();
     const bucket = this.configService.get<string>('R2_BUCKET')?.trim();
-    const accessKeyId = this.configService
-      .get<string>('R2_ACCESS_KEY_ID')
-      ?.trim();
-    const secretAccessKey = this.configService
-      .get<string>('R2_SECRET_ACCESS_KEY')
-      ?.trim();
+    const accessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID')?.trim();
+    const secretAccessKey = this.configService.get<string>('R2_SECRET_ACCESS_KEY')?.trim();
     const endpointOverride = this.configService.get<string>('R2_ENDPOINT')?.trim();
     const publicUrl = this.configService.get<string>('R2_PUBLIC_URL')?.trim();
 

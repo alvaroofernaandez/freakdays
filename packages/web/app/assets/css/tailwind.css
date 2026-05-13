@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -83,7 +83,7 @@
   --font-family-display: Outfit, system-ui, sans-serif;
   --font-family-heading: Outfit, system-ui, sans-serif;
   --font-family-logo: Righteous, system-ui, sans-serif;
-  --font-family-mono: Inconsolata, "Courier New", monospace;
+  --font-family-mono: Inconsolata, 'Courier New', monospace;
 
   --color-exp-easy: oklch(0.7 0.2 145);
   --color-exp-medium: oklch(0.8 0.18 85);
@@ -160,12 +160,7 @@
 
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(
-      to right,
-      var(--primary),
-      var(--accent),
-      var(--secondary)
-    );
+    background-image: linear-gradient(to right, var(--primary), var(--accent), var(--secondary));
   }
 
   .glow-primary {
@@ -200,18 +195,15 @@
   }
 
   .glow-border::before {
-    content: "";
+    content: '';
     position: absolute;
     inset: -1px;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(
-      135deg,
-      var(--primary),
-      var(--accent),
-      var(--secondary)
-    );
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary));
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     mask-composite: exclude;
     opacity: 0.5;
     pointer-events: none;

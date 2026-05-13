@@ -153,7 +153,7 @@ const authContext = useAuthContext();
 await authContext.refresh();
 
 const api = useApiClient();
-const profile = await api.get<UserProfile>("/v1/profile/me", {
+const profile = await api.get<UserProfile>('/v1/profile/me', {
   requireOrg: true,
 });
 ```
@@ -407,11 +407,11 @@ Los verticales no migrados aún se mantienen fuera de este decommission y no fue
 
 Con `NUXT_PUBLIC_ENABLE_SUPABASE_FALLBACK=false` se endurece runtime para **bloquear explícitamente** puntos de entrada públicos que todavía dependen de Supabase directo.
 
-| Dominio | Estado Lote C | Punto legacy bloqueado cuando fallback OFF |
-|---|---|---|
-| Calendar | Pending migration | `useCalendar.*` (lectura/escritura en `release_calendar` vía Supabase) |
-| Quests / Notifications | Pending migration parcial | `useQuests.checkOverdueQuests` y `useQuests.checkQuestsDueSoon` (RPC Supabase) |
-| Party Lists compartidas | Pending migration | `usePartyLists.fetchLists` y `usePartyLists.createList` (token/session legacy Supabase) |
+| Dominio                 | Estado Lote C             | Punto legacy bloqueado cuando fallback OFF                                              |
+| ----------------------- | ------------------------- | --------------------------------------------------------------------------------------- |
+| Calendar                | Pending migration         | `useCalendar.*` (lectura/escritura en `release_calendar` vía Supabase)                  |
+| Quests / Notifications  | Pending migration parcial | `useQuests.checkOverdueQuests` y `useQuests.checkQuestsDueSoon` (RPC Supabase)          |
+| Party Lists compartidas | Pending migration         | `usePartyLists.fetchLists` y `usePartyLists.createList` (token/session legacy Supabase) |
 
 Comportamiento UX asociado:
 
@@ -824,13 +824,13 @@ Shape de respuesta:
 
 ## 4) Riesgos y mitigaciones
 
-| Riesgo | Impacto | Mitigación |
-|---|---|---|
-| Desalineación de contratos FE↔BE | Alto | Definir DTOs y versionado de endpoints antes de cada fase |
-| Pérdida de contexto tenant | Crítico | Forzar `orgId` en requests multi-tenant + tests de aislamiento |
-| Brecha de seguridad en auth | Crítico | Validación JWT en backend en todo endpoint protegido |
-| Regresión funcional por migración gradual | Alto | Migración por fases con feature flags y smoke tests |
-| Flujo de uploads inconsistente | Medio | Protocolo fijo request/upload/confirm y validación de ownership |
+| Riesgo                                    | Impacto | Mitigación                                                      |
+| ----------------------------------------- | ------- | --------------------------------------------------------------- |
+| Desalineación de contratos FE↔BE          | Alto    | Definir DTOs y versionado de endpoints antes de cada fase       |
+| Pérdida de contexto tenant                | Crítico | Forzar `orgId` en requests multi-tenant + tests de aislamiento  |
+| Brecha de seguridad en auth               | Crítico | Validación JWT en backend en todo endpoint protegido            |
+| Regresión funcional por migración gradual | Alto    | Migración por fases con feature flags y smoke tests             |
+| Flujo de uploads inconsistente            | Medio   | Protocolo fijo request/upload/confirm y validación de ownership |
 
 ---
 
@@ -853,15 +853,15 @@ Shape de respuesta:
 
 ## 6) Matriz de responsabilidades (Frontend vs Backend)
 
-| Capacidad | Frontend (`freak-days`) | Backend (`freak-days-api`) |
-|---|---|---|
-| UI/UX | Render, interacción y estados locales | No aplica |
-| Auth | Iniciar sesión Clerk y enviar contexto | Verificar JWT y autorizar |
-| Multitenancy | Selección tenant activa y propagación `orgId` | Enforcement de aislamiento por tenant |
-| Datos de dominio | Consumir contratos HTTP tipados | Reglas de negocio + persistencia |
-| Storage | Solicitar signed URL, subir archivo y confirmar | Emitir signed URL, validar ownership y registrar metadatos |
-| Emails | Disparar acción de negocio desde UI | Ejecutar envío con Resend + trazabilidad |
-| Errores | Mapear a mensajes de producto | Emitir códigos/errores de dominio consistentes |
+| Capacidad        | Frontend (`freak-days`)                         | Backend (`freak-days-api`)                                 |
+| ---------------- | ----------------------------------------------- | ---------------------------------------------------------- |
+| UI/UX            | Render, interacción y estados locales           | No aplica                                                  |
+| Auth             | Iniciar sesión Clerk y enviar contexto          | Verificar JWT y autorizar                                  |
+| Multitenancy     | Selección tenant activa y propagación `orgId`   | Enforcement de aislamiento por tenant                      |
+| Datos de dominio | Consumir contratos HTTP tipados                 | Reglas de negocio + persistencia                           |
+| Storage          | Solicitar signed URL, subir archivo y confirmar | Emitir signed URL, validar ownership y registrar metadatos |
+| Emails           | Disparar acción de negocio desde UI             | Ejecutar envío con Resend + trazabilidad                   |
+| Errores          | Mapear a mensajes de producto                   | Emitir códigos/errores de dominio consistentes             |
 
 ---
 

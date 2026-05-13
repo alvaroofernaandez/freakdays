@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import MangaCard from "../../../../app/components/manga/MangaCard";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import MangaCard from '../../../../app/components/manga/MangaCard';
 
-describe("MangaCard.vue", () => {
-  it("should render component", () => {
+describe('MangaCard.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(MangaCard, {
       global: {
         stubs: {

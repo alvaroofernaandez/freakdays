@@ -1,12 +1,12 @@
-import { useAuthStore } from "~~/stores/auth";
+import { useAuthStore } from '~~/stores/auth';
 
 export type AnimeStatus =
-  | "watching"
-  | "completed"
-  | "on_hold"
-  | "dropped"
-  | "plan_to_watch"
-  | "rewatching";
+  | 'watching'
+  | 'completed'
+  | 'on_hold'
+  | 'dropped'
+  | 'plan_to_watch'
+  | 'rewatching';
 
 export interface AnimeEntry {
   id: string;
@@ -66,7 +66,7 @@ export function useAnime() {
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.get<ApiAnimeEntry[]>("/v1/anime", {
+      const data = await apiClient.get<ApiAnimeEntry[]>('/v1/anime', {
         requireOrg: true,
       });
       return data.map(mapApiToAnime);
@@ -83,7 +83,7 @@ export function useAnime() {
     try {
       const data = await apiClient.get<ApiAnimeEntry[]>(
         `/v1/anime?status=${encodeURIComponent(status)}`,
-        { requireOrg: true }
+        { requireOrg: true },
       );
       return data.map(mapApiToAnime);
     } catch {
@@ -93,24 +93,24 @@ export function useAnime() {
 
   async function addAnime(dto: CreateAnimeDTO): Promise<AnimeEntry | null> {
     if (!authStore.userId) {
-      console.error("No user ID available");
+      console.error('No user ID available');
       return null;
     }
 
     if (!dto.title || !dto.title.trim()) {
-      console.error("Title is required");
+      console.error('Title is required');
       return null;
     }
 
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.post<ApiAnimeEntry>("/v1/anime", dto, {
+      const data = await apiClient.post<ApiAnimeEntry>('/v1/anime', dto, {
         requireOrg: true,
       });
       return mapApiToAnime(data);
     } catch (error) {
-      console.error("Error in addAnime:", error);
+      console.error('Error in addAnime:', error);
       throw apiClient.normalizeApiError(error);
     }
   }
@@ -124,7 +124,7 @@ export function useAnime() {
         { currentEpisode: episode },
         {
           requireOrg: true,
-        }
+        },
       );
       return true;
     } catch {
@@ -132,10 +132,7 @@ export function useAnime() {
     }
   }
 
-  async function updateStatus(
-    id: string,
-    status: AnimeStatus
-  ): Promise<boolean> {
+  async function updateStatus(id: string, status: AnimeStatus): Promise<boolean> {
     await refreshAuthContext();
 
     try {
@@ -145,9 +142,9 @@ export function useAnime() {
         startDate?: string;
       } = { status };
 
-      if (status === "completed") {
+      if (status === 'completed') {
         updates.endDate = new Date().toISOString();
-      } else if (status === "watching") {
+      } else if (status === 'watching') {
         updates.startDate = new Date().toISOString();
       }
 
@@ -169,7 +166,7 @@ export function useAnime() {
         { score },
         {
           requireOrg: true,
-        }
+        },
       );
       return true;
     } catch {

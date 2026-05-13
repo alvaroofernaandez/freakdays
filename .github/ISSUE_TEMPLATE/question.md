@@ -7,16 +7,19 @@ assignees: ''
 ---
 
 ## 📋 Pregunta
+
 <!-- Formula tu pregunta de forma clara -->
 
 Tu pregunta aquí.
 
 ## 🔍 Contexto
+
 <!-- Proporciona contexto adicional sobre tu pregunta -->
 
 Describe el contexto o situación que te llevó a hacer esta pregunta.
 
 ## 📚 Lo que ya he revisado
+
 <!-- ¿Qué has intentado o revisado antes de preguntar? -->
 
 - [ ] He leído la documentación
@@ -25,14 +28,15 @@ Describe el contexto o situación que te llevó a hacer esta pregunta.
 - [ ] He probado [describe lo que probaste]
 
 ## 🎯 Lo que necesito saber
+
 <!-- ¿Qué información específica necesitas? -->
 
 Describe qué información específica necesitas o qué problema estás tratando de resolver.
 
 ## 🔗 Enlaces Útiles
+
 <!-- Si hay documentación, código o issues relacionados -->
 
-- Documentación relevante: 
-- Código relacionado: 
+- Documentación relevante:
+- Código relacionado:
 - Issues relacionados: #
-

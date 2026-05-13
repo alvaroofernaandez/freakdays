@@ -1,28 +1,33 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Loader2, Trash2, Tv, User } from 'lucide-vue-next'
-import { computed } from 'vue'
-import type { PartyAnimeItem } from '~~/domain/types/party'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Loader2, Trash2, Tv, User } from 'lucide-vue-next';
+import { computed } from 'vue';
+import type { PartyAnimeItem } from '~~/domain/types/party';
 
-const props = withDefaults(defineProps<{
-  anime: PartyAnimeItem
-  isDeleting?: boolean
-}>(), {
-  isDeleting: false,
-})
+const props = withDefaults(
+  defineProps<{
+    anime: PartyAnimeItem;
+    isDeleting?: boolean;
+  }>(),
+  {
+    isDeleting: false,
+  },
+);
 
 const emit = defineEmits<{
-  (e: 'delete', id: string): void
-}>()
+  (e: 'delete', id: string): void;
+}>();
 
 const progress = computed(() => {
-  if (!props.anime.totalEpisodes) return 0
-  return Math.round((props.anime.currentEpisode / props.anime.totalEpisodes) * 100)
-})
+  if (!props.anime.totalEpisodes) return 0;
+  return Math.round((props.anime.currentEpisode / props.anime.totalEpisodes) * 100);
+});
 
-const addedBy = computed(() => props.anime.addedByUser?.displayName || props.anime.addedByUser?.username || 'Unknown')
+const addedBy = computed(
+  () => props.anime.addedByUser?.displayName || props.anime.addedByUser?.username || 'Unknown',
+);
 
 const statusLabels: Record<string, string> = {
   watching: 'En curso',
@@ -30,7 +35,7 @@ const statusLabels: Record<string, string> = {
   on_hold: 'En pausa',
   dropped: 'Droppeado',
   plan_to_watch: 'Pendiente',
-}
+};
 </script>
 
 <template>
@@ -95,7 +100,10 @@ const statusLabels: Record<string, string> = {
           >
             {{ statusLabels[anime.status] || anime.status }}
           </Badge>
-          <span v-if="anime.score" class="text-xs font-medium text-yellow-500 flex items-center gap-0.5">
+          <span
+            v-if="anime.score"
+            class="text-xs font-medium text-yellow-500 flex items-center gap-0.5"
+          >
             <span aria-hidden="true">★</span>
             <span>{{ anime.score }}</span>
           </span>

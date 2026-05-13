@@ -5,6 +5,7 @@ Este proyecto utiliza Prisma como ORM intermediario entre la aplicación y Supab
 ## Instalación
 
 1. Instalar las dependencias:
+
 ```bash
 pnpm install
 # o
@@ -12,11 +13,13 @@ npm install
 ```
 
 2. Configurar la variable de entorno `DATABASE_URL` en tu archivo `.env`:
+
 ```env
 DATABASE_URL=postgresql://user:password@host:port/database?schema=public&pgbouncer=true&connection_limit=1
 ```
 
 Para obtener la URL de conexión de Supabase:
+
 - Ve a tu proyecto en Supabase Dashboard
 - Settings → Database
 - Copia la "Connection string" bajo "Connection pooling"
@@ -25,6 +28,7 @@ Para obtener la URL de conexión de Supabase:
 **Importante**: Usa el modo "Transaction" para Prisma, que es compatible con PgBouncer.
 
 3. Generar el cliente de Prisma:
+
 ```bash
 pnpm prisma:generate
 # o
@@ -39,18 +43,18 @@ Las operaciones de base de datos se ejecutan a través de API routes en el servi
 
 ```typescript
 // app/composables/useAnime.ts
-const data = await $fetch(`/api/anime?userId=${userId}`)
+const data = await $fetch(`/api/anime?userId=${userId}`);
 
 // server/api/anime/index.get.ts
-import { getPrisma } from '../../utils/prisma'
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
-  const prisma = await getPrisma()
+  const prisma = await getPrisma();
   const data = await prisma.animeEntry.findMany({
-    where: { userId }
-  })
-  return data
-})
+    where: { userId },
+  });
+  return data;
+});
 ```
 
 ### Helper getPrisma
@@ -59,12 +63,12 @@ Para usar Prisma en API routes, usa el helper `getPrisma()`:
 
 ```typescript
 // server/api/example.ts
-import { getPrisma } from '../utils/prisma'
+import { getPrisma } from '../utils/prisma';
 
 export default defineEventHandler(async (event) => {
-  const prisma = await getPrisma()
+  const prisma = await getPrisma();
   // Usar prisma aquí
-})
+});
 ```
 
 **Nota**: `usePrisma()` composable está deprecado. Usa API routes en su lugar.
@@ -125,4 +129,3 @@ Algunas funciones RPC de Supabase (como `check_overdue_quests`, `check_quests_du
 
 - Usa connection pooling en Supabase
 - Asegúrate de que `DATABASE_URL` incluya `pgbouncer=true`
-

@@ -1,22 +1,36 @@
 <script setup lang="ts">
-import { Card, CardContent } from '@/components/ui/card'
-import { Globe, Image as ImageIcon, Instagram, Link2, MapPin, MessageSquare, Twitter } from 'lucide-vue-next'
-import type { AnimeEntry } from '@/composables/useAnime'
-import type { MangaEntry } from '@/composables/useManga'
-import type { UserProfile } from '@/composables/useProfile'
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Globe,
+  Image as ImageIcon,
+  Instagram,
+  Link2,
+  MapPin,
+  MessageSquare,
+  Twitter,
+} from 'lucide-vue-next';
+import type { AnimeEntry } from '@/composables/useAnime';
+import type { MangaEntry } from '@/composables/useManga';
+import type { UserProfile } from '@/composables/useProfile';
 
 interface Props {
-  profile: UserProfile
-  favoriteAnime: AnimeEntry | null
-  favoriteManga: MangaEntry | null
+  profile: UserProfile;
+  favoriteAnime: AnimeEntry | null;
+  favoriteManga: MangaEntry | null;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 </script>
 
 <template>
   <div
-    v-if="favoriteAnime || favoriteManga || profile.location || profile.website || Object.keys(profile.socialLinks || {}).length > 0"
+    v-if="
+      favoriteAnime ||
+      favoriteManga ||
+      profile.location ||
+      profile.website ||
+      Object.keys(profile.socialLinks || {}).length > 0
+    "
     class="grid grid-cols-1 md:grid-cols-2 gap-4"
   >
     <Card
@@ -119,7 +133,9 @@ const props = defineProps<Props>()
       <div class="absolute top-0 right-0 w-24 h-24 bg-secondary/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0"
+          >
             <Instagram class="h-6 w-6 text-secondary" />
           </div>
           <div class="flex-1 min-w-0">
@@ -148,4 +164,3 @@ const props = defineProps<Props>()
     </Card>
   </div>
 </template>
-

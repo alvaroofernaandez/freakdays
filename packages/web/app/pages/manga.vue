@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { BookOpen, Plus, CheckCircle2, Heart, TrendingUp, List } from 'lucide-vue-next'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import MangaStats from '@/components/manga/MangaStats.vue'
-import MangaStatsSkeleton from '@/components/manga/MangaStatsSkeleton.vue'
-import MangaList from '@/components/manga/MangaList.vue'
-import AddMangaModal from '@/components/manga/AddMangaModal.vue'
-import { ErrorState } from '@/components/error'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import { useMangaPage } from '@/composables/useMangaPage'
+import { BookOpen, Plus, CheckCircle2, Heart, TrendingUp, List } from 'lucide-vue-next';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import MangaStats from '@/components/manga/MangaStats.vue';
+import MangaStatsSkeleton from '@/components/manga/MangaStatsSkeleton.vue';
+import MangaList from '@/components/manga/MangaList.vue';
+import AddMangaModal from '@/components/manga/AddMangaModal.vue';
+import { ErrorState } from '@/components/error';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { useMangaPage } from '@/composables/useMangaPage';
 
 const {
   mangaCollection,
@@ -24,14 +24,14 @@ const {
   handleUpdatePrice,
   handleUpdateStatus,
   reloadManga,
-} = useMangaPage()
+} = useMangaPage();
 
 const tabs = [
   { value: 'all' as const, label: 'Todos', icon: List },
   { value: 'collecting' as const, label: 'En curso', icon: TrendingUp },
   { value: 'completed' as const, label: 'Completadas', icon: CheckCircle2 },
   { value: 'wishlist' as const, label: 'Wishlist', icon: Heart },
-]
+];
 </script>
 
 <template>
@@ -42,9 +42,7 @@ const tabs = [
           <BookOpen class="h-6 w-6 text-primary" />
           Colección Manga
         </h1>
-        <p class="text-muted-foreground text-sm">
-          Gestiona tu biblioteca física de mangas
-        </p>
+        <p class="text-muted-foreground text-sm">Gestiona tu biblioteca física de mangas</p>
       </div>
       <Tooltip>
         <TooltipTrigger as-child>
@@ -59,7 +57,7 @@ const tabs = [
     </header>
 
     <MangaStatsSkeleton v-if="loading" />
-    <ErrorState 
+    <ErrorState
       v-else-if="error"
       :message="error.message"
       action-label="Reintentar"
@@ -69,9 +67,9 @@ const tabs = [
 
     <Tabs v-model="activeTab" class="w-full">
       <TabsList class="grid w-full grid-cols-4">
-        <TabsTrigger 
-          v-for="tab in tabs" 
-          :key="tab.value" 
+        <TabsTrigger
+          v-for="tab in tabs"
+          :key="tab.value"
           :value="tab.value"
           class="flex items-center gap-2"
         >
@@ -129,10 +127,6 @@ const tabs = [
       </TabsContent>
     </Tabs>
 
-    <AddMangaModal 
-      :show="modal.isOpen.value" 
-      @close="modal.close()"
-      @submit="addManga"
-    />
+    <AddMangaModal :show="modal.isOpen.value" @close="modal.close()" @submit="addManga" />
   </div>
 </template>

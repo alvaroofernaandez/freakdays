@@ -1,25 +1,25 @@
 <script setup lang="ts">
-import { Plus, Trophy, Clock, Loader2 } from 'lucide-vue-next'
-import type { Quest } from '~~/domain/types'
-import { Empty } from '@/components/ui/empty'
-import QuestCard from './QuestCard.vue'
-import QuestCardSkeleton from './QuestCardSkeleton.vue'
+import { Plus, Trophy, Clock, Loader2 } from 'lucide-vue-next';
+import type { Quest } from '~~/domain/types';
+import { Empty } from '@/components/ui/empty';
+import QuestCard from './QuestCard.vue';
+import QuestCardSkeleton from './QuestCardSkeleton.vue';
 
 interface Props {
-  quests: Quest[]
-  loading: boolean
-  isCompleted?: boolean
+  quests: Quest[];
+  loading: boolean;
+  isCompleted?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isCompleted: false,
-})
+});
 
 const emit = defineEmits<{
-  complete: [id: string]
-  delete: [id: string]
-  add: []
-}>()
+  complete: [id: string];
+  delete: [id: string];
+  add: [];
+}>();
 </script>
 
 <template>
@@ -30,8 +30,14 @@ const emit = defineEmits<{
 
     <Empty
       v-else-if="quests.length === 0"
-      :title="isCompleted ? 'Aún no has completado ninguna quest' : '¡Todas las quests completadas!'"
-      :description="isCompleted ? 'Completa tus primeras misiones para ganar EXP' : 'Crea una nueva misión para continuar'"
+      :title="
+        isCompleted ? 'Aún no has completado ninguna quest' : '¡Todas las quests completadas!'
+      "
+      :description="
+        isCompleted
+          ? 'Completa tus primeras misiones para ganar EXP'
+          : 'Crea una nueva misión para continuar'
+      "
     >
       <template #icon>
         <Trophy v-if="!isCompleted" class="h-12 w-12 text-primary/50" />
@@ -57,4 +63,3 @@ const emit = defineEmits<{
     </div>
   </div>
 </template>
-

@@ -1,5 +1,5 @@
-import type { Quest } from "@prisma/client";
-import { getPrisma } from "../../utils/prisma";
+import type { Quest } from '@prisma/client';
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -7,14 +7,14 @@ export default defineEventHandler(async (event) => {
   if (!body.userId) {
     throw createError({
       statusCode: 400,
-      message: "User ID is required",
+      message: 'User ID is required',
     });
   }
 
   if (!body.title || !body.title.trim()) {
     throw createError({
       statusCode: 400,
-      message: "Title is required",
+      message: 'Title is required',
     });
   }
 
@@ -49,8 +49,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error creating quest",
+      message: 'Error creating quest',
     });
   }
 });
-

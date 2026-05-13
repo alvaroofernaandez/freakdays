@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import ErrorBoundary from "../../../../app/components/error/ErrorBoundary";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import ErrorBoundary from '../../../../app/components/error/ErrorBoundary';
 
-describe("ErrorBoundary.vue", () => {
-  it("should render component", () => {
+describe('ErrorBoundary.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(ErrorBoundary, {
       global: {
         stubs: {

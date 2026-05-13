@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue'
-import RegisterForm from '@/components/auth/RegisterForm.vue'
-import RegisterHeader from '@/components/auth/RegisterHeader.vue'
-import RegisterSuccessMessage from '@/components/auth/RegisterSuccessMessage.vue'
-import { useRegisterPage } from '@/composables/useRegisterPage'
-import { Gamepad2 } from 'lucide-vue-next'
-import { useAuthStore } from '~~/stores/auth'
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue';
+import RegisterForm from '@/components/auth/RegisterForm.vue';
+import RegisterHeader from '@/components/auth/RegisterHeader.vue';
+import RegisterSuccessMessage from '@/components/auth/RegisterSuccessMessage.vue';
+import { useRegisterPage } from '@/composables/useRegisterPage';
+import { Gamepad2 } from 'lucide-vue-next';
+import { useAuthStore } from '~~/stores/auth';
 
 definePageMeta({
-  layout: false
-})
+  layout: false,
+});
 
-const authStore = useAuthStore()
+const authStore = useAuthStore();
 const {
   email,
   password,
@@ -25,7 +25,7 @@ const {
   strengthColor,
   handleSubmit,
   handleGoogleSignIn,
-} = useRegisterPage()
+} = useRegisterPage();
 </script>
 
 <template>
@@ -48,26 +48,42 @@ const {
 
             <div class="flex items-center gap-4">
               <Separator class="flex-1" />
-              <span class="text-xs text-muted-foreground uppercase tracking-wider">o con email</span>
+              <span class="text-xs text-muted-foreground uppercase tracking-wider"
+                >o con email</span
+              >
               <Separator class="flex-1" />
             </div>
 
-            <RegisterForm v-model:email="email" v-model:password="password" v-model:confirm-password="confirmPassword"
-              v-model:show-password="showPassword" :passwords-match="passwordsMatch"
-              :is-valid-password="isValidPassword" :password-strength="passwordStrength" :strength-label="strengthLabel"
-              :strength-color="strengthColor" :loading="authStore.loading" :error="authStore.error"
-              @submit="handleSubmit" />
+            <RegisterForm
+              v-model:email="email"
+              v-model:password="password"
+              v-model:confirm-password="confirmPassword"
+              v-model:show-password="showPassword"
+              :passwords-match="passwordsMatch"
+              :is-valid-password="isValidPassword"
+              :password-strength="passwordStrength"
+              :strength-label="strengthLabel"
+              :strength-color="strengthColor"
+              :loading="authStore.loading"
+              :error="authStore.error"
+              @submit="handleSubmit"
+            />
 
             <p class="text-center text-sm text-muted-foreground">
               ¿Ya tienes cuenta?
-              <NuxtLink to="/login" class="text-primary hover:text-accent transition-colors font-semibold ml-1">
+              <NuxtLink
+                to="/login"
+                class="text-primary hover:text-accent transition-colors font-semibold ml-1"
+              >
                 Inicia sesión
               </NuxtLink>
             </p>
           </template>
         </div>
 
-        <p class="text-center text-xs text-muted-foreground/60 mt-6 flex items-center justify-center gap-1">
+        <p
+          class="text-center text-xs text-muted-foreground/60 mt-6 flex items-center justify-center gap-1"
+        >
           <Gamepad2 class="h-3 w-3" />
           Nivel 1 · +500 XP de bienvenida
         </p>

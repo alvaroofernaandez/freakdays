@@ -17,22 +17,22 @@ Este archivo contiene reglas y directrices específicas para que Cursor AI siga 
 ```vue
 <script setup lang="ts">
 // 1. Imports de Vue y librerías
-import { ref, computed, onMounted } from "vue";
-import type { Component } from "vue";
+import { ref, computed, onMounted } from 'vue';
+import type { Component } from 'vue';
 
 // 2. Imports de tipos
-import type { UserProfile } from "@/composables/useProfile";
+import type { UserProfile } from '@/composables/useProfile';
 
 // 3. Imports de composables
-import { useAnime } from "@/composables/useAnime";
-import { useToast } from "@/composables/useToast";
+import { useAnime } from '@/composables/useAnime';
+import { useToast } from '@/composables/useToast';
 
 // 4. Imports de componentes
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 // 5. Imports de iconos
-import { Plus, Trash2 } from "lucide-vue-next";
+import { Plus, Trash2 } from 'lucide-vue-next';
 
 // 6. Props y Emits
 interface Props {
@@ -53,12 +53,12 @@ const toast = useToast();
 
 // 8. Refs y Reactive
 const isLoading = ref(false);
-const searchQuery = ref("");
+const searchQuery = ref('');
 
 // 9. Computed
 const filteredItems = computed(() => {
   return props.items.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    item.title.toLowerCase().includes(searchQuery.value.toLowerCase()),
   );
 });
 
@@ -67,10 +67,10 @@ async function handleAdd(item: Item) {
   isLoading.value = true;
   try {
     await animeApi.addAnime(item);
-    emit("add", item);
-    toast.success("Añadido exitosamente");
+    emit('add', item);
+    toast.success('Añadido exitosamente');
   } catch (error) {
-    toast.error("Error al añadir");
+    toast.error('Error al añadir');
   } finally {
     isLoading.value = false;
   }
@@ -98,9 +98,9 @@ onMounted(() => {
 
 ```typescript
 // app/composables/useNewFeature.ts
-import { useAuthStore } from "~~/stores/auth";
-import { useSupabase } from "./useSupabase";
-import type { NewEntity } from "~~/domain/types";
+import { useAuthStore } from '~~/stores/auth';
+import { useSupabase } from './useSupabase';
+import type { NewEntity } from '~~/domain/types';
 
 export interface CreateNewEntityDTO {
   title: string;
@@ -115,23 +115,21 @@ export function useNewFeature() {
     if (!authStore.userId) return [];
 
     const { data, error } = await supabase
-      .from("table_name")
-      .select("*")
-      .eq("user_id", authStore.userId)
-      .order("created_at", { ascending: false });
+      .from('table_name')
+      .select('*')
+      .eq('user_id', authStore.userId)
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
 
     return (data ?? []).map(mapDbToEntity);
   }
 
-  async function createEntity(
-    dto: CreateNewEntityDTO
-  ): Promise<NewEntity | null> {
+  async function createEntity(dto: CreateNewEntityDTO): Promise<NewEntity | null> {
     if (!authStore.userId) return null;
 
     const { data, error } = await supabase
-      .from("table_name")
+      .from('table_name')
       .insert({
         user_id: authStore.userId,
         title: dto.title,
@@ -202,8 +200,8 @@ await errorHandler.handleAsyncError(async () => {
 
 ```typescript
 const profilePage = useProfilePage();
-const uploadingBanner = toRef(profilePage, "uploadingBanner");
-const bannerPreview = toRef(profilePage, "bannerPreview");
+const uploadingBanner = toRef(profilePage, 'uploadingBanner');
+const bannerPreview = toRef(profilePage, 'bannerPreview');
 ```
 
 **NO hacer esto** (pierde reactividad):
@@ -215,8 +213,8 @@ const { uploadingBanner, bannerPreview } = profilePage; // ❌
 **SÍ hacer esto**:
 
 ```typescript
-const uploadingBanner = toRef(profilePage, "uploadingBanner"); // ✅
-const bannerPreview = toRef(profilePage, "bannerPreview"); // ✅
+const uploadingBanner = toRef(profilePage, 'uploadingBanner'); // ✅
+const bannerPreview = toRef(profilePage, 'bannerPreview'); // ✅
 ```
 
 ## Acceso a Datos
@@ -240,7 +238,7 @@ const animeList = await animeApi.fetchAnimeList();
 try {
   const data = await animeApi.addAnime(dto);
 } catch (error) {
-  toast.error("Error al añadir anime");
+  toast.error('Error al añadir anime');
 }
 ```
 
@@ -338,7 +336,7 @@ Al crear nueva funcionalidad:
 
 ```typescript
 const isMobile = computed(() => {
-  if (typeof window === "undefined") return false;
+  if (typeof window === 'undefined') return false;
   return window.innerWidth < 1024;
 });
 ```
@@ -488,9 +486,9 @@ Code should be self-documenting. Avoid inline comments except for:
 ### Test Naming
 
 ```typescript
-describe("ComponentName or FunctionName", () => {
-  describe("methodName or scenario", () => {
-    it("should [expected behavior] when [condition]", () => {});
+describe('ComponentName or FunctionName', () => {
+  describe('methodName or scenario', () => {
+    it('should [expected behavior] when [condition]', () => {});
   });
 });
 ```
@@ -564,7 +562,7 @@ export interface NewEntity {
 }
 
 // stores/new-module.ts
-export const useNewModuleStore = defineStore("new-module", () => {
+export const useNewModuleStore = defineStore('new-module', () => {
   // state, getters, actions
 });
 ```
@@ -642,11 +640,11 @@ SUPABASE_ANON_KEY=your-anon-key
 When destructuring refs from composables, use `toRef()` to maintain reactivity:
 
 ```typescript
-import { toRef } from "vue";
+import { toRef } from 'vue';
 
 const profilePage = useProfilePage();
-const uploadingBanner = toRef(profilePage, "uploadingBanner");
-const bannerPreview = toRef(profilePage, "bannerPreview");
+const uploadingBanner = toRef(profilePage, 'uploadingBanner');
+const bannerPreview = toRef(profilePage, 'bannerPreview');
 ```
 
 **Why**: Direct destructuring loses reactivity, `toRef()` creates a reactive reference.

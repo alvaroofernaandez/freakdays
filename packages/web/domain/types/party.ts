@@ -1,4 +1,4 @@
-import type { AnimeStatus } from "./anime";
+import type { AnimeStatus } from './anime';
 
 export interface Party {
   id: string;
@@ -15,7 +15,7 @@ export interface PartyMember {
   id: string;
   partyId: string;
   userId: string;
-  role: "owner" | "admin" | "member";
+  role: 'owner' | 'admin' | 'member';
   joinedAt: Date;
   profile?: {
     username: string;
@@ -24,7 +24,7 @@ export interface PartyMember {
   };
 }
 
-export type SharedListType = "anime" | "manga" | "quests" | "tier_list";
+export type SharedListType = 'anime' | 'manga' | 'quests' | 'tier_list';
 
 export interface PartySharedList {
   id: string;
@@ -83,6 +83,6 @@ export interface Tier {
 export interface TierItem {
   id: string;
   content: string;
-  type: "text" | "image";
+  type: 'text' | 'image';
   meta?: any;
 }

@@ -42,16 +42,12 @@ if (noStart) {
 }
 
 console.log(`▶ Iniciando backend en puerto ${backendPort} ...`);
-const backend = spawnInherit(
-  'pnpm',
-  ['--dir', backendDir, 'start:dev'],
-  {
-    env: {
-      ...process.env,
-      PORT: backendPort,
-    },
+const backend = spawnInherit('pnpm', ['--dir', backendDir, 'start:dev'], {
+  env: {
+    ...process.env,
+    PORT: backendPort,
   },
-);
+});
 
 console.log('▶ Iniciando frontend Nuxt ...');
 const frontend = spawnInherit('pnpm', ['dev'], {

@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import StartWorkoutModal from "../../../../app/components/workouts/StartWorkoutModal";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import StartWorkoutModal from '../../../../app/components/workouts/StartWorkoutModal';
 
-describe("StartWorkoutModal.vue", () => {
-  it("should render component", () => {
+describe('StartWorkoutModal.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(StartWorkoutModal, {
       global: {
         stubs: {

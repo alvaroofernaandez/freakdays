@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import CalendarGridSkeleton from "../../../../app/components/calendar/CalendarGridSkeleton";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import CalendarGridSkeleton from '../../../../app/components/calendar/CalendarGridSkeleton';
 
-describe("CalendarGridSkeleton.vue", () => {
-  it("should render component", () => {
+describe('CalendarGridSkeleton.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(CalendarGridSkeleton, {
       global: {
         stubs: {

@@ -1,14 +1,14 @@
-import { describe, it, expect, vi } from "vitest";
-import { mount } from "@vue/test-utils";
-import AppHeader from "../../../../app/components/layout/AppHeader.vue";
+import { describe, it, expect, vi } from 'vitest';
+import { mount } from '@vue/test-utils';
+import AppHeader from '../../../../app/components/layout/AppHeader.vue';
 
-vi.mock("vue-router", () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
 }));
 
-describe("AppHeader.vue", () => {
+describe('AppHeader.vue', () => {
   const baseProps = {
     profile: null,
     expProgress: {
@@ -21,7 +21,7 @@ describe("AppHeader.vue", () => {
     isActive: () => false,
   };
 
-  it("should render app header", () => {
+  it('should render app header', () => {
     const wrapper = mount(AppHeader, {
       props: baseProps,
       global: {
@@ -41,7 +41,7 @@ describe("AppHeader.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("should emit logout when logout is triggered", () => {
+  it('should emit logout when logout is triggered', () => {
     const wrapper = mount(AppHeader, {
       props: baseProps,
       global: {

@@ -64,10 +64,7 @@ export class PartyService {
     private readonly identityContext: IdentityContextService,
   ) {}
 
-  async listForCurrentUser(
-    clerkUserId: string,
-    orgId: string | null,
-  ): Promise<PartyView[]> {
+  async listForCurrentUser(clerkUserId: string, orgId: string | null): Promise<PartyView[]> {
     const { currentUser, organization } = await this.resolveIdentityInOrganization(
       clerkUserId,
       orgId,
@@ -114,9 +111,7 @@ export class PartyService {
     }
 
     const maxMembers =
-      typeof input.maxMembers === 'number' && input.maxMembers > 1
-        ? input.maxMembers
-        : 10;
+      typeof input.maxMembers === 'number' && input.maxMembers > 1 ? input.maxMembers : 10;
 
     const created = await this.prisma.party.create({
       data: {
@@ -212,9 +207,7 @@ export class PartyService {
       throw new NotFoundException('Party no encontrada');
     }
 
-    const actorMembership = party.members.find(
-      (member) => member.userId === currentUser.id,
-    );
+    const actorMembership = party.members.find((member) => member.userId === currentUser.id);
 
     if (!actorMembership) {
       throw new ForbiddenException('No tenés acceso a esta party');
@@ -238,9 +231,7 @@ export class PartyService {
       throw new NotFoundException('Party no encontrada');
     }
 
-    const actorMembership = party.members.find(
-      (member) => member.userId === currentUser.id,
-    );
+    const actorMembership = party.members.find((member) => member.userId === currentUser.id);
 
     if (!actorMembership) {
       throw new NotFoundException('No sos miembro de esta party');
@@ -279,9 +270,7 @@ export class PartyService {
       throw new NotFoundException('Party no encontrada');
     }
 
-    const actorMembership = party.members.find(
-      (member) => member.userId === currentUser.id,
-    );
+    const actorMembership = party.members.find((member) => member.userId === currentUser.id);
 
     const canRegenerateInviteCode =
       actorMembership?.role === PartyMemberRole.owner ||
@@ -343,9 +332,7 @@ export class PartyService {
       throw new NotFoundException('Party no encontrada');
     }
 
-    const actorMembership = party.members.find(
-      (member) => member.userId === currentUser.id,
-    );
+    const actorMembership = party.members.find((member) => member.userId === currentUser.id);
 
     const canRemoveMembers =
       actorMembership?.role === PartyMemberRole.owner ||
@@ -367,9 +354,7 @@ export class PartyService {
       throw new NotFoundException('Miembro no encontrado');
     }
 
-    const targetMembership = party.members.find(
-      (member) => member.userId === targetUser.id,
-    );
+    const targetMembership = party.members.find((member) => member.userId === targetUser.id);
 
     if (!targetMembership) {
       throw new NotFoundException('Miembro no encontrado');
@@ -443,10 +428,7 @@ export class PartyService {
     };
   }
 
-  private buildUsername(user: {
-    clerkUserId: string;
-    email: string | null;
-  }): string {
+  private buildUsername(user: { clerkUserId: string; email: string | null }): string {
     if (user.email && user.email.includes('@')) {
       const username = user.email.split('@')[0];
       if (username && username.length > 0) {

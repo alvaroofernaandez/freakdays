@@ -212,19 +212,19 @@ Los composables actúan como repositorios, abstraen el acceso a datos a través 
 export function useAnime() {
   async function fetchAnimeList(): Promise<AnimeEntry[]> {
     // Llama a API route que usa Prisma en el servidor
-    const data = await $fetch(`/api/anime?userId=${userId}`)
-    return data.map(mapDbToAnime)
+    const data = await $fetch(`/api/anime?userId=${userId}`);
+    return data.map(mapDbToAnime);
   }
 }
 
 // server/api/anime/index.get.ts
 export default defineEventHandler(async (event) => {
-  const prisma = await getPrisma()
+  const prisma = await getPrisma();
   const data = await prisma.animeEntry.findMany({
-    where: { userId }
-  })
-  return data
-})
+    where: { userId },
+  });
+  return data;
+});
 ```
 
 ### 2. Composable Pattern
@@ -254,10 +254,10 @@ export function parseJikanAnime(data: AnimeSearchResult): CreateAnimeDTO {
 Vue Reactivity System:
 
 ```typescript
-const count = ref(0)
+const count = ref(0);
 watch(count, (newVal) => {
   // Reacciona a cambios
-})
+});
 ```
 
 ## 🔐 Seguridad
@@ -380,5 +380,3 @@ Ver `docs/PRISMA_MIGRATION.md` y `docs/prisma-setup.md` para más detalles.
 ---
 
 **Última actualización**: Enero 2025
-
-

@@ -1,15 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  MembershipRole,
-  Prisma,
-  type Organization,
-  type User,
-} from '@prisma/client';
+import { MembershipRole, Prisma, type Organization, type User } from '@prisma/client';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -51,10 +42,7 @@ export class WebhooksService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async processClerkWebhook(
-    payload: string,
-    headers: ClerkSvixHeaders,
-  ): Promise<void> {
+  async processClerkWebhook(payload: string, headers: ClerkSvixHeaders): Promise<void> {
     this.verifySvixSignature(payload, headers);
 
     const event = this.parseWebhookEvent(payload);
@@ -107,14 +95,8 @@ export class WebhooksService {
 
   private verifySvixSignature(payload: string, headers: ClerkSvixHeaders): void {
     const svixId = this.getRequiredHeader(headers.svixId, 'svix-id');
-    const timestampRaw = this.getRequiredHeader(
-      headers.svixTimestamp,
-      'svix-timestamp',
-    );
-    const svixSignature = this.getRequiredHeader(
-      headers.svixSignature,
-      'svix-signature',
-    );
+    const timestampRaw = this.getRequiredHeader(headers.svixTimestamp, 'svix-timestamp');
+    const svixSignature = this.getRequiredHeader(headers.svixSignature, 'svix-signature');
     const webhookSecret = this.getRequiredSecret();
 
     const timestamp = Number.parseInt(timestampRaw, 10);
@@ -460,9 +442,7 @@ export class WebhooksService {
     }
 
     const safeSuffix = clerkOrgId.replace(/[^a-zA-Z0-9]/g, '').slice(-8);
-    return safeSuffix.length > 0
-      ? `Organization ${safeSuffix}`
-      : 'Organization';
+    return safeSuffix.length > 0 ? `Organization ${safeSuffix}` : 'Organization';
   }
 
   private normalizeSlug(rawValue: string): string {

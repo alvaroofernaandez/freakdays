@@ -1,30 +1,34 @@
 <script setup lang="ts">
-import { Zap, Target, Trophy } from 'lucide-vue-next'
-import type { UserProfile } from '@/composables/useProfile'
-import { Progress } from '@/components/ui/progress'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Zap, Target, Trophy } from 'lucide-vue-next';
+import type { UserProfile } from '@/composables/useProfile';
+import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface Props {
-  profile: UserProfile
+  profile: UserProfile;
   expProgress: {
-    current: number
-    needed: number
-    progress: number
-  }
+    current: number;
+    needed: number;
+    progress: number;
+  };
 }
 
-defineProps<Props>()
+defineProps<Props>();
 </script>
 
 <template>
-  <Card class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/10 via-background to-exp-legendary/10">
+  <Card
+    class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/10 via-background to-exp-legendary/10"
+  >
     <div class="absolute top-0 right-0 w-64 h-64 bg-exp-legendary/10 rounded-full blur-3xl" />
     <div class="absolute bottom-0 left-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
     <CardContent class="relative p-6">
       <div class="flex items-center gap-6">
         <div class="relative flex-shrink-0">
           <div class="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-pulse" />
-          <div class="relative w-20 h-20 rounded-full bg-linear-to-br from-primary via-accent to-primary flex items-center justify-center shadow-lg border-2 border-primary/30">
+          <div
+            class="relative w-20 h-20 rounded-full bg-linear-to-br from-primary via-accent to-primary flex items-center justify-center shadow-lg border-2 border-primary/30"
+          >
             <span class="text-3xl font-bold text-white drop-shadow-lg">{{ profile.level }}</span>
           </div>
         </div>
@@ -50,7 +54,9 @@ defineProps<Props>()
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{{ expProgress.current }} / {{ expProgress.needed }} EXP para el siguiente nivel</p>
+              <p>
+                {{ expProgress.current }} / {{ expProgress.needed }} EXP para el siguiente nivel
+              </p>
             </TooltipContent>
           </Tooltip>
           <div class="flex items-center gap-6 text-sm text-muted-foreground">
@@ -68,4 +74,3 @@ defineProps<Props>()
     </CardContent>
   </Card>
 </template>
-

@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { setActivePinia, createPinia } from 'pinia'
-import QuestsPage from '../../../app/pages/quests.vue'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mount } from '@vue/test-utils';
+import { setActivePinia, createPinia } from 'pinia';
+import QuestsPage from '../../../app/pages/quests.vue';
 
 vi.mock('../../../app/composables/useQuestsPage', () => ({
   useQuestsPage: () => ({
@@ -30,12 +30,12 @@ vi.mock('../../../app/composables/useQuestsPage', () => ({
     markNotificationAsRead: vi.fn(),
     initialize: vi.fn(),
   }),
-}))
+}));
 
 describe('quests.vue', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
-  })
+    setActivePinia(createPinia());
+  });
 
   it('should render quests page', () => {
     const wrapper = mount(QuestsPage, {
@@ -55,13 +55,13 @@ describe('quests.vue', () => {
           Badge: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.text()).toContain('Misiones Diarias')
-  })
+    expect(wrapper.text()).toContain('Misiones Diarias');
+  });
 
   it('should render page with initialize function', () => {
-    const initialize = vi.fn()
+    const initialize = vi.fn();
     vi.doMock('../../../app/composables/useQuestsPage', () => ({
       useQuestsPage: () => ({
         quests: { value: [] },
@@ -89,7 +89,7 @@ describe('quests.vue', () => {
         markNotificationAsRead: vi.fn(),
         initialize,
       }),
-    }))
+    }));
 
     const wrapper = mount(QuestsPage, {
       global: {
@@ -108,24 +108,24 @@ describe('quests.vue', () => {
           Badge: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
+    expect(wrapper.exists()).toBe(true);
+  });
 
   it('should open modal when add button is clicked', async () => {
-    const open = vi.fn()
+    const open = vi.fn();
     const modal = {
       isOpen: { value: false },
       open,
       close: vi.fn(),
-    }
+    };
 
     vi.doMock('../../../app/composables/useQuestsPage', () => ({
       useQuestsPage: () => ({
         modal,
       }),
-    }))
+    }));
 
     const wrapper = mount(QuestsPage, {
       global: {
@@ -144,9 +144,8 @@ describe('quests.vue', () => {
           Badge: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
-})
-
+    expect(wrapper.exists()).toBe(true);
+  });
+});

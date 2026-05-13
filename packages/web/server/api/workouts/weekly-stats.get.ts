@@ -1,4 +1,4 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
   const userId = getQuery(event).userId as string;
@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   if (!userId) {
     throw createError({
       statusCode: 400,
-      message: "User ID is required",
+      message: 'User ID is required',
     });
   }
 
@@ -29,16 +29,12 @@ export default defineEventHandler(async (event) => {
 
     return {
       count: workouts.length,
-      totalMinutes: workouts.reduce(
-        (sum, w) => sum + (w.durationMinutes || 0),
-        0
-      ),
+      totalMinutes: workouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0),
     };
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error fetching weekly stats",
+      message: 'Error fetching weekly stats',
     });
   }
 });
-

@@ -1,10 +1,10 @@
 export type AnimeStatus =
-  | "watching"
-  | "completed"
-  | "on_hold"
-  | "dropped"
-  | "plan_to_watch"
-  | "rewatching";
+  | 'watching'
+  | 'completed'
+  | 'on_hold'
+  | 'dropped'
+  | 'plan_to_watch'
+  | 'rewatching';
 
 export interface Anime {
   id: string;
@@ -21,10 +21,10 @@ export interface Anime {
 }
 
 export const ANIME_STATUS_LABELS: Record<AnimeStatus, string> = {
-  watching: "En curso",
-  completed: "Visto",
-  on_hold: "En pausa",
-  dropped: "Droppeado",
-  plan_to_watch: "Pendiente",
-  rewatching: "Rewatch",
+  watching: 'En curso',
+  completed: 'Visto',
+  on_hold: 'En pausa',
+  dropped: 'Droppeado',
+  plan_to_watch: 'Pendiente',
+  rewatching: 'Rewatch',
 };

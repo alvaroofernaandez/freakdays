@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import type { OrganizationMembership } from '@/composables/useOrganizations'
+import type { OrganizationMembership } from '@/composables/useOrganizations';
 
 interface Props {
-  items: OrganizationMembership[]
-  activeOrgId: string | null
-  loading?: boolean
+  items: OrganizationMembership[];
+  activeOrgId: string | null;
+  loading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
-})
+});
 
 const emit = defineEmits<{
-  change: [orgId: string]
-}>()
+  change: [orgId: string];
+}>();
 
 const selectedOrgId = computed({
   get: () => props.activeOrgId ?? '',
   set: (value: string) => {
     if (value && value !== props.activeOrgId) {
-      emit('change', value)
+      emit('change', value);
     }
   },
-})
+});
 
-const isDisabled = computed(() => props.loading || props.items.length === 0)
+const isDisabled = computed(() => props.loading || props.items.length === 0);
 
 function formatRole(role: OrganizationMembership['role']): string {
-  if (role === 'owner') return 'Owner'
-  if (role === 'admin') return 'Admin'
-  return 'Member'
+  if (role === 'owner') return 'Owner';
+  if (role === 'admin') return 'Admin';
+  return 'Member';
 }
 </script>
 

@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { Dumbbell, Plus, Play } from 'lucide-vue-next'
-import WorkoutStats from '@/components/workouts/WorkoutStats.vue'
-import WorkoutStatsSkeleton from '@/components/workouts/WorkoutStatsSkeleton.vue'
-import WorkoutDetailStats from '@/components/workouts/WorkoutDetailStats.vue'
-import WorkoutList from '@/components/workouts/WorkoutList.vue'
-import StartWorkoutModal from '@/components/workouts/StartWorkoutModal.vue'
-import ActiveWorkoutModal from '@/components/workouts/ActiveWorkoutModal.vue'
-import DeleteWorkoutConfirmModal from '@/components/workouts/DeleteWorkoutConfirmModal.vue'
-import WorkoutDetailModal from '@/components/workouts/WorkoutDetailModal.vue'
-import { useWorkoutsPage } from '@/composables/useWorkoutsPage'
+import { Dumbbell, Plus, Play } from 'lucide-vue-next';
+import WorkoutStats from '@/components/workouts/WorkoutStats.vue';
+import WorkoutStatsSkeleton from '@/components/workouts/WorkoutStatsSkeleton.vue';
+import WorkoutDetailStats from '@/components/workouts/WorkoutDetailStats.vue';
+import WorkoutList from '@/components/workouts/WorkoutList.vue';
+import StartWorkoutModal from '@/components/workouts/StartWorkoutModal.vue';
+import ActiveWorkoutModal from '@/components/workouts/ActiveWorkoutModal.vue';
+import DeleteWorkoutConfirmModal from '@/components/workouts/DeleteWorkoutConfirmModal.vue';
+import WorkoutDetailModal from '@/components/workouts/WorkoutDetailModal.vue';
+import { useWorkoutsPage } from '@/composables/useWorkoutsPage';
 
 const {
   workouts,
@@ -41,16 +41,18 @@ const {
   workoutToView,
   deletingWorkout,
   initialize,
-} = useWorkoutsPage()
+} = useWorkoutsPage();
 
 onMounted(() => {
-  initialize()
-})
+  initialize();
+});
 </script>
 
 <template>
   <div class="space-y-4 sm:space-y-6">
-    <header class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+    <header
+      class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0"
+    >
       <div>
         <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
           <Dumbbell class="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
@@ -61,17 +63,17 @@ onMounted(() => {
         </p>
       </div>
       <div class="flex items-center gap-2 w-full sm:w-auto">
-        <Button 
+        <Button
           v-if="!currentWorkout"
           size="lg"
-          class="flex-1 sm:flex-none sm:h-10 sm:w-auto rounded-full glow-primary" 
+          class="flex-1 sm:flex-none sm:h-10 sm:w-auto rounded-full glow-primary"
           @click="modal.open()"
         >
           <Plus class="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
           <span class="sm:hidden">Nuevo</span>
           <span class="hidden sm:inline">Nuevo Entrenamiento</span>
         </Button>
-        <Button 
+        <Button
           v-else
           variant="outline"
           size="lg"
@@ -90,19 +92,21 @@ onMounted(() => {
       <div v-if="currentWorkout && currentWorkoutStats">
         <div class="flex items-center gap-2 mb-3 sm:mb-4">
           <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-          <h2 class="text-sm sm:text-base font-semibold text-muted-foreground uppercase tracking-wide">
+          <h2
+            class="text-sm sm:text-base font-semibold text-muted-foreground uppercase tracking-wide"
+          >
             Entrenamiento en curso
           </h2>
         </div>
-        <WorkoutDetailStats 
-          :stats="currentWorkoutStats"
-        />
+        <WorkoutDetailStats :stats="currentWorkoutStats" />
       </div>
       <div>
-        <h2 class="text-sm sm:text-base font-semibold text-muted-foreground uppercase tracking-wide mb-3 sm:mb-4">
+        <h2
+          class="text-sm sm:text-base font-semibold text-muted-foreground uppercase tracking-wide mb-3 sm:mb-4"
+        >
           Estadísticas generales
         </h2>
-        <WorkoutStats 
+        <WorkoutStats
           :weekly-count="stats.count"
           :total-count="workouts.length"
           :weekly-minutes="stats.totalMinutes"

@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
@@ -104,10 +100,7 @@ export class MangaService {
       input.pricePerVolume ?? input.price_per_volume,
       'pricePerVolume',
     );
-    const totalCost = this.normalizeOptionalFloat(
-      input.totalCost ?? input.total_cost,
-      'totalCost',
-    );
+    const totalCost = this.normalizeOptionalFloat(input.totalCost ?? input.total_cost, 'totalCost');
 
     const created = await this.prisma.mangaEntry.create({
       data: {
@@ -219,11 +212,7 @@ export class MangaService {
     return this.toMangaView(updated);
   }
 
-  async remove(
-    clerkUserId: string,
-    orgId: string | null,
-    id: string,
-  ): Promise<{ success: true }> {
+  async remove(clerkUserId: string, orgId: string | null, id: string): Promise<{ success: true }> {
     const { currentUser, organization } = await this.resolveIdentityInOrganization(
       clerkUserId,
       orgId,

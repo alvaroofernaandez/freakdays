@@ -1,4 +1,4 @@
-import { useAuthStore } from "~~/stores/auth";
+import { useAuthStore } from '~~/stores/auth';
 
 export interface Workout {
   id: string;
@@ -57,7 +57,7 @@ export function useWorkouts() {
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.get<Array<Record<string, unknown>>>("/v1/workouts", {
+      const data = await apiClient.get<Array<Record<string, unknown>>>('/v1/workouts', {
         requireOrg: true,
         query: {
           limit,
@@ -66,7 +66,7 @@ export function useWorkouts() {
 
       return (data ?? []).map(mapDbToWorkout);
     } catch (error) {
-      console.error("Error fetching workouts:", error);
+      console.error('Error fetching workouts:', error);
       return [];
     }
   }
@@ -77,17 +77,14 @@ export function useWorkouts() {
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.get<Record<string, unknown> | null>(
-        "/v1/workouts/in-progress",
-        {
-          requireOrg: true,
-        }
-      );
+      const data = await apiClient.get<Record<string, unknown> | null>('/v1/workouts/in-progress', {
+        requireOrg: true,
+      });
 
       if (!data) return null;
       return mapDbToWorkout(data);
     } catch (error) {
-      console.error("Error fetching in-progress workout:", error);
+      console.error('Error fetching in-progress workout:', error);
       return null;
     }
   }
@@ -101,7 +98,7 @@ export function useWorkouts() {
       });
       return mapDbToWorkout(data);
     } catch (error) {
-      console.error("Error fetching workout:", error);
+      console.error('Error fetching workout:', error);
       return null;
     }
   }
@@ -113,29 +110,29 @@ export function useWorkouts() {
 
     try {
       const data = await apiClient.post<Record<string, unknown>>(
-        "/v1/workouts",
+        '/v1/workouts',
         {
           name: dto.name,
           description: dto.description,
           workout_date: dto.workout_date,
           duration_minutes: dto.duration_minutes,
-          status: dto.status || "in_progress",
+          status: dto.status || 'in_progress',
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       return mapDbToWorkout(data);
     } catch (error) {
-      console.error("Error creating workout:", error);
+      console.error('Error creating workout:', error);
       return null;
     }
   }
 
   async function addExercise(
     workoutId: string,
-    exerciseName: string
+    exerciseName: string,
   ): Promise<WorkoutExercise | null> {
     await refreshAuthContext();
 
@@ -147,7 +144,7 @@ export function useWorkouts() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       return {
@@ -158,7 +155,7 @@ export function useWorkouts() {
         sets: [],
       };
     } catch (error) {
-      console.error("Error adding exercise:", error);
+      console.error('Error adding exercise:', error);
       return null;
     }
   }
@@ -169,7 +166,7 @@ export function useWorkouts() {
       reps?: number;
       weight_kg?: number;
       rest_seconds?: number;
-    }
+    },
   ): Promise<WorkoutSet | null> {
     await refreshAuthContext();
 
@@ -183,7 +180,7 @@ export function useWorkouts() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       const reps = data.reps;
@@ -194,11 +191,14 @@ export function useWorkouts() {
         setNumber: Number(data.set_number),
         reps: reps !== null && reps !== undefined ? Number(reps) : null,
         weightKg: weightKg !== null && weightKg !== undefined ? Number(weightKg) : null,
-        restSeconds: data.rest_seconds !== null && data.rest_seconds !== undefined ? Number(data.rest_seconds) : null,
+        restSeconds:
+          data.rest_seconds !== null && data.rest_seconds !== undefined
+            ? Number(data.rest_seconds)
+            : null,
         notes: data.notes as string | null,
       };
     } catch (error) {
-      console.error("Error adding set:", error);
+      console.error('Error adding set:', error);
       return null;
     }
   }
@@ -209,7 +209,7 @@ export function useWorkouts() {
       reps?: number | null;
       weight_kg?: number | null;
       rest_seconds?: number | null;
-    }
+    },
   ): Promise<WorkoutSet | null> {
     await refreshAuthContext();
 
@@ -223,7 +223,7 @@ export function useWorkouts() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       const reps = data.reps;
@@ -234,11 +234,14 @@ export function useWorkouts() {
         setNumber: Number(data.set_number),
         reps: reps !== null && reps !== undefined ? Number(reps) : null,
         weightKg: weightKg !== null && weightKg !== undefined ? Number(weightKg) : null,
-        restSeconds: data.rest_seconds !== null && data.rest_seconds !== undefined ? Number(data.rest_seconds) : null,
+        restSeconds:
+          data.rest_seconds !== null && data.rest_seconds !== undefined
+            ? Number(data.rest_seconds)
+            : null,
         notes: data.notes as string | null,
       };
     } catch (error) {
-      console.error("Error updating set:", error);
+      console.error('Error updating set:', error);
       return null;
     }
   }
@@ -256,7 +259,7 @@ export function useWorkouts() {
       });
       return true;
     } catch (error) {
-      console.error("Error deleting set:", error);
+      console.error('Error deleting set:', error);
       return false;
     }
   }
@@ -268,16 +271,16 @@ export function useWorkouts() {
       await apiClient.patch<Record<string, unknown>>(
         `/v1/workouts/${workoutId}`,
         {
-          status: "completed",
+          status: 'completed',
           duration_minutes: durationMinutes,
         },
         {
           requireOrg: true,
-        }
+        },
       );
       return true;
     } catch (error) {
-      console.error("Error completing workout:", error);
+      console.error('Error completing workout:', error);
       return false;
     }
   }
@@ -291,7 +294,7 @@ export function useWorkouts() {
       });
       return true;
     } catch (error) {
-      console.error("Error deleting workout:", error);
+      console.error('Error deleting workout:', error);
       return false;
     }
   }
@@ -306,22 +309,21 @@ export function useWorkouts() {
 
     try {
       const data = await apiClient.get<{ count: number; totalMinutes: number }>(
-        "/v1/workouts/weekly-stats",
+        '/v1/workouts/weekly-stats',
         {
           requireOrg: true,
-        }
+        },
       );
 
       return data;
     } catch (error) {
-      console.error("Error fetching weekly stats:", error);
+      console.error('Error fetching weekly stats:', error);
       return { count: 0, totalMinutes: 0 };
     }
   }
 
   function mapDbToWorkout(row: Record<string, unknown>): Workout {
-    const exercises =
-      (row.workout_exercises as Array<Record<string, unknown>>) ?? [];
+    const exercises = (row.workout_exercises as Array<Record<string, unknown>>) ?? [];
 
     return {
       id: row.id as string,
@@ -343,9 +345,9 @@ export function useWorkouts() {
             orderIndex: e.order_index as number,
             sets: sets
               .map((s) => {
-                const setId = (s.id as string) || (s.set_id as string)
+                const setId = (s.id as string) || (s.set_id as string);
                 if (!setId || typeof setId !== 'string' || setId.length < 10) {
-                  return null
+                  return null;
                 }
                 const reps = s.reps;
                 const weightKg = s.weight_kg;
@@ -353,8 +355,14 @@ export function useWorkouts() {
                   id: setId,
                   setNumber: Number(s.set_number),
                   reps: reps !== null && reps !== undefined && reps !== '' ? Number(reps) : null,
-                  weightKg: weightKg !== null && weightKg !== undefined && weightKg !== '' ? Number(weightKg) : null,
-                  restSeconds: s.rest_seconds !== null && s.rest_seconds !== undefined ? Number(s.rest_seconds) : null,
+                  weightKg:
+                    weightKg !== null && weightKg !== undefined && weightKg !== ''
+                      ? Number(weightKg)
+                      : null,
+                  restSeconds:
+                    s.rest_seconds !== null && s.rest_seconds !== undefined
+                      ? Number(s.rest_seconds)
+                      : null,
                   notes: s.notes as string | null,
                 };
               })

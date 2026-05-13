@@ -1,12 +1,12 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
+  const id = getRouterParam(event, 'id');
 
   if (!id) {
     throw createError({
       statusCode: 400,
-      message: "User ID is required",
+      message: 'User ID is required',
     });
   }
 
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     if (!profile) {
       throw createError({
         statusCode: 404,
-        message: "Profile not found",
+        message: 'Profile not found',
       });
     }
 
@@ -39,12 +39,11 @@ export default defineEventHandler(async (event) => {
       socialLinks: profile.socialLinks,
     };
   } catch (error: any) {
-    console.error("Error in profile API:", error);
+    console.error('Error in profile API:', error);
     throw createError({
       statusCode: 500,
-      message: error?.message || "Error fetching profile",
+      message: error?.message || 'Error fetching profile',
       data: error,
     });
   }
 });
-

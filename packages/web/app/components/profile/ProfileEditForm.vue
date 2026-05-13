@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Globe, Instagram, Link2, MapPin, MessageSquare, Twitter } from 'lucide-vue-next'
-import type { AnimeEntry } from '@/composables/useAnime'
-import type { MangaEntry } from '@/composables/useManga'
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Globe, Instagram, Link2, MapPin, MessageSquare, Twitter } from 'lucide-vue-next';
+import type { AnimeEntry } from '@/composables/useAnime';
+import type { MangaEntry } from '@/composables/useManga';
 
 interface EditForm {
-  username: string
-  display_name: string
-  bio: string
-  favorite_anime_id: string
-  favorite_manga_id: string
-  location: string
-  website: string
-  twitter: string
-  instagram: string
-  discord: string
+  username: string;
+  display_name: string;
+  bio: string;
+  favorite_anime_id: string;
+  favorite_manga_id: string;
+  location: string;
+  website: string;
+  twitter: string;
+  instagram: string;
+  discord: string;
 }
 
 interface Props {
-  form: EditForm
-  animeList: readonly AnimeEntry[]
-  mangaList: readonly MangaEntry[]
+  form: EditForm;
+  animeList: readonly AnimeEntry[];
+  mangaList: readonly MangaEntry[];
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'update:form': [value: EditForm]
-}>()
+  'update:form': [value: EditForm];
+}>();
 
 function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
-  emit('update:form', { ...props.form, [field]: value })
+  emit('update:form', { ...props.form, [field]: value });
 }
 </script>
 
@@ -178,4 +178,3 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
     </div>
   </div>
 </template>
-

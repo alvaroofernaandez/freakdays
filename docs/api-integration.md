@@ -29,7 +29,7 @@ SUPABASE_ANON_KEY=tu_anon_key
 
 ```typescript
 // app/composables/useSupabase.ts
-const supabase = useSupabase()
+const supabase = useSupabase();
 ```
 
 ### Base de Datos
@@ -37,11 +37,8 @@ const supabase = useSupabase()
 #### Conexión
 
 ```typescript
-const supabase = useSupabase()
-const { data, error } = await supabase
-  .from('anime_list')
-  .select('*')
-  .eq('user_id', userId)
+const supabase = useSupabase();
+const { data, error } = await supabase.from('anime_list').select('*').eq('user_id', userId);
 ```
 
 #### Row Level Security (RLS)
@@ -69,7 +66,7 @@ const { data } = await supabase
   .select('*')
   .eq('user_id', userId)
   .eq('status', 'watching')
-  .order('updated_at', { ascending: false })
+  .order('updated_at', { ascending: false });
 ```
 
 **Insert:**
@@ -80,10 +77,10 @@ const { data, error } = await supabase
   .insert({
     user_id: userId,
     title: 'One Piece',
-    status: 'watching'
+    status: 'watching',
   })
   .select()
-  .single()
+  .single();
 ```
 
 **Update:**
@@ -92,16 +89,13 @@ const { data, error } = await supabase
 const { error } = await supabase
   .from('anime_list')
   .update({ current_episode: 50 })
-  .eq('id', animeId)
+  .eq('id', animeId);
 ```
 
 **Delete:**
 
 ```typescript
-const { error } = await supabase
-  .from('anime_list')
-  .delete()
-  .eq('id', animeId)
+const { error } = await supabase.from('anime_list').delete().eq('id', animeId);
 ```
 
 ### Autenticación
@@ -138,11 +132,12 @@ GET /anime?q={query}&limit={limit}&page={page}
 // app/composables/useAnimeSearch.ts
 const response = await fetch(
   `${JIKAN_API_BASE}/anime?q=${encodeURIComponent(query)}&limit=20&page=${page}`,
-  { signal: abortController.signal }
-)
+  { signal: abortController.signal },
+);
 ```
 
 **Parámetros:**
+
 - `q`: Query de búsqueda
 - `limit`: Resultados por página (máx 25)
 - `page`: Número de página
@@ -151,11 +146,11 @@ const response = await fetch(
 
 ```typescript
 interface AnimeSearchResponse {
-  data: AnimeSearchResult[]
+  data: AnimeSearchResult[];
   pagination: {
-    last_visible_page: number
-    has_next_page: boolean
-  }
+    last_visible_page: number;
+    has_next_page: boolean;
+  };
 }
 ```
 
@@ -170,8 +165,8 @@ GET /anime/{id}/full
 **Implementación:**
 
 ```typescript
-const response = await fetch(`${JIKAN_API_BASE}/anime/${malId}/full`)
-const data = await response.json()
+const response = await fetch(`${JIKAN_API_BASE}/anime/${malId}/full`);
+const data = await response.json();
 ```
 
 ### Optimizaciones
@@ -181,15 +176,15 @@ const data = await response.json()
 Las búsquedas tienen debounce de 500ms para reducir requests:
 
 ```typescript
-const DEBOUNCE_DELAY = 500
+const DEBOUNCE_DELAY = 500;
 
 function debouncedSearch(query: string) {
   if (debounceTimer) {
-    clearTimeout(debounceTimer)
+    clearTimeout(debounceTimer);
   }
   debounceTimer = setTimeout(() => {
-    searchAnime(query, 1)
-  }, DEBOUNCE_DELAY)
+    searchAnime(query, 1);
+  }, DEBOUNCE_DELAY);
 }
 ```
 
@@ -199,14 +194,14 @@ Cancela requests anteriores cuando se inicia una nueva búsqueda:
 
 ```typescript
 if (abortController) {
-  abortController.abort()
+  abortController.abort();
 }
-const currentAbortController = new AbortController()
-abortController = currentAbortController
+const currentAbortController = new AbortController();
+abortController = currentAbortController;
 
 const response = await fetch(url, {
-  signal: currentAbortController.signal
-})
+  signal: currentAbortController.signal,
+});
 ```
 
 #### Paginación
@@ -215,9 +210,9 @@ Carga resultados adicionales bajo demanda:
 
 ```typescript
 async function loadMoreResults() {
-  if (!hasMorePages.value || searching.value) return
-  const nextPage = currentPage.value + 1
-  await searchAnime(searchQuery.value, nextPage)
+  if (!hasMorePages.value || searching.value) return;
+  const nextPage = currentPage.value + 1;
+  await searchAnime(searchQuery.value, nextPage);
 }
 ```
 
@@ -234,7 +229,7 @@ export function parseJikanAnime(data: AnimeSearchResult): CreateAnimeDTO {
     cover_url: data.images.jpg.large_image_url,
     notes: formatNotes(data.synopsis, data.genres, data.studios),
     // ...
-  }
+  };
 }
 ```
 
@@ -251,13 +246,15 @@ FreakDays utiliza Supabase Auth para autenticación.
 ```typescript
 // app/composables/useAuth.ts
 async function initialize() {
-  const { data: { session } } = await supabase.auth.getSession()
-  authStore.setSession(session)
-  
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  authStore.setSession(session);
+
   supabase.auth.onAuthStateChange(async (event, session) => {
-    authStore.setSession(session)
+    authStore.setSession(session);
     // Manejar cambios de estado
-  })
+  });
 }
 ```
 
@@ -267,11 +264,11 @@ async function initialize() {
 async function signUp(email: string, password: string) {
   const { data, error } = await supabase.auth.signUp({
     email,
-    password
-  })
-  
+    password,
+  });
+
   if (data.user) {
-    await ensureProfileExists(data.user.id, email)
+    await ensureProfileExists(data.user.id, email);
   }
 }
 ```
@@ -282,8 +279,8 @@ async function signUp(email: string, password: string) {
 async function signIn(email: string, password: string) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password
-  })
+    password,
+  });
 }
 ```
 
@@ -291,9 +288,9 @@ async function signIn(email: string, password: string) {
 
 ```typescript
 async function signOut() {
-  await supabase.auth.signOut()
-  authStore.setSession(null)
-  navigateTo('/login')
+  await supabase.auth.signOut();
+  authStore.setSession(null);
+  navigateTo('/login');
 }
 ```
 
@@ -303,10 +300,10 @@ La sesión se gestiona en el store de Pinia:
 
 ```typescript
 // stores/auth.ts
-const session = ref<Session | null>(null)
+const session = ref<Session | null>(null);
 
-const isAuthenticated = computed(() => !!session.value)
-const userId = computed(() => session.value?.user?.id ?? null)
+const isAuthenticated = computed(() => !!session.value);
+const userId = computed(() => session.value?.user?.id ?? null);
 ```
 
 ### Middleware de Autenticación
@@ -317,9 +314,9 @@ El middleware `auth.global.ts` protege todas las rutas:
 // app/middleware/auth.global.ts
 export default defineNuxtRouteMiddleware(async (to) => {
   if (!authStore.isAuthenticated && !isPublicRoute) {
-    return navigateTo('/login')
+    return navigateTo('/login');
   }
-})
+});
 ```
 
 ---
@@ -339,23 +336,19 @@ Supabase Storage se utiliza para almacenar avatares de usuario.
 ```typescript
 // app/composables/useProfile.ts
 async function uploadAvatar(file: File): Promise<string | null> {
-  const fileName = `${userId}-${Date.now()}.${file.name.split('.').pop()}`
-  const filePath = `public/avatars/${fileName}`
-  
-  const { error: uploadError } = await supabase.storage
-    .from('avatars')
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: true
-    })
-  
-  if (uploadError) throw uploadError
-  
-  const { data } = supabase.storage
-    .from('avatars')
-    .getPublicUrl(filePath)
-  
-  return data.publicUrl
+  const fileName = `${userId}-${Date.now()}.${file.name.split('.').pop()}`;
+  const filePath = `public/avatars/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, {
+    cacheControl: '3600',
+    upsert: true,
+  });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+
+  return data.publicUrl;
 }
 ```
 
@@ -363,14 +356,12 @@ async function uploadAvatar(file: File): Promise<string | null> {
 
 ```typescript
 async function deleteAvatar() {
-  if (!profile.value?.avatarUrl) return
-  
-  const fileName = profile.value.avatarUrl.split('/').pop()
-  const filePath = `public/avatars/${fileName}`
-  
-  await supabase.storage
-    .from('avatars')
-    .remove([filePath])
+  if (!profile.value?.avatarUrl) return;
+
+  const fileName = profile.value.avatarUrl.split('/').pop();
+  const filePath = `public/avatars/${fileName}`;
+
+  await supabase.storage.from('avatars').remove([filePath]);
 }
 ```
 
@@ -406,11 +397,11 @@ USING (
 ### Errores de Supabase
 
 ```typescript
-const { data, error } = await supabase.from('anime_list').select('*')
+const { data, error } = await supabase.from('anime_list').select('*');
 
 if (error) {
-  console.error('Supabase error:', error)
-  throw new Error(error.message)
+  console.error('Supabase error:', error);
+  throw new Error(error.message);
 }
 ```
 
@@ -418,18 +409,18 @@ if (error) {
 
 ```typescript
 try {
-  const response = await fetch(url)
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
-  const data = await response.json()
+  const data = await response.json();
 } catch (error) {
   if (error.name === 'AbortError') {
     // Request cancelado, ignorar
-    return
+    return;
   }
-  console.error('API error:', error)
-  throw error
+  console.error('API error:', error);
+  throw error;
 }
 ```
 
@@ -438,15 +429,15 @@ try {
 ```typescript
 // app/composables/useErrorHandler.ts
 export function useErrorHandler() {
-  const toast = useToast()
-  
+  const toast = useToast();
+
   function handleError(error: Error | unknown) {
-    const message = error instanceof Error ? error.message : 'Error desconocido'
-    toast.error(message)
-    console.error('Error:', error)
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    toast.error(message);
+    console.error('Error:', error);
   }
-  
-  return { handleError }
+
+  return { handleError };
 }
 ```
 
@@ -459,10 +450,10 @@ export class AppError extends Error {
     message: string,
     public code?: string,
     public statusCode?: number,
-    public details?: unknown
+    public details?: unknown,
   ) {
-    super(message)
-    this.name = 'AppError'
+    super(message);
+    this.name = 'AppError';
   }
 }
 ```
@@ -503,5 +494,3 @@ Supabase tiene límites según el plan:
 ---
 
 **Última actualización**: Enero 2025
-
-

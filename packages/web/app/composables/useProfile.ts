@@ -1,5 +1,5 @@
-import { AppError } from "@/utils/error-handling";
-import { useAuthStore } from "~~/stores/auth";
+import { AppError } from '@/utils/error-handling';
+import { useAuthStore } from '~~/stores/auth';
 
 export interface UserProfile {
   id: string;
@@ -56,24 +56,20 @@ export function useProfile() {
     return !!authStore.userId || !!authContext.getAccessToken();
   }
 
-  async function uploadViaSignedUrl(
-    signedUrl: string,
-    file: File,
-    contentType?: string
-  ) {
+  async function uploadViaSignedUrl(signedUrl: string, file: File, contentType?: string) {
     const response = await fetch(signedUrl, {
-      method: "PUT",
+      method: 'PUT',
       headers: {
-        "Content-Type": contentType || file.type || "application/octet-stream",
+        'Content-Type': contentType || file.type || 'application/octet-stream',
       },
       body: file,
     });
 
     if (!response.ok) {
       throw new AppError(
-        "Falló la subida del archivo al storage firmado",
-        "SIGNED_UPLOAD_FAILED",
-        response.status
+        'Falló la subida del archivo al storage firmado',
+        'SIGNED_UPLOAD_FAILED',
+        response.status,
       );
     }
   }
@@ -95,7 +91,7 @@ export function useProfile() {
   }): UserProfile {
     return {
       id: row.id,
-      username: row.username ?? "",
+      username: row.username ?? '',
       displayName: row.displayName,
       avatarUrl: row.avatarUrl,
       bannerUrl: row.bannerUrl,
@@ -116,7 +112,7 @@ export function useProfile() {
     if (!hasAuthContext()) return null;
 
     try {
-      const data = await apiClient.get<UserProfile>("/v1/profile/me");
+      const data = await apiClient.get<UserProfile>('/v1/profile/me');
       return mapApiToProfile(data);
     } catch {
       return null;
@@ -140,7 +136,7 @@ export function useProfile() {
     if (!hasAuthContext()) return false;
 
     try {
-      await apiClient.put<UserProfile>("/v1/profile/me", updates);
+      await apiClient.put<UserProfile>('/v1/profile/me', updates);
       return true;
     } catch {
       return false;
@@ -154,20 +150,20 @@ export function useProfile() {
 
     try {
       const signed = await apiClient.post<SignedUploadUrlResponse>(
-        "/v1/profile/me/avatar/upload-url",
+        '/v1/profile/me/avatar/upload-url',
         {
-          contentType: file.type || "application/octet-stream",
+          contentType: file.type || 'application/octet-stream',
           fileName: file.name,
-        }
+        },
       );
 
       await uploadViaSignedUrl(signed.uploadUrl, file, file.type);
 
       const confirmed = await apiClient.post<ConfirmAvatarResponse>(
-        "/v1/profile/me/avatar/confirm",
+        '/v1/profile/me/avatar/confirm',
         {
           key: signed.key,
-        }
+        },
       );
 
       return confirmed.avatarUrl || signed.publicUrl;
@@ -182,7 +178,7 @@ export function useProfile() {
     if (!hasAuthContext()) return false;
 
     try {
-      await apiClient.del<{ success: true }>("/v1/profile/me/avatar");
+      await apiClient.del<{ success: true }>('/v1/profile/me/avatar');
       return true;
     } catch {
       return false;
@@ -196,20 +192,20 @@ export function useProfile() {
 
     try {
       const signed = await apiClient.post<SignedUploadUrlResponse>(
-        "/v1/profile/me/banner/upload-url",
+        '/v1/profile/me/banner/upload-url',
         {
-          contentType: file.type || "application/octet-stream",
+          contentType: file.type || 'application/octet-stream',
           fileName: file.name,
-        }
+        },
       );
 
       await uploadViaSignedUrl(signed.uploadUrl, file, file.type);
 
       const confirmed = await apiClient.post<ConfirmBannerResponse>(
-        "/v1/profile/me/banner/confirm",
+        '/v1/profile/me/banner/confirm',
         {
           key: signed.key,
-        }
+        },
       );
 
       return confirmed.bannerUrl || signed.publicUrl;
@@ -224,22 +220,20 @@ export function useProfile() {
     if (!hasAuthContext()) return false;
 
     try {
-      await apiClient.del<{ success: true }>("/v1/profile/me/banner");
+      await apiClient.del<{ success: true }>('/v1/profile/me/banner');
       return true;
     } catch {
       return false;
     }
   }
 
-  async function addExp(
-    amount: number
-  ): Promise<{ newTotal: number; newLevel: number } | null> {
+  async function addExp(amount: number): Promise<{ newTotal: number; newLevel: number } | null> {
     await refreshAuthContext();
 
     if (!hasAuthContext()) return null;
 
     try {
-      const result = await apiClient.post<AddExpResponse>("/v1/profile/me/exp", {
+      const result = await apiClient.post<AddExpResponse>('/v1/profile/me/exp', {
         amount,
       });
       return result as { newTotal: number; newLevel: number };

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight } from 'lucide-vue-next'
+import { ArrowRight } from 'lucide-vue-next';
 </script>
 
 <template>
@@ -7,12 +7,12 @@ import { ArrowRight } from 'lucide-vue-next'
     <NuxtLink to="/profile">
       <CardHeader class="flex flex-row items-center justify-between">
         <div>
-          <CardTitle class="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+          <CardTitle
+            class="text-sm text-muted-foreground group-hover:text-foreground transition-colors"
+          >
             ¿Quieres más módulos?
           </CardTitle>
-          <CardDescription class="text-xs">
-            Activa más funciones en tu perfil
-          </CardDescription>
+          <CardDescription class="text-xs"> Activa más funciones en tu perfil </CardDescription>
         </div>
         <Button variant="ghost" size="sm" class="group-hover:bg-primary/10">
           <span class="mr-2">Configurar</span>
@@ -22,4 +22,3 @@ import { ArrowRight } from 'lucide-vue-next'
     </NuxtLink>
   </Card>
 </template>
-

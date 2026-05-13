@@ -7,14 +7,17 @@ assignees: ''
 ---
 
 ## 📋 Descripción
+
 <!-- Describe qué código o funcionalidad quieres refactorizar -->
 
 Una descripción clara de qué parte del código necesita ser refactorizada y por qué.
 
 ## 🎯 Objetivo
+
 <!-- ¿Cuál es el objetivo de esta refactorización? -->
 
 Describe qué se espera lograr con esta refactorización:
+
 - [ ] Mejorar legibilidad del código
 - [ ] Mejorar rendimiento
 - [ ] Reducir complejidad
@@ -23,22 +26,26 @@ Describe qué se espera lograr con esta refactorización:
 - [ ] Otro: <!-- especifica -->
 
 ## 📍 Área a Refactorizar
+
 <!-- Especifica qué archivos, componentes o módulos están involucrados -->
 
-- **Archivos/Componentes**: 
+- **Archivos/Componentes**:
   - `ruta/al/archivo1.ts`
   - `ruta/al/archivo2.vue`
 - **Módulo/Funcionalidad**: <!-- ej: Sistema de autenticación, Gestión de animes, etc. -->
 
 ## 💡 Propuesta de Refactorización
+
 <!-- Describe cómo te gustaría refactorizar el código -->
 
 Una descripción detallada de cómo se debería refactorizar:
+
 - ¿Qué patrones o principios aplicar?
 - ¿Qué estructura propones?
 - ¿Qué cambios específicos harías?
 
 ## 🔄 Cambios Propuestos
+
 <!-- Lista los cambios específicos que propones -->
 
 1. Cambio 1: Descripción
@@ -46,6 +53,7 @@ Una descripción detallada de cómo se debería refactorizar:
 3. Cambio 3: Descripción
 
 ## ⚠️ Consideraciones
+
 <!-- ¿Hay algo que deba tenerse en cuenta? -->
 
 - [ ] Requiere cambios en la base de datos
@@ -55,6 +63,7 @@ Una descripción detallada de cómo se debería refactorizar:
 - [ ] Puede romper compatibilidad
 
 ## 📊 Impacto
+
 <!-- ¿Qué tan grande es el impacto de esta refactorización? -->
 
 - [ ] Bajo - Cambios localizados
@@ -62,10 +71,10 @@ Una descripción detallada de cómo se debería refactorizar:
 - [ ] Alto - Refactorización mayor que afecta múltiples áreas
 
 ## 🔗 Enlaces Relacionados
+
 <!-- Si hay issues, PRs o documentación relacionada -->
 
 - Issue relacionado: #
 - PR relacionado: #
-- Código relacionado: 
-- Documentación: 
-
+- Código relacionado:
+- Documentación:

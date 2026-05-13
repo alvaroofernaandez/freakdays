@@ -1,192 +1,198 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { X, ZoomIn, ZoomOut, Move } from 'lucide-vue-next'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { X, ZoomIn, ZoomOut, Move } from 'lucide-vue-next';
 
 interface Props {
-  open: boolean
-  imageFile: File | null
-  aspectRatio?: number
+  open: boolean;
+  imageFile: File | null;
+  aspectRatio?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   aspectRatio: 16 / 9,
-})
+});
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-  'crop': [file: File]
-  'cancel': []
-}>()
+  'update:open': [value: boolean];
+  crop: [file: File];
+  cancel: [];
+}>();
 
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-const imageRef = ref<HTMLImageElement | null>(null)
-const containerRef = ref<HTMLDivElement | null>(null)
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+const imageRef = ref<HTMLImageElement | null>(null);
+const containerRef = ref<HTMLDivElement | null>(null);
 
-const scale = ref(1)
-const position = ref({ x: 0, y: 0 })
-const isDragging = ref(false)
-const dragStart = ref({ x: 0, y: 0 })
-const isProcessing = ref(false)
+const scale = ref(1);
+const position = ref({ x: 0, y: 0 });
+const isDragging = ref(false);
+const dragStart = ref({ x: 0, y: 0 });
+const isProcessing = ref(false);
 
 const imageUrl = computed(() => {
-  if (!props.imageFile) return null
-  return URL.createObjectURL(props.imageFile)
-})
+  if (!props.imageFile) return null;
+  return URL.createObjectURL(props.imageFile);
+});
 
-const containerWidth = ref(0)
-const containerHeight = ref(0)
+const containerWidth = ref(0);
+const containerHeight = ref(0);
 
-watch(() => props.open, (open) => {
-  if (open && props.imageFile) {
-    nextTick(() => {
-      loadImage()
-      updateContainerSize()
-    })
-  } else {
-    resetState()
-  }
-})
+watch(
+  () => props.open,
+  (open) => {
+    if (open && props.imageFile) {
+      nextTick(() => {
+        loadImage();
+        updateContainerSize();
+      });
+    } else {
+      resetState();
+    }
+  },
+);
 
-watch(() => props.imageFile, () => {
-  if (props.open && props.imageFile) {
-    nextTick(() => {
-      loadImage()
-    })
-  }
-})
+watch(
+  () => props.imageFile,
+  () => {
+    if (props.open && props.imageFile) {
+      nextTick(() => {
+        loadImage();
+      });
+    }
+  },
+);
 
 function updateContainerSize() {
   if (containerRef.value) {
-    containerWidth.value = containerRef.value.clientWidth
-    containerHeight.value = containerRef.value.clientHeight
+    containerWidth.value = containerRef.value.clientWidth;
+    containerHeight.value = containerRef.value.clientHeight;
   }
 }
 
 function resetState() {
-  scale.value = 1
-  position.value = { x: 0, y: 0 }
-  isDragging.value = false
+  scale.value = 1;
+  position.value = { x: 0, y: 0 };
+  isDragging.value = false;
   if (imageUrl.value) {
-    URL.revokeObjectURL(imageUrl.value)
+    URL.revokeObjectURL(imageUrl.value);
   }
 }
 
 function loadImage() {
-  if (!imageRef.value || !props.imageFile) return
+  if (!imageRef.value || !props.imageFile) return;
 
-  const img = new Image()
+  const img = new Image();
   img.onload = () => {
-    const containerAspect = containerWidth.value / containerHeight.value
-    const imageAspect = img.width / img.height
-    const targetAspect = props.aspectRatio
+    const containerAspect = containerWidth.value / containerHeight.value;
+    const imageAspect = img.width / img.height;
+    const targetAspect = props.aspectRatio;
 
-    let initialScale = 1
+    let initialScale = 1;
     if (imageAspect > targetAspect) {
-      initialScale = containerHeight.value / img.height
+      initialScale = containerHeight.value / img.height;
     } else {
-      initialScale = containerWidth.value / img.width
+      initialScale = containerWidth.value / img.width;
     }
 
-    scale.value = Math.max(initialScale, 1)
-    position.value = { x: 0, y: 0 }
-  }
-  img.src = imageUrl.value!
+    scale.value = Math.max(initialScale, 1);
+    position.value = { x: 0, y: 0 };
+  };
+  img.src = imageUrl.value!;
 }
 
 function handleZoomIn() {
-  scale.value = Math.min(scale.value + 0.1, 3)
+  scale.value = Math.min(scale.value + 0.1, 3);
 }
 
 function handleZoomOut() {
-  scale.value = Math.max(scale.value - 0.1, 0.5)
+  scale.value = Math.max(scale.value - 0.1, 0.5);
 }
 
 function handleMouseDown(e: MouseEvent) {
-  isDragging.value = true
-  dragStart.value = { x: e.clientX - position.value.x, y: e.clientY - position.value.y }
+  isDragging.value = true;
+  dragStart.value = { x: e.clientX - position.value.x, y: e.clientY - position.value.y };
 }
 
 function handleMouseMove(e: MouseEvent) {
-  if (!isDragging.value) return
+  if (!isDragging.value) return;
   position.value = {
     x: e.clientX - dragStart.value.x,
     y: e.clientY - dragStart.value.y,
-  }
+  };
 }
 
 function handleMouseUp() {
-  isDragging.value = false
+  isDragging.value = false;
 }
 
 function handleTouchStart(e: TouchEvent) {
   if (e.touches.length === 1) {
-    isDragging.value = true
+    isDragging.value = true;
     dragStart.value = {
       x: e.touches[0].clientX - position.value.x,
       y: e.touches[0].clientY - position.value.y,
-    }
+    };
   }
 }
 
 function handleTouchMove(e: TouchEvent) {
-  if (!isDragging.value || e.touches.length !== 1) return
-  e.preventDefault()
+  if (!isDragging.value || e.touches.length !== 1) return;
+  e.preventDefault();
   position.value = {
     x: e.touches[0].clientX - dragStart.value.x,
     y: e.touches[0].clientY - dragStart.value.y,
-  }
+  };
 }
 
 function handleTouchEnd() {
-  isDragging.value = false
+  isDragging.value = false;
 }
 
 async function handleCrop() {
-  if (!canvasRef.value || !imageRef.value || !props.imageFile) return
+  if (!canvasRef.value || !imageRef.value || !props.imageFile) return;
 
-  isProcessing.value = true
+  isProcessing.value = true;
   try {
-    const canvas = canvasRef.value
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const canvas = canvasRef.value;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    const targetWidth = 1920
-    const targetHeight = targetWidth / props.aspectRatio
+    const targetWidth = 1920;
+    const targetHeight = targetWidth / props.aspectRatio;
 
-    canvas.width = targetWidth
-    canvas.height = targetHeight
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
 
-    const img = new Image()
+    const img = new Image();
     await new Promise((resolve, reject) => {
-      img.onload = resolve
-      img.onerror = reject
-      img.src = imageUrl.value!
-    })
+      img.onload = resolve;
+      img.onerror = reject;
+      img.src = imageUrl.value!;
+    });
 
-    const containerAspect = containerWidth.value / containerHeight.value
-    const imageAspect = img.width / img.height
+    const containerAspect = containerWidth.value / containerHeight.value;
+    const imageAspect = img.width / img.height;
 
-    let displayWidth = containerWidth.value
-    let displayHeight = containerHeight.value
+    let displayWidth = containerWidth.value;
+    let displayHeight = containerHeight.value;
 
     if (imageAspect > containerAspect) {
-      displayHeight = containerWidth.value / imageAspect
+      displayHeight = containerWidth.value / imageAspect;
     } else {
-      displayWidth = containerHeight.value * imageAspect
+      displayWidth = containerHeight.value * imageAspect;
     }
 
-    const scaledWidth = displayWidth * scale.value
-    const scaledHeight = displayHeight * scale.value
+    const scaledWidth = displayWidth * scale.value;
+    const scaledHeight = displayHeight * scale.value;
 
-    const offsetX = position.value.x
-    const offsetY = position.value.y
+    const offsetX = position.value.x;
+    const offsetY = position.value.y;
 
-    const sourceX = Math.max(0, (-offsetX / scaledWidth) * img.width)
-    const sourceY = Math.max(0, (-offsetY / scaledHeight) * img.height)
-    const sourceWidth = Math.min(img.width, (containerWidth.value / scaledWidth) * img.width)
-    const sourceHeight = Math.min(img.height, (containerHeight.value / scaledHeight) * img.height)
+    const sourceX = Math.max(0, (-offsetX / scaledWidth) * img.width);
+    const sourceY = Math.max(0, (-offsetY / scaledHeight) * img.height);
+    const sourceWidth = Math.min(img.width, (containerWidth.value / scaledWidth) * img.width);
+    const sourceHeight = Math.min(img.height, (containerHeight.value / scaledHeight) * img.height);
 
     ctx.drawImage(
       img,
@@ -197,44 +203,44 @@ async function handleCrop() {
       0,
       0,
       targetWidth,
-      targetHeight
-    )
+      targetHeight,
+    );
 
     canvas.toBlob(
       (blob) => {
         if (blob) {
           const croppedFile = new File([blob], props.imageFile!.name, {
             type: props.imageFile!.type,
-          })
-          emit('crop', croppedFile)
-          emit('update:open', false)
+          });
+          emit('crop', croppedFile);
+          emit('update:open', false);
         }
       },
       props.imageFile.type,
-      0.9
-    )
+      0.9,
+    );
   } catch (error) {
-    console.error('Error cropping image:', error)
+    console.error('Error cropping image:', error);
   } finally {
-    isProcessing.value = false
+    isProcessing.value = false;
   }
 }
 
 function handleCancel() {
-  emit('update:open', false)
-  emit('cancel')
+  emit('update:open', false);
+  emit('cancel');
 }
 
 onMounted(() => {
-  window.addEventListener('resize', updateContainerSize)
-})
+  window.addEventListener('resize', updateContainerSize);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateContainerSize)
+  window.removeEventListener('resize', updateContainerSize);
   if (imageUrl.value) {
-    URL.revokeObjectURL(imageUrl.value)
+    URL.revokeObjectURL(imageUrl.value);
   }
-})
+});
 </script>
 
 <template>
@@ -244,7 +250,7 @@ onUnmounted(() => {
         <div
           v-if="open && imageFile"
           class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-background/95 backdrop-blur-sm overflow-y-auto"
-          style="pointer-events: auto;"
+          style="pointer-events: auto"
           @click.self="handleCancel"
           @keydown.esc="handleCancel"
           role="dialog"
@@ -369,4 +375,3 @@ onUnmounted(() => {
   opacity: 0;
 }
 </style>
-

@@ -6,10 +6,7 @@ import { IdentityContextService } from '../common/identity/identity-context.serv
 export class QuestsNotificationsService {
   constructor(private readonly identityContext: IdentityContextService) {}
 
-  async checkOverdue(
-    clerkUserId: string,
-    orgId: string | null,
-  ): Promise<{ updatedCount: number }> {
+  async checkOverdue(clerkUserId: string, orgId: string | null): Promise<{ updatedCount: number }> {
     await this.resolveIdentityInOrganization(clerkUserId, orgId);
 
     return {
@@ -17,10 +14,7 @@ export class QuestsNotificationsService {
     };
   }
 
-  async checkDueSoon(
-    clerkUserId: string,
-    orgId: string | null,
-  ): Promise<{ updatedCount: number }> {
+  async checkDueSoon(clerkUserId: string, orgId: string | null): Promise<{ updatedCount: number }> {
     await this.resolveIdentityInOrganization(clerkUserId, orgId);
 
     return {

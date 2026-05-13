@@ -1,17 +1,15 @@
 <script setup lang="ts">
 interface Props {
-  enabledModulesCount: number
+  enabledModulesCount: number;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 </script>
 
 <template>
   <section class="space-y-3">
-    <h2 class="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-      Información
-    </h2>
-    
+    <h2 class="text-sm font-medium text-muted-foreground uppercase tracking-wider">Información</h2>
+
     <Card>
       <CardContent class="py-4 space-y-2">
         <div class="flex justify-between text-sm">
@@ -26,4 +24,3 @@ defineProps<Props>()
     </Card>
   </section>
 </template>
-

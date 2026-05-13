@@ -48,6 +48,7 @@ DATABASE_URL=postgres://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.
 ```
 
 Para obtener `DATABASE_URL`:
+
 - Ve a Supabase Dashboard → Settings → Database
 - Copia la "Connection string" bajo "Connection pooling" (modo Transaction)
 - Añade `&pgbouncer=true&connection_limit=1` al final
@@ -108,46 +109,46 @@ freak-days/
 
 ### Naming
 
-| Elemento | Convención | Ejemplo |
-|----------|-----------|---------|
-| Archivos | kebab-case | `anime-card.vue` |
-| Componentes | PascalCase | `AnimeCard` |
-| Composables | camelCase + `use` | `useAnime()` |
-| Stores | camelCase + `Store` | `useModulesStore()` |
-| Tipos | PascalCase | `AnimeEntry` |
-| Constantes | SCREAMING_SNAKE_CASE | `DIFFICULTY_EXP` |
+| Elemento    | Convención           | Ejemplo             |
+| ----------- | -------------------- | ------------------- |
+| Archivos    | kebab-case           | `anime-card.vue`    |
+| Componentes | PascalCase           | `AnimeCard`         |
+| Composables | camelCase + `use`    | `useAnime()`        |
+| Stores      | camelCase + `Store`  | `useModulesStore()` |
+| Tipos       | PascalCase           | `AnimeEntry`        |
+| Constantes  | SCREAMING_SNAKE_CASE | `DIFFICULTY_EXP`    |
 
 ### Estructura de Componentes
 
 ```vue
 <script setup lang="ts">
 // 1. Imports
-import { ref, computed } from 'vue'
-import type { AnimeEntry } from '@/composables/useAnime'
+import { ref, computed } from 'vue';
+import type { AnimeEntry } from '@/composables/useAnime';
 
 // 2. Props y Emits
 interface Props {
-  anime: AnimeEntry
+  anime: AnimeEntry;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 
 const emit = defineEmits<{
-  update: [value: string]
-  delete: []
-}>()
+  update: [value: string];
+  delete: [];
+}>();
 
 // 3. Composables y Stores
-const animeApi = useAnime()
-const toast = useToast()
+const animeApi = useAnime();
+const toast = useToast();
 
 // 4. Refs y Reactive
-const isLoading = ref(false)
+const isLoading = ref(false);
 
 // 5. Computed
 const progress = computed(() => {
   // lógica
-})
+});
 
 // 6. Funciones
 async function handleUpdate() {
@@ -157,7 +158,7 @@ async function handleUpdate() {
 // 7. Lifecycle Hooks
 onMounted(() => {
   // lógica
-})
+});
 </script>
 
 <template>
@@ -175,14 +176,14 @@ onMounted(() => {
 ```typescript
 // ✅ Bueno
 interface User {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
-type Status = 'active' | 'inactive'
+type Status = 'active' | 'inactive';
 
 // ❌ Malo
-const user: any = {}
+const user: any = {};
 ```
 
 ### Vue Composition API
@@ -194,11 +195,11 @@ const user: any = {}
 
 ```typescript
 // ✅ Bueno
-const count = ref(0)
-const doubled = computed(() => count.value * 2)
+const count = ref(0);
+const doubled = computed(() => count.value * 2);
 
 // ❌ Malo
-const state = reactive({ count: 0 })
+const state = reactive({ count: 0 });
 ```
 
 ---
@@ -239,20 +240,20 @@ tests/
 ### Ejemplo de Test
 
 ```typescript
-import { describe, it, expect } from 'vitest'
-import { calculateTotalExp } from '~~/domain/types/quests'
+import { describe, it, expect } from 'vitest';
+import { calculateTotalExp } from '~~/domain/types/quests';
 
 describe('calculateTotalExp', () => {
   it('should calculate base exp for easy quest', () => {
-    const exp = calculateTotalExp('easy', 0)
-    expect(exp).toBe(10)
-  })
-  
+    const exp = calculateTotalExp('easy', 0);
+    expect(exp).toBe(10);
+  });
+
   it('should add streak bonus', () => {
-    const exp = calculateTotalExp('medium', 7)
-    expect(exp).toBe(30) // 25 base + 5 bonus
-  })
-})
+    const exp = calculateTotalExp('medium', 7);
+    expect(exp).toBe(30); // 25 base + 5 bonus
+  });
+});
 ```
 
 ### Cobertura Objetivo
@@ -272,7 +273,9 @@ Nuxt DevTools está habilitado en desarrollo:
 
 ```typescript
 // nuxt.config.ts
-devtools: { enabled: true }
+devtools: {
+  enabled: true;
+}
 ```
 
 Accede en: `http://localhost:3000/_nuxt/dev`
@@ -289,11 +292,11 @@ Instala la extensión del navegador:
 ```typescript
 // Desarrollo
 if (import.meta.dev) {
-  console.log('Debug info:', data)
+  console.log('Debug info:', data);
 }
 
 // Producción (evitar)
-console.error('Error:', error) // Solo errores críticos
+console.error('Error:', error); // Solo errores críticos
 ```
 
 ### Supabase Debugging
@@ -314,16 +317,14 @@ Usa el dashboard de Supabase para:
 1. **Lazy Loading**
 
 ```typescript
-const HeavyComponent = defineAsyncComponent(() => 
-  import('@/components/HeavyComponent.vue')
-)
+const HeavyComponent = defineAsyncComponent(() => import('@/components/HeavyComponent.vue'));
 ```
 
 2. **Computed vs Methods**
 
 ```typescript
 // ✅ Usar computed para valores derivados
-const fullName = computed(() => `${firstName.value} ${lastName.value}`)
+const fullName = computed(() => `${firstName.value} ${lastName.value}`);
 
 // ✅ Usar methods para acciones
 function handleClick() {
@@ -377,7 +378,7 @@ function handleClick() {
 
 ```typescript
 function validateEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 ```
 
@@ -398,10 +399,10 @@ El código debe ser auto-documentado:
 ```typescript
 // ❌ Malo
 // Calcula el total de EXP
-const total = baseExp + bonus
+const total = baseExp + bonus;
 
 // ✅ Bueno
-const totalExp = calculateTotalExp(baseExp, streakBonus)
+const totalExp = calculateTotalExp(baseExp, streakBonus);
 ```
 
 2. **Funciones Pequeñas**
@@ -414,9 +415,9 @@ function processData(data) {
 
 // ✅ Bueno
 function processData(data) {
-  const validated = validateData(data)
-  const transformed = transformData(validated)
-  return saveData(transformed)
+  const validated = validateData(data);
+  const transformed = transformData(validated);
+  return saveData(transformed);
 }
 ```
 
@@ -424,12 +425,12 @@ function processData(data) {
 
 ```typescript
 // ❌ Malo
-const d = new Date()
-const x = calculate()
+const d = new Date();
+const x = calculate();
 
 // ✅ Bueno
-const currentDate = new Date()
-const totalExp = calculateTotalExp()
+const currentDate = new Date();
+const totalExp = calculateTotalExp();
 ```
 
 ---
@@ -456,6 +457,7 @@ git commit -m "feat: añade nueva funcionalidad"
 ```
 
 **Convenciones de commits:**
+
 - `feat:` Nueva funcionalidad
 - `fix:` Corrección de bug
 - `docs:` Documentación
@@ -509,5 +511,3 @@ pnpm install
 ---
 
 **Última actualización**: Enero 2025
-
-

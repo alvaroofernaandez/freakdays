@@ -1,10 +1,10 @@
-const ACTIVE_ORG_STORAGE_KEY = "freak-days:active-org-id";
+const ACTIVE_ORG_STORAGE_KEY = 'freak-days:active-org-id';
 
 export function useOrganizationContext() {
   const authContext = useAuthContext();
 
-  const activeOrgId = useState<string | null>("organization-context:active-org-id", () => null);
-  const hasHydrated = useState<boolean>("organization-context:hydrated", () => false);
+  const activeOrgId = useState<string | null>('organization-context:active-org-id', () => null);
+  const hasHydrated = useState<boolean>('organization-context:hydrated', () => false);
 
   function persistActiveOrgId(nextOrgId: string | null) {
     if (!import.meta.client) {

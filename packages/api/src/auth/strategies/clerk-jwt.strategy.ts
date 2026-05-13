@@ -18,10 +18,7 @@ interface ClerkAuthRuntimeConfig {
 
 @Injectable()
 export class ClerkJwtStrategy {
-  private readonly jwksCache = new Map<
-    string,
-    ReturnType<typeof createRemoteJWKSet>
-  >();
+  private readonly jwksCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
   constructor(private readonly configService: ConfigService) {}
 

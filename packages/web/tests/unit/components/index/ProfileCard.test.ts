@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import ProfileCard from "../../../../app/components/index/ProfileCard";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import ProfileCard from '../../../../app/components/index/ProfileCard';
 
-describe("ProfileCard.vue", () => {
-  it("should render component", () => {
+describe('ProfileCard.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(ProfileCard, {
       global: {
         stubs: {

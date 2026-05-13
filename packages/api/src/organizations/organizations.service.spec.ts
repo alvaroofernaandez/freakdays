@@ -39,9 +39,7 @@ describe('OrganizationsService', () => {
     jest.clearAllMocks();
     service = new OrganizationsService(prisma, identityContext);
 
-    (prisma.$transaction as jest.Mock).mockImplementation(async (callback: any) =>
-      callback(tx),
-    );
+    (prisma.$transaction as jest.Mock).mockImplementation(async (callback: any) => callback(tx));
   });
 
   it('devuelve organización principal existente si ya hay memberships', async () => {

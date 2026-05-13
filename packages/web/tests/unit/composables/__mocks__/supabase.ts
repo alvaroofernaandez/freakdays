@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { vi } from 'vitest';
 
 export function createMockSupabase() {
   const mockChain = {
@@ -13,8 +13,7 @@ export function createMockSupabase() {
     order: vi.fn(() => mockChain),
     limit: vi.fn(() => mockChain),
     single: vi.fn(() => mockChain),
-  }
+  };
 
-  return mockChain
+  return mockChain;
 }
-

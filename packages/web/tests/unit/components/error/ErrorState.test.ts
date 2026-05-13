@@ -1,12 +1,12 @@
-import { describe, it, expect, vi } from "vitest";
-import { mount } from "@vue/test-utils";
-import ErrorState from "../../../../app/components/error/ErrorState.vue";
+import { describe, it, expect, vi } from 'vitest';
+import { mount } from '@vue/test-utils';
+import ErrorState from '../../../../app/components/error/ErrorState.vue';
 
-describe("ErrorState.vue", () => {
-  it("should render error state with default title", () => {
+describe('ErrorState.vue', () => {
+  it('should render error state with default title', () => {
     const wrapper = mount(ErrorState, {
       props: {
-        message: "Test error message",
+        message: 'Test error message',
       },
       global: {
         stubs: {
@@ -33,11 +33,11 @@ describe("ErrorState.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("should render error state with custom title", () => {
+  it('should render error state with custom title', () => {
     const wrapper = mount(ErrorState, {
       props: {
-        title: "Custom error",
-        message: "Test error message",
+        title: 'Custom error',
+        message: 'Test error message',
       },
       global: {
         stubs: {
@@ -64,13 +64,13 @@ describe("ErrorState.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("should render action button when onAction is provided", () => {
+  it('should render action button when onAction is provided', () => {
     const onAction = vi.fn();
     const wrapper = mount(ErrorState, {
       props: {
-        message: "Test error",
+        message: 'Test error',
         onAction,
-        actionLabel: "Retry",
+        actionLabel: 'Retry',
       },
       global: {
         stubs: {
@@ -91,7 +91,7 @@ describe("ErrorState.vue", () => {
           },
           Button: {
             template: '<button @click="onClick"><slot /></button>',
-            props: ["onClick"],
+            props: ['onClick'],
           },
         },
       },
@@ -100,11 +100,11 @@ describe("ErrorState.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("should render compact variant", () => {
+  it('should render compact variant', () => {
     const wrapper = mount(ErrorState, {
       props: {
-        message: "Test error",
-        variant: "compact",
+        message: 'Test error',
+        variant: 'compact',
       },
       global: {
         stubs: {
@@ -116,4 +116,3 @@ describe("ErrorState.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
 });
-

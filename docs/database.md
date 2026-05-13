@@ -33,9 +33,11 @@ CREATE TABLE public.profiles (
 ```
 
 **Índices:**
+
 - `idx_profiles_username` en `username`
 
 **Políticas RLS:**
+
 - Usuarios pueden ver su propio perfil
 - Usuarios pueden actualizar su propio perfil
 - Usuarios pueden insertar su propio perfil
@@ -56,9 +58,11 @@ CREATE TABLE public.user_modules (
 ```
 
 **Índices:**
+
 - `idx_user_modules_user` en `user_id`
 
 **Políticas RLS:**
+
 - Usuarios pueden gestionar sus propios módulos
 
 ### 3. `workouts`
@@ -83,10 +87,12 @@ CREATE TABLE public.workouts (
 ```
 
 **Índices:**
+
 - `idx_workouts_user_date` en `(user_id, workout_date DESC)`
 - `idx_workouts_status` en `(user_id, status)` WHERE `status = 'in_progress'`
 
 **Relaciones:**
+
 - `workout_exercises` (uno a muchos)
 - `workout_sets` (a través de `workout_exercises`)
 
@@ -106,6 +112,7 @@ CREATE TABLE public.workout_exercises (
 ```
 
 **Índices:**
+
 - `idx_workout_exercises_workout` en `workout_id`
 
 ### 5. `workout_sets`
@@ -127,6 +134,7 @@ CREATE TABLE public.workout_sets (
 ```
 
 **Índices:**
+
 - `idx_workout_sets_exercise` en `exercise_id`
 
 ### 6. `manga_collection`
@@ -153,10 +161,12 @@ CREATE TABLE public.manga_collection (
 ```
 
 **Índices:**
+
 - `idx_manga_user` en `user_id`
 - `idx_manga_status` en `(user_id, status)`
 
 **Campos especiales:**
+
 - `owned_volumes`: Array de enteros con los volúmenes poseídos
 - `price_per_volume`: Precio por volumen (para cálculo de costos)
 - `total_cost`: Costo total calculado automáticamente
@@ -185,6 +195,7 @@ CREATE TABLE public.anime_list (
 ```
 
 **Índices:**
+
 - `idx_anime_user` en `user_id`
 - `idx_anime_status` en `(user_id, status)`
 
@@ -212,6 +223,7 @@ CREATE TABLE public.quests (
 ```
 
 **Índices:**
+
 - `idx_quests_user` en `user_id`
 - `idx_quests_active` en `(user_id, active)`
 
@@ -231,6 +243,7 @@ CREATE TABLE public.quest_completions (
 ```
 
 **Índices:**
+
 - `idx_quest_completions_quest` en `quest_id`
 - `idx_quest_completions_user_date` en `(user_id, completed_at DESC)`
 
@@ -252,6 +265,7 @@ CREATE TABLE public.parties (
 ```
 
 **Índices:**
+
 - `idx_parties_owner` en `owner_id`
 - `idx_parties_invite` en `invite_code`
 
@@ -271,6 +285,7 @@ CREATE TABLE public.party_members (
 ```
 
 **Índices:**
+
 - `idx_party_members_party` en `party_id`
 - `idx_party_members_user` en `user_id`
 
@@ -290,6 +305,7 @@ CREATE TABLE public.party_shared_lists (
 ```
 
 **Índices:**
+
 - `idx_party_lists_party` en `party_id`
 
 ### 13. `release_calendar`
@@ -312,6 +328,7 @@ CREATE TABLE public.release_calendar (
 ```
 
 **Índices:**
+
 - `idx_releases_date` en `release_date`
 - `idx_releases_user` en `user_id` WHERE `user_id IS NOT NULL`
 - `idx_releases_global` en `is_global` WHERE `is_global = true`
@@ -348,6 +365,7 @@ $$ LANGUAGE plpgsql;
 ```
 
 Aplicado a:
+
 - `profiles`
 - `workouts`
 - `manga_collection`
@@ -362,6 +380,7 @@ Aplicado a:
 **Archivo**: `database/migrations/001_workouts_sets_migration.sql`
 
 **Cambios:**
+
 - Agrega campo `status` a `workouts` (in_progress/completed)
 - Agrega campos `started_at` y `completed_at`
 - Crea tabla `workout_sets` para series individuales
@@ -372,6 +391,7 @@ Aplicado a:
 **Archivo**: `database/migrations/002_manga_pricing_migration.sql`
 
 **Cambios:**
+
 - Agrega `price_per_volume` a `manga_collection`
 - Agrega `total_cost` con cálculo automático
 - Actualiza costos existentes
@@ -381,6 +401,7 @@ Aplicado a:
 **Archivo**: `database/migrations/003_profile_enhancement.sql`
 
 **Cambios:**
+
 - Agrega `bio` a `profiles`
 - Agrega `favorite_anime_id` y `favorite_manga_id` (foreign keys)
 - Agrega `location` y `website`
@@ -391,7 +412,7 @@ Aplicado a:
 ### Obtener estadísticas de usuario
 
 ```sql
-SELECT 
+SELECT
     (SELECT COUNT(*) FROM anime_list WHERE user_id = $1) as anime_count,
     (SELECT COUNT(*) FROM manga_collection WHERE user_id = $1) as manga_count,
     (SELECT COUNT(*) FROM workouts WHERE user_id = $1) as workout_count,
@@ -411,7 +432,7 @@ WHERE qc.user_id = $1
 ### Obtener mangas completadas con costo total
 
 ```sql
-SELECT 
+SELECT
     COUNT(*) as total_completed,
     SUM(total_cost) as total_investment
 FROM manga_collection
@@ -455,6 +476,7 @@ WHERE user_id = $1
 Bucket para almacenar avatares de usuarios.
 
 **Políticas RLS:**
+
 - Lectura pública
 - Escritura solo para el propietario
 - Path: `{userId}/{filename}`
@@ -464,15 +486,15 @@ Bucket para almacenar avatares de usuarios.
 Bucket para almacenar banners de perfil de usuarios.
 
 **Políticas RLS:**
+
 - Lectura pública
 - Escritura solo para el propietario
 - Path: `{userId}/{filename}`
 
 **Configuración:**
+
 - Tamaño máximo: 10MB
 - Tipos permitidos: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
 - Aspect ratio recomendado: 16:9
 
 **Última actualización**: Enero 2025
-
-

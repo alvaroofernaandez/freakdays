@@ -94,9 +94,9 @@ Code should be self-documenting. Avoid inline comments except for:
 ### Test Naming
 
 ```typescript
-describe("ComponentName or FunctionName", () => {
-  describe("methodName or scenario", () => {
-    it("should [expected behavior] when [condition]", () => {});
+describe('ComponentName or FunctionName', () => {
+  describe('methodName or scenario', () => {
+    it('should [expected behavior] when [condition]', () => {});
   });
 });
 ```
@@ -170,7 +170,7 @@ export interface NewEntity {
 }
 
 // stores/new-module.ts
-export const useNewModuleStore = defineStore("new-module", () => {
+export const useNewModuleStore = defineStore('new-module', () => {
   // state, getters, actions
 });
 ```
@@ -248,11 +248,11 @@ SUPABASE_ANON_KEY=your-anon-key
 When destructuring refs from composables, use `toRef()` to maintain reactivity:
 
 ```typescript
-import { toRef } from 'vue'
+import { toRef } from 'vue';
 
-const profilePage = useProfilePage()
-const uploadingBanner = toRef(profilePage, 'uploadingBanner')
-const bannerPreview = toRef(profilePage, 'bannerPreview')
+const profilePage = useProfilePage();
+const uploadingBanner = toRef(profilePage, 'uploadingBanner');
+const bannerPreview = toRef(profilePage, 'bannerPreview');
 ```
 
 **Why**: Direct destructuring loses reactivity, `toRef()` creates a reactive reference.

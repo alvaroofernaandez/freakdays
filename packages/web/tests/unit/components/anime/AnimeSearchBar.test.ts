@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import AnimeSearchBar from "../../../../app/components/anime/AnimeSearchBar";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import AnimeSearchBar from '../../../../app/components/anime/AnimeSearchBar';
 
-describe("AnimeSearchBar.vue", () => {
-  it("should render component", () => {
+describe('AnimeSearchBar.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(AnimeSearchBar, {
       global: {
         stubs: {

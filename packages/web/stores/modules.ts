@@ -1,6 +1,6 @@
-import { defineStore } from "pinia";
-import type { AppModule, ModuleId } from "~~/domain/types/modules";
-import { ALL_MODULES } from "~~/domain/types/modules";
+import { defineStore } from 'pinia';
+import type { AppModule, ModuleId } from '~~/domain/types/modules';
+import { ALL_MODULES } from '~~/domain/types/modules';
 
 interface ModuleState {
   modules: AppModule[];
@@ -8,7 +8,7 @@ interface ModuleState {
   moduleMap: Record<ModuleId, boolean>;
 }
 
-export const useModulesStore = defineStore("modules", {
+export const useModulesStore = defineStore('modules', {
   state: (): ModuleState => ({
     modules: ALL_MODULES.map((m) => ({ ...m, enabled: false })),
     synced: false,
@@ -119,19 +119,17 @@ export const useModulesStore = defineStore("modules", {
       for (const module of ALL_MODULES) {
         const isEnabled = this.moduleMap[module.id] ?? false;
 
-        const { error: upsertError } = await supabase
-          .from("user_modules")
-          .upsert(
-            {
-              user_id: userId,
-              module_id: module.id,
-              enabled: isEnabled,
-              enabled_at: isEnabled ? new Date().toISOString() : null,
-            },
-            {
-              onConflict: "user_id,module_id",
-            }
-          );
+        const { error: upsertError } = await supabase.from('user_modules').upsert(
+          {
+            user_id: userId,
+            module_id: module.id,
+            enabled: isEnabled,
+            enabled_at: isEnabled ? new Date().toISOString() : null,
+          },
+          {
+            onConflict: 'user_id,module_id',
+          },
+        );
 
         if (upsertError) {
           console.error(`Error syncing module ${module.id}:`, upsertError);

@@ -3,16 +3,16 @@ type RuntimeConfigPublic = {
 };
 
 function toBooleanFlag(value: string | boolean | undefined): boolean {
-  if (typeof value === "boolean") {
+  if (typeof value === 'boolean') {
     return value;
   }
 
-  if (typeof value !== "string") {
+  if (typeof value !== 'string') {
     return false;
   }
 
   const normalized = value.trim().toLowerCase();
-  return normalized === "true" || normalized === "1";
+  return normalized === 'true' || normalized === '1';
 }
 
 export function isSupabaseFallbackEnabled(): boolean {
@@ -21,7 +21,7 @@ export function isSupabaseFallbackEnabled(): boolean {
       globalThis as { useRuntimeConfig?: () => { public?: RuntimeConfigPublic } }
     ).useRuntimeConfig;
 
-    if (typeof maybeUseRuntimeConfig !== "function") {
+    if (typeof maybeUseRuntimeConfig !== 'function') {
       return false;
     }
 

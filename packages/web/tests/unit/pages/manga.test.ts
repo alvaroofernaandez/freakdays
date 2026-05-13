@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { setActivePinia, createPinia } from 'pinia'
-import MangaPage from '../../../app/pages/manga.vue'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mount } from '@vue/test-utils';
+import { setActivePinia, createPinia } from 'pinia';
+import MangaPage from '../../../app/pages/manga.vue';
 
 vi.mock('../../../app/composables/useMangaPage', () => ({
   useMangaPage: () => ({
@@ -23,12 +23,12 @@ vi.mock('../../../app/composables/useMangaPage', () => ({
     handleUpdateStatus: vi.fn(),
     reloadManga: vi.fn(),
   }),
-}))
+}));
 
 describe('manga.vue', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
-  })
+    setActivePinia(createPinia());
+  });
 
   it('should render manga page', () => {
     const wrapper = mount(MangaPage, {
@@ -49,10 +49,10 @@ describe('manga.vue', () => {
           TooltipContent: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.text()).toContain('Colección Manga')
-  })
+    expect(wrapper.text()).toContain('Colección Manga');
+  });
 
   it('should show error state when error exists', () => {
     vi.doMock('../../../app/composables/useMangaPage', () => ({
@@ -60,7 +60,7 @@ describe('manga.vue', () => {
         error: { value: { message: 'Test error' } },
         loading: { value: false },
       }),
-    }))
+    }));
 
     const wrapper = mount(MangaPage, {
       global: {
@@ -80,17 +80,17 @@ describe('manga.vue', () => {
           TooltipContent: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
+    expect(wrapper.exists()).toBe(true);
+  });
 
   it('should show loading skeleton when loading', () => {
     vi.doMock('../../../app/composables/useMangaPage', () => ({
       useMangaPage: () => ({
         loading: { value: true },
       }),
-    }))
+    }));
 
     const wrapper = mount(MangaPage, {
       global: {
@@ -110,9 +110,8 @@ describe('manga.vue', () => {
           TooltipContent: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
-})
-
+    expect(wrapper.exists()).toBe(true);
+  });
+});

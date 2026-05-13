@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
 
 interface Props {
-  modelValue?: number
-  max?: number
-  class?: HTMLAttributes['class']
+  modelValue?: number;
+  max?: number;
+  class?: HTMLAttributes['class'];
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: 0,
   max: 100,
-})
+});
 
 const percentage = computed(() => {
-  return Math.min(100, Math.max(0, (props.modelValue / props.max) * 100))
-})
+  return Math.min(100, Math.max(0, (props.modelValue / props.max) * 100));
+});
 </script>
 
 <template>
@@ -32,4 +32,3 @@ const percentage = computed(() => {
     />
   </div>
 </template>
-

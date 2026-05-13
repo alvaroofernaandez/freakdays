@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import CalendarDay from "../../../../app/components/calendar/CalendarDay.vue";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import CalendarDay from '../../../../app/components/calendar/CalendarDay.vue';
 
-describe("CalendarDay.vue", () => {
-  it("should render component", () => {
+describe('CalendarDay.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(CalendarDay, {
       props: {
         date: new Date(),

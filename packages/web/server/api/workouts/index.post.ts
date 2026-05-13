@@ -1,4 +1,4 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -6,20 +6,20 @@ export default defineEventHandler(async (event) => {
   if (!body.userId) {
     throw createError({
       statusCode: 400,
-      message: "User ID is required",
+      message: 'User ID is required',
     });
   }
 
   if (!body.name || !body.name.trim()) {
     throw createError({
       statusCode: 400,
-      message: "Workout name is required",
+      message: 'Workout name is required',
     });
   }
 
   try {
     const prisma = await getPrisma();
-    const status = body.status || "in_progress";
+    const status = body.status || 'in_progress';
     const now = new Date();
 
     const data = await prisma.workout.create({
@@ -30,19 +30,19 @@ export default defineEventHandler(async (event) => {
         workoutDate: new Date(body.workout_date),
         durationMinutes: body.duration_minutes || null,
         status: status,
-        startedAt: status === "in_progress" ? now : null,
+        startedAt: status === 'in_progress' ? now : null,
       },
       include: {
         exercises: {
           include: {
             sets: {
               orderBy: {
-                setNumber: "asc",
+                setNumber: 'asc',
               },
             },
           },
           orderBy: {
-            orderIndex: "asc",
+            orderIndex: 'asc',
           },
         },
       },
@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
       id: data.id,
       name: data.name,
       description: data.description,
-      workout_date: data.workoutDate.toISOString().split("T")[0],
+      workout_date: data.workoutDate.toISOString().split('T')[0],
       duration_minutes: data.durationMinutes,
       notes: data.notes,
       status: data.status,
@@ -67,8 +67,14 @@ export default defineEventHandler(async (event) => {
           id: set.id,
           set_number: set.setNumber,
           reps: set.reps !== null && set.reps !== undefined ? Number(set.reps) : null,
-          weight_kg: set.weightKg !== null && set.weightKg !== undefined ? Number(set.weightKg.toString()) : null,
-          rest_seconds: set.restSeconds !== null && set.restSeconds !== undefined ? Number(set.restSeconds) : null,
+          weight_kg:
+            set.weightKg !== null && set.weightKg !== undefined
+              ? Number(set.weightKg.toString())
+              : null,
+          rest_seconds:
+            set.restSeconds !== null && set.restSeconds !== undefined
+              ? Number(set.restSeconds)
+              : null,
           notes: set.notes,
         })),
       })),
@@ -76,8 +82,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error creating workout",
+      message: 'Error creating workout',
     });
   }
 });
-

@@ -31,6 +31,7 @@ Añade los siguientes parámetros a la URL:
 ```
 
 **URL final completa:**
+
 ```
 postgres://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
 ```
@@ -51,6 +52,7 @@ DATABASE_URL=postgres://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.
 ```
 
 **Importante:**
+
 - Reemplaza `[PROJECT-REF]` con el ID de tu proyecto (ej: `apbkobhfnmcqqzqeeqss`)
 - Reemplaza `[PASSWORD]` con tu contraseña de base de datos
 - Reemplaza `[REGION]` con tu región (ej: `us-east-1`)
@@ -58,11 +60,13 @@ DATABASE_URL=postgres://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.
 ## 📝 Explicación de Parámetros
 
 ### `pgbouncer=true`
+
 - Desactiva prepared statements en Prisma
 - Requerido para Transaction mode (puerto 6543)
 - Evita el error: `prepared statement already exists`
 
 ### `connection_limit=1`
+
 - Limita las conexiones de Prisma a 1
 - Recomendado para entornos serverless
 - Evita el error: `Max client connections reached`
@@ -71,18 +75,21 @@ DATABASE_URL=postgres://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.
 ## 🔄 Modos de Conexión
 
 ### Transaction Mode (Puerto 6543) - **RECOMENDADO para Prisma**
+
 - ✅ Ideal para serverless/edge functions
 - ✅ Soporta más conexiones simultáneas
 - ✅ Mejor rendimiento para aplicaciones con muchas conexiones transitorias
 - ⚠️ No soporta prepared statements (usa `pgbouncer=true`)
 
 ### Session Mode (Puerto 5432)
+
 - ✅ Soporta prepared statements
 - ✅ Mejor para migraciones de Prisma
 - ⚠️ Menos conexiones simultáneas
 - ⚠️ No recomendado para producción en serverless
 
 ### Direct Connection (Puerto 5432)
+
 - ✅ Mejor latencia
 - ⚠️ Solo funciona con IPv6 (o requiere IPv4 add-on)
 - ⚠️ No recomendado para serverless
@@ -106,6 +113,7 @@ pnpm prisma studio
 **Causa:** Prisma está intentando conectarse directamente al puerto 5432 en lugar del pooler.
 
 **Solución:**
+
 1. Verifica que `DATABASE_URL` use el puerto **6543** (Transaction mode)
 2. Verifica que la URL incluya `pooler.supabase.com` (no `db.supabase.co`)
 3. Asegúrate de que la URL tenga el formato correcto con `pgbouncer=true`
@@ -115,6 +123,7 @@ pnpm prisma studio
 **Causa:** Transaction mode no soporta prepared statements.
 
 **Solución:**
+
 - Añade `pgbouncer=true` a la URL de conexión
 
 ### Error: "Max client connections reached"
@@ -122,6 +131,7 @@ pnpm prisma studio
 **Causa:** Demasiadas conexiones simultáneas.
 
 **Solución:**
+
 - Añade `connection_limit=1` a la URL (o un valor más bajo)
 - Considera aumentar el pool size en Supabase Dashboard
 
@@ -130,6 +140,7 @@ pnpm prisma studio
 **Causa:** La variable de entorno no está configurada.
 
 **Solución:**
+
 1. Crea un archivo `.env` en la raíz del proyecto
 2. Añade `DATABASE_URL=...` con la URL completa
 3. Reinicia el servidor de desarrollo

@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   formatDueDate,
   formatDueTime,
   getTimeRemaining,
-} from "../../../app/utils/quest-formatters";
-import type { Quest } from "../../../domain/types";
+} from '../../../app/utils/quest-formatters';
+import type { Quest } from '../../../domain/types';
 
-describe("quest-formatters", () => {
+describe('quest-formatters', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -15,15 +15,15 @@ describe("quest-formatters", () => {
     vi.useRealTimers();
   });
 
-  describe("formatDueDate", () => {
-    it("should return empty string when no dueDate", () => {
+  describe('formatDueDate', () => {
+    it('should return empty string when no dueDate', () => {
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: null,
         dueTime: null,
@@ -32,18 +32,18 @@ describe("quest-formatters", () => {
         completedAt: null,
       };
 
-      expect(formatDueDate(quest)).toBe("");
+      expect(formatDueDate(quest)).toBe('');
     });
 
     it('should return "Hoy" for today', () => {
       const today = new Date();
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: today,
         dueTime: null,
@@ -53,19 +53,19 @@ describe("quest-formatters", () => {
       };
 
       vi.setSystemTime(today);
-      expect(formatDueDate(quest)).toBe("Hoy");
+      expect(formatDueDate(quest)).toBe('Hoy');
     });
 
     it('should return "Mañana" for tomorrow', () => {
-      const today = new Date("2024-01-15");
-      const tomorrow = new Date("2024-01-16");
+      const today = new Date('2024-01-15');
+      const tomorrow = new Date('2024-01-16');
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: tomorrow,
         dueTime: null,
@@ -75,43 +75,43 @@ describe("quest-formatters", () => {
       };
 
       vi.setSystemTime(today);
-      expect(formatDueDate(quest)).toBe("Mañana");
+      expect(formatDueDate(quest)).toBe('Mañana');
     });
 
-    it("should format date for other days", () => {
+    it('should format date for other days', () => {
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
-        dueDate: new Date("2024-01-20"),
+        dueDate: new Date('2024-01-20'),
         dueTime: null,
         reminderMinutesBefore: null,
         createdAt: new Date(),
         completedAt: null,
       };
 
-      vi.setSystemTime(new Date("2024-01-15"));
+      vi.setSystemTime(new Date('2024-01-15'));
       const result = formatDueDate(quest);
 
-      expect(result).toContain("sáb");
-      expect(result).toContain("20");
-      expect(result).toContain("ene");
+      expect(result).toContain('sáb');
+      expect(result).toContain('20');
+      expect(result).toContain('ene');
     });
   });
 
-  describe("formatDueTime", () => {
-    it("should return empty string when no dueTime", () => {
+  describe('formatDueTime', () => {
+    it('should return empty string when no dueTime', () => {
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: null,
         dueTime: null,
@@ -120,57 +120,57 @@ describe("quest-formatters", () => {
         completedAt: null,
       };
 
-      expect(formatDueTime(quest)).toBe("");
+      expect(formatDueTime(quest)).toBe('');
     });
 
-    it("should return time in HH:mm format", () => {
+    it('should return time in HH:mm format', () => {
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: null,
-        dueTime: "14:30:00",
+        dueTime: '14:30:00',
         reminderMinutesBefore: null,
         createdAt: new Date(),
         completedAt: null,
       };
 
-      expect(formatDueTime(quest)).toBe("14:30");
+      expect(formatDueTime(quest)).toBe('14:30');
     });
 
-    it("should handle time without seconds", () => {
+    it('should handle time without seconds', () => {
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: null,
-        dueTime: "09:15",
+        dueTime: '09:15',
         reminderMinutesBefore: null,
         createdAt: new Date(),
         completedAt: null,
       };
 
-      expect(formatDueTime(quest)).toBe("09:15");
+      expect(formatDueTime(quest)).toBe('09:15');
     });
   });
 
-  describe("getTimeRemaining", () => {
-    it("should return empty string when no dueDate", () => {
+  describe('getTimeRemaining', () => {
+    it('should return empty string when no dueDate', () => {
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: null,
         dueTime: null,
@@ -179,18 +179,18 @@ describe("quest-formatters", () => {
         completedAt: null,
       };
 
-      expect(getTimeRemaining(quest)).toBe("");
+      expect(getTimeRemaining(quest)).toBe('');
     });
 
     it('should return "Atrasada" for past dates', () => {
-      const pastDate = new Date("2024-01-10");
+      const pastDate = new Date('2024-01-10');
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: pastDate,
         dueTime: null,
@@ -199,55 +199,55 @@ describe("quest-formatters", () => {
         completedAt: null,
       };
 
-      vi.setSystemTime(new Date("2024-01-15"));
-      expect(getTimeRemaining(quest)).toBe("Atrasada");
+      vi.setSystemTime(new Date('2024-01-15'));
+      expect(getTimeRemaining(quest)).toBe('Atrasada');
     });
 
-    it("should return hours and minutes format", () => {
-      const futureDate = new Date("2024-01-15T15:30:00");
+    it('should return hours and minutes format', () => {
+      const futureDate = new Date('2024-01-15T15:30:00');
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: futureDate,
-        dueTime: "15:30",
+        dueTime: '15:30',
         reminderMinutesBefore: null,
         createdAt: new Date(),
         completedAt: null,
       };
 
-      vi.setSystemTime(new Date("2024-01-15T14:00:00"));
+      vi.setSystemTime(new Date('2024-01-15T14:00:00'));
       const result = getTimeRemaining(quest);
 
-      expect(result).toContain("h");
-      expect(result).toContain("m");
+      expect(result).toContain('h');
+      expect(result).toContain('m');
     });
 
-    it("should return only minutes when less than an hour", () => {
-      const futureDate = new Date("2024-01-15T14:30:00");
+    it('should return only minutes when less than an hour', () => {
+      const futureDate = new Date('2024-01-15T14:30:00');
       const quest: Quest = {
-        id: "1",
-        title: "Test",
-        description: "Test",
-        difficulty: "easy",
+        id: '1',
+        title: 'Test',
+        description: 'Test',
+        difficulty: 'easy',
         exp: 10,
-        status: "pending",
+        status: 'pending',
         streak: 0,
         dueDate: futureDate,
-        dueTime: "14:30",
+        dueTime: '14:30',
         reminderMinutesBefore: null,
         createdAt: new Date(),
         completedAt: null,
       };
 
-      vi.setSystemTime(new Date("2024-01-15T14:15:00"));
+      vi.setSystemTime(new Date('2024-01-15T14:15:00'));
       const result = getTimeRemaining(quest);
 
-      expect(result).toBe("15m");
+      expect(result).toBe('15m');
     });
   });
 });

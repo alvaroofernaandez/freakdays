@@ -1,19 +1,19 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
+  const id = getRouterParam(event, 'id');
   const body = await readBody(event);
 
   if (!id) {
     throw createError({
       statusCode: 400,
-      message: "Manga ID is required",
+      message: 'Manga ID is required',
     });
   }
 
   try {
     const prisma = await getPrisma();
-    
+
     const updateData: {
       ownedVolumes?: number[];
       totalCost?: number;
@@ -49,8 +49,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error updating manga entry",
+      message: 'Error updating manga entry',
     });
   }
 });
-

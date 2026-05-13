@@ -1,57 +1,57 @@
-export type ToastType = 'success' | 'error' | 'info' | 'warning'
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface Toast {
-  id: string
-  message: string
-  type: ToastType
-  duration?: number
+  id: string;
+  message: string;
+  type: ToastType;
+  duration?: number;
 }
 
-const toasts = ref<Toast[]>([])
+const toasts = ref<Toast[]>([]);
 
 export function useToast() {
   function show(message: string, type: ToastType = 'info', duration = 3000) {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
-    const toast: Toast = { id, message, type, duration }
-    
-    toasts.value.push(toast)
-    
+    const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const toast: Toast = { id, message, type, duration };
+
+    toasts.value.push(toast);
+
     if (duration > 0) {
       setTimeout(() => {
-        remove(id)
-      }, duration)
+        remove(id);
+      }, duration);
     }
-    
-    return id
+
+    return id;
   }
-  
+
   function success(message: string, duration = 3000) {
-    return show(message, 'success', duration)
+    return show(message, 'success', duration);
   }
-  
+
   function error(message: string, duration = 4000) {
-    return show(message, 'error', duration)
+    return show(message, 'error', duration);
   }
-  
+
   function info(message: string, duration = 3000) {
-    return show(message, 'info', duration)
+    return show(message, 'info', duration);
   }
-  
+
   function warning(message: string, duration = 3000) {
-    return show(message, 'warning', duration)
+    return show(message, 'warning', duration);
   }
-  
+
   function remove(id: string) {
-    const index = toasts.value.findIndex(t => t.id === id)
+    const index = toasts.value.findIndex((t) => t.id === id);
     if (index > -1) {
-      toasts.value.splice(index, 1)
+      toasts.value.splice(index, 1);
     }
   }
-  
+
   function clear() {
-    toasts.value = []
+    toasts.value = [];
   }
-  
+
   return {
     toasts: readonly(toasts),
     show,
@@ -61,6 +61,5 @@ export function useToast() {
     warning,
     remove,
     clear,
-  }
+  };
 }
-

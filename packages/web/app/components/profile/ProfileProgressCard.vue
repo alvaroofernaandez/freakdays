@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Zap } from 'lucide-vue-next'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Zap } from 'lucide-vue-next';
 
 interface Props {
-  level: number
-  currentExp: number
-  neededExp: number
+  level: number;
+  currentExp: number;
+  neededExp: number;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const progress = computed(() => {
-  if (props.neededExp === 0) return 100
-  return Math.min(100, (props.currentExp / props.neededExp) * 100)
-})
+  if (props.neededExp === 0) return 100;
+  return Math.min(100, (props.currentExp / props.neededExp) * 100);
+});
 </script>
 
 <template>
@@ -51,11 +51,11 @@ const progress = computed(() => {
           </TooltipContent>
         </Tooltip>
         <p class="text-center text-sm text-muted-foreground">
-          Te faltan <span class="font-semibold text-primary">{{ neededExp - currentExp }} EXP</span>
-          para subir al nivel {{ level + 1 }}
+          Te faltan
+          <span class="font-semibold text-primary">{{ neededExp - currentExp }} EXP</span> para
+          subir al nivel {{ level + 1 }}
         </p>
       </div>
     </CardContent>
   </Card>
 </template>
-

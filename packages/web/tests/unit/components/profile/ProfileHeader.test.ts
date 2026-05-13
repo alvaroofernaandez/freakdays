@@ -1,16 +1,16 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import ProfileHeader from "../../../../app/components/profile/ProfileHeader.vue";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import ProfileHeader from '../../../../app/components/profile/ProfileHeader.vue';
 
-describe("ProfileHeader.vue", () => {
-  it("should render component", () => {
+describe('ProfileHeader.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(ProfileHeader, {
       props: {
         profile: {
-          id: "1",
-          userId: "user1",
-          username: "test",
-          displayName: "Test User",
+          id: '1',
+          userId: 'user1',
+          username: 'test',
+          displayName: 'Test User',
           bio: null,
           avatarUrl: null,
           level: 1,

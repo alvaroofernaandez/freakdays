@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   Prisma,
   type WorkoutExercise,
@@ -203,10 +199,7 @@ export class WorkoutsService {
     return this.toWorkoutSessionView(workout);
   }
 
-  async getWeeklyStats(
-    clerkUserId: string,
-    orgId: string | null,
-  ): Promise<WeeklyWorkoutStats> {
+  async getWeeklyStats(clerkUserId: string, orgId: string | null): Promise<WeeklyWorkoutStats> {
     const { currentUser, organization } = await this.resolveIdentityInOrganization(
       clerkUserId,
       orgId,
@@ -396,10 +389,8 @@ export class WorkoutsService {
 
       if (status === 'completed') {
         data.completedAt =
-          this.normalizeOptionalDate(
-            input.completedAt ?? input.completed_at,
-            'completedAt',
-          ) ?? new Date();
+          this.normalizeOptionalDate(input.completedAt ?? input.completed_at, 'completedAt') ??
+          new Date();
       }
 
       if (status === 'in_progress') {
@@ -457,11 +448,7 @@ export class WorkoutsService {
     return this.toWorkoutSessionView(updated);
   }
 
-  async remove(
-    clerkUserId: string,
-    orgId: string | null,
-    id: string,
-  ): Promise<{ success: true }> {
+  async remove(clerkUserId: string, orgId: string | null, id: string): Promise<{ success: true }> {
     const { currentUser, organization } = await this.resolveIdentityInOrganization(
       clerkUserId,
       orgId,
@@ -717,9 +704,7 @@ export class WorkoutsService {
     }
 
     if (title.length > 180) {
-      throw new BadRequestException(
-        'El nombre del entrenamiento no puede superar 180 caracteres',
-      );
+      throw new BadRequestException('El nombre del entrenamiento no puede superar 180 caracteres');
     }
 
     return title;

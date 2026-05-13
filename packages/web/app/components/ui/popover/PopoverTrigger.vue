@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { PopoverTrigger as RadixPopoverTrigger } from 'radix-vue'
+import { PopoverTrigger as RadixPopoverTrigger } from 'radix-vue';
 
 const props = defineProps<{
-  asChild?: boolean
-}>()
+  asChild?: boolean;
+}>();
 </script>
 
 <template>
@@ -11,4 +11,3 @@ const props = defineProps<{
     <slot />
   </RadixPopoverTrigger>
 </template>
-

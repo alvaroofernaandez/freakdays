@@ -24,10 +24,7 @@ export class MangaController {
   constructor(private readonly mangaService: MangaService) {}
 
   @Get()
-  listManga(
-    @Req() request: Request,
-    @CurrentOrg() orgId: string | null,
-  ): Promise<MangaView[]> {
+  listManga(@Req() request: Request, @CurrentOrg() orgId: string | null): Promise<MangaView[]> {
     const user = this.getRequestUser(request);
     return this.mangaService.list(user.sub, orgId);
   }

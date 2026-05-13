@@ -1,4 +1,4 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
   const userId = getQuery(event).userId as string;
@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   if (!userId) {
     throw createError({
       statusCode: 400,
-      message: "User ID is required",
+      message: 'User ID is required',
     });
   }
 
@@ -15,24 +15,24 @@ export default defineEventHandler(async (event) => {
     const data = await prisma.workout.findFirst({
       where: {
         userId,
-        status: "in_progress",
+        status: 'in_progress',
       },
       include: {
         exercises: {
           include: {
             sets: {
               orderBy: {
-                setNumber: "asc",
+                setNumber: 'asc',
               },
             },
           },
           orderBy: {
-            orderIndex: "asc",
+            orderIndex: 'asc',
           },
         },
       },
       orderBy: {
-        startedAt: "desc",
+        startedAt: 'desc',
       },
     });
 
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
       id: data.id,
       name: data.name,
       description: data.description,
-      workout_date: data.workoutDate.toISOString().split("T")[0],
+      workout_date: data.workoutDate.toISOString().split('T')[0],
       duration_minutes: data.durationMinutes,
       notes: data.notes,
       status: data.status,
@@ -59,8 +59,14 @@ export default defineEventHandler(async (event) => {
           id: set.id,
           set_number: set.setNumber,
           reps: set.reps !== null && set.reps !== undefined ? Number(set.reps) : null,
-          weight_kg: set.weightKg !== null && set.weightKg !== undefined ? Number(set.weightKg.toString()) : null,
-          rest_seconds: set.restSeconds !== null && set.restSeconds !== undefined ? Number(set.restSeconds) : null,
+          weight_kg:
+            set.weightKg !== null && set.weightKg !== undefined
+              ? Number(set.weightKg.toString())
+              : null,
+          rest_seconds:
+            set.restSeconds !== null && set.restSeconds !== undefined
+              ? Number(set.restSeconds)
+              : null,
           notes: set.notes,
         })),
       })),
@@ -68,8 +74,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error fetching in-progress workout",
+      message: 'Error fetching in-progress workout',
     });
   }
 });
-

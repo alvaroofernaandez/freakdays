@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { TooltipRoot, TooltipProvider } from 'radix-vue'
-import type { HTMLAttributes } from 'vue'
+import { TooltipRoot, TooltipProvider } from 'radix-vue';
+import type { HTMLAttributes } from 'vue';
 
 interface Props {
-  delayDuration?: number
-  disableHoverableContent?: boolean
-  open?: boolean
-  defaultOpen?: boolean
+  delayDuration?: number;
+  disableHoverableContent?: boolean;
+  open?: boolean;
+  defaultOpen?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   delayDuration: 700,
   disableHoverableContent: false,
-})
+});
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-}>()
+  'update:open': [value: boolean];
+}>();
 </script>
 
 <template>
@@ -31,4 +31,3 @@ const emit = defineEmits<{
     </TooltipRoot>
   </TooltipProvider>
 </template>
-

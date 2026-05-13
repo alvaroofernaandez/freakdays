@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { UserPlus, X } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { UserPlus, X } from 'lucide-vue-next';
 
 interface Props {
-  open: boolean
-  code: string
-  isSubmitting: boolean
+  open: boolean;
+  code: string;
+  isSubmitting: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  close: []
-  'update:code': [value: string]
-  submit: []
-}>()
+  close: [];
+  'update:code': [value: string];
+  submit: [];
+}>();
 
 function handleInput(event: Event) {
-  const target = event.target as HTMLInputElement
-  const value = target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
-  emit('update:code', value)
+  const target = event.target as HTMLInputElement;
+  const value = target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  emit('update:code', value);
 }
 </script>
 
@@ -33,7 +33,7 @@ function handleInput(event: Event) {
         <div
           v-if="open"
           class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-background/95 backdrop-blur-sm overflow-y-auto"
-          style="pointer-events: auto;"
+          style="pointer-events: auto"
           @click.self="emit('close')"
           @keydown.esc="emit('close')"
           role="dialog"
@@ -74,11 +74,19 @@ function handleInput(event: Event) {
                   <p id="code-helper" class="text-xs text-muted-foreground text-center">
                     Introduce el código de 6 caracteres que te compartieron
                   </p>
-                  <p id="code-status" v-if="code.length > 0 && code.length !== 6"
-                    class="text-xs text-destructive text-center" role="alert">
+                  <p
+                    id="code-status"
+                    v-if="code.length > 0 && code.length !== 6"
+                    class="text-xs text-destructive text-center"
+                    role="alert"
+                  >
                     El código debe tener exactamente 6 caracteres
                   </p>
-                  <p v-else-if="code.length === 6" class="text-xs text-exp-easy text-center" role="status">
+                  <p
+                    v-else-if="code.length === 6"
+                    class="text-xs text-exp-easy text-center"
+                    role="status"
+                  >
                     ✓ Código válido
                   </p>
                 </div>
@@ -90,7 +98,13 @@ function handleInput(event: Event) {
                 aria-label="Unirse a la party con código {{ code }}"
               >
                 <UserPlus v-if="!isSubmitting" class="h-4 w-4 mr-2" aria-hidden="true" />
-                <span v-else class="animate-spin mr-2 inline-block" role="status" aria-label="Uniéndose a party">⏳</span>
+                <span
+                  v-else
+                  class="animate-spin mr-2 inline-block"
+                  role="status"
+                  aria-label="Uniéndose a party"
+                  >⏳</span
+                >
                 {{ isSubmitting ? 'Uniéndose...' : 'Unirse' }}
               </Button>
             </CardContent>
@@ -112,4 +126,3 @@ function handleInput(event: Event) {
   opacity: 0;
 }
 </style>
-

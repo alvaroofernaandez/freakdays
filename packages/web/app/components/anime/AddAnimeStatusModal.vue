@@ -1,99 +1,111 @@
 <script setup lang="ts">
-import { Play, CheckCircle2, Pause, X, Tv } from 'lucide-vue-next'
-import type { AnimeStatus } from '@/composables/useAnime'
-import type { AnimeSearchResult } from '@/composables/useAnimeSearch'
+import { Play, CheckCircle2, Pause, X, Tv } from 'lucide-vue-next';
+import type { AnimeStatus } from '@/composables/useAnime';
+import type { AnimeSearchResult } from '@/composables/useAnimeSearch';
 
 interface Props {
-  anime: AnimeSearchResult | null
-  open: boolean
+  anime: AnimeSearchResult | null;
+  open: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  close: []
-  confirm: [status: AnimeStatus]
-}>()
+  close: [];
+  confirm: [status: AnimeStatus];
+}>();
 
-const selectedStatus = ref<AnimeStatus>('plan_to_watch')
+const selectedStatus = ref<AnimeStatus>('plan_to_watch');
 
-const statusOptions: Array<{ value: AnimeStatus; label: string; icon: any; color: string; description: string }> = [
-  { 
-    value: 'plan_to_watch', 
-    label: 'Pendiente', 
-    icon: Tv, 
+const statusOptions: Array<{
+  value: AnimeStatus;
+  label: string;
+  icon: any;
+  color: string;
+  description: string;
+}> = [
+  {
+    value: 'plan_to_watch',
+    label: 'Pendiente',
+    icon: Tv,
     color: 'text-muted-foreground',
-    description: 'Animes que planeas ver'
+    description: 'Animes que planeas ver',
   },
-  { 
-    value: 'watching', 
-    label: 'En curso', 
-    icon: Play, 
+  {
+    value: 'watching',
+    label: 'En curso',
+    icon: Play,
     color: 'text-primary',
-    description: 'Animes que estás viendo actualmente'
+    description: 'Animes que estás viendo actualmente',
   },
-  { 
-    value: 'completed', 
-    label: 'Visto', 
-    icon: CheckCircle2, 
+  {
+    value: 'completed',
+    label: 'Visto',
+    icon: CheckCircle2,
     color: 'text-exp-easy',
-    description: 'Animes que ya terminaste'
+    description: 'Animes que ya terminaste',
   },
-  { 
-    value: 'on_hold', 
-    label: 'En pausa', 
-    icon: Pause, 
+  {
+    value: 'on_hold',
+    label: 'En pausa',
+    icon: Pause,
     color: 'text-exp-medium',
-    description: 'Animes que pausaste temporalmente'
+    description: 'Animes que pausaste temporalmente',
   },
-  { 
-    value: 'dropped', 
-    label: 'Droppeado', 
-    icon: X, 
+  {
+    value: 'dropped',
+    label: 'Droppeado',
+    icon: X,
     color: 'text-destructive',
-    description: 'Animes que dejaste de ver'
+    description: 'Animes que dejaste de ver',
   },
-]
+];
 
-const displayTitle = computed(() => 
-  props.anime?.title_english || props.anime?.title || ''
-)
+const displayTitle = computed(() => props.anime?.title_english || props.anime?.title || '');
 
-const coverUrl = computed(() => 
-  props.anime?.images?.jpg?.large_image_url || 
-  props.anime?.images?.jpg?.image_url || 
-  props.anime?.images?.webp?.large_image_url ||
-  null
-)
+const coverUrl = computed(
+  () =>
+    props.anime?.images?.jpg?.large_image_url ||
+    props.anime?.images?.jpg?.image_url ||
+    props.anime?.images?.webp?.large_image_url ||
+    null,
+);
 
 function handleConfirm() {
-  emit('confirm', selectedStatus.value)
-  emit('close')
+  emit('confirm', selectedStatus.value);
+  emit('close');
 }
 
 function handleCancel() {
-  emit('close')
+  emit('close');
 }
 
-watch(() => props.open, (isOpen) => {
-  if (isOpen) {
-    selectedStatus.value = 'plan_to_watch'
-  }
-})
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen) {
+      selectedStatus.value = 'plan_to_watch';
+    }
+  },
+);
 </script>
 
 <template>
-  <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto" @click.self="handleCancel">
+  <div
+    v-if="open"
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
+    @click.self="handleCancel"
+  >
     <Card class="w-full max-w-md my-auto shadow-xl border-2">
       <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
         <div class="flex items-center gap-2">
           <Tv class="h-5 w-5 text-primary" />
           <CardTitle class="text-lg sm:text-xl">Añadir Anime</CardTitle>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          class="h-8 w-8 sm:h-9 sm:w-9 hover:bg-muted hover:text-foreground cursor-pointer" 
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-8 w-8 sm:h-9 sm:w-9 hover:bg-muted hover:text-foreground cursor-pointer"
           @click="handleCancel"
         >
           <X class="h-4 w-4" />
@@ -121,7 +133,10 @@ watch(() => props.open, (isOpen) => {
             <h3 class="font-semibold text-sm line-clamp-2">
               {{ displayTitle }}
             </h3>
-            <p v-if="anime.title_japanese && anime.title_japanese !== anime.title" class="text-xs text-muted-foreground mt-0.5">
+            <p
+              v-if="anime.title_japanese && anime.title_japanese !== anime.title"
+              class="text-xs text-muted-foreground mt-0.5"
+            >
               {{ anime.title_japanese }}
             </p>
           </div>
@@ -138,14 +153,11 @@ watch(() => props.open, (isOpen) => {
                 'flex items-start gap-3 p-3 rounded-lg border-2 transition-all text-left cursor-pointer',
                 selectedStatus === option.value
                   ? 'border-primary bg-primary/10'
-                  : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                  : 'border-border hover:border-primary/50 hover:bg-muted/50',
               ]"
               @click="selectedStatus = option.value"
             >
-              <component
-                :is="option.icon"
-                :class="['h-5 w-5 shrink-0 mt-0.5', option.color]"
-              />
+              <component :is="option.icon" :class="['h-5 w-5 shrink-0 mt-0.5', option.color]" />
               <div class="flex-1 min-w-0">
                 <div class="font-medium text-sm">{{ option.label }}</div>
                 <div class="text-xs text-muted-foreground mt-0.5">
@@ -164,14 +176,9 @@ watch(() => props.open, (isOpen) => {
       </CardContent>
 
       <CardFooter class="flex justify-end gap-2 pt-4 border-t">
-        <Button variant="outline" @click="handleCancel">
-          Cancelar
-        </Button>
-        <Button @click="handleConfirm">
-          Añadir Anime
-        </Button>
+        <Button variant="outline" @click="handleCancel"> Cancelar </Button>
+        <Button @click="handleConfirm"> Añadir Anime </Button>
       </CardFooter>
     </Card>
   </div>
 </template>
-

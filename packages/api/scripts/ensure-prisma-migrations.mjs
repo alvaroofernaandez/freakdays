@@ -4,7 +4,9 @@ import path from 'node:path';
 const migrationsDir = path.resolve(process.cwd(), 'prisma', 'migrations');
 
 if (!existsSync(migrationsDir)) {
-  console.error('❌ Falta prisma/migrations. Generá baseline con: pnpm prisma:migrate:dev --name init');
+  console.error(
+    '❌ Falta prisma/migrations. Generá baseline con: pnpm prisma:migrate:dev --name init',
+  );
   process.exit(1);
 }
 

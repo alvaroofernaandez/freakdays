@@ -1,29 +1,29 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { useAnimeSearch } from '../../../app/composables/useAnimeSearch'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { useAnimeSearch } from '../../../app/composables/useAnimeSearch';
 
-global.fetch = vi.fn()
+global.fetch = vi.fn();
 
 describe('useAnimeSearch', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    vi.useFakeTimers()
-  })
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
 
   afterEach(() => {
-    vi.restoreAllMocks()
-    vi.useRealTimers()
-  })
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
 
   describe('searchAnime', () => {
     it('should return empty array for empty query', async () => {
-      const { searchAnime, searchResults } = useAnimeSearch()
-      
-      const results = await searchAnime('')
-      
-      expect(results).toEqual([])
-      expect(searchResults.value).toEqual([])
-      expect(global.fetch).not.toHaveBeenCalled()
-    })
+      const { searchAnime, searchResults } = useAnimeSearch();
+
+      const results = await searchAnime('');
+
+      expect(results).toEqual([]);
+      expect(searchResults.value).toEqual([]);
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
 
     it('should fetch anime from Jikan API', async () => {
       const mockResponse = {
@@ -53,74 +53,74 @@ describe('useAnimeSearch', () => {
           last_visible_page: 1,
           has_next_page: false,
         },
-      }
+      };
 
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response)
+      } as Response);
 
-      const { searchAnime } = useAnimeSearch()
-      const results = await searchAnime('test')
+      const { searchAnime } = useAnimeSearch();
+      const results = await searchAnime('test');
 
-      expect(results).toHaveLength(1)
-      expect(results[0].title).toBe('Test Anime')
-      expect(global.fetch).toHaveBeenCalled()
-    })
+      expect(results).toHaveLength(1);
+      expect(results[0].title).toBe('Test Anime');
+      expect(global.fetch).toHaveBeenCalled();
+    });
 
     it('should handle API errors gracefully', async () => {
-      vi.mocked(global.fetch).mockRejectedValueOnce(new Error('API Error'))
+      vi.mocked(global.fetch).mockRejectedValueOnce(new Error('API Error'));
 
-      const { searchAnime } = useAnimeSearch()
-      const results = await searchAnime('test')
+      const { searchAnime } = useAnimeSearch();
+      const results = await searchAnime('test');
 
-      expect(results).toEqual([])
-    })
+      expect(results).toEqual([]);
+    });
 
     it('should cancel previous search when new search starts', async () => {
-      vi.useRealTimers()
-      const abortSpy = vi.fn()
-      
+      vi.useRealTimers();
+      const abortSpy = vi.fn();
+
       class MockAbortController {
-        abort = abortSpy
-        signal = { aborted: false } as AbortSignal
+        abort = abortSpy;
+        signal = { aborted: false } as AbortSignal;
       }
 
-      const originalAbortController = global.AbortController
-      global.AbortController = MockAbortController as any
+      const originalAbortController = global.AbortController;
+      global.AbortController = MockAbortController as any;
 
-      vi.mocked(global.fetch).mockImplementation(() => 
-        new Promise(() => {}) // Never resolves
-      )
+      vi.mocked(global.fetch).mockImplementation(
+        () => new Promise(() => {}), // Never resolves
+      );
 
-      const { searchAnime } = useAnimeSearch()
-      const promise1 = searchAnime('test1')
-      await new Promise(resolve => setTimeout(resolve, 10))
-      const promise2 = searchAnime('test2')
-      await new Promise(resolve => setTimeout(resolve, 10))
-      
-      expect(abortSpy).toHaveBeenCalled()
-      
-      global.AbortController = originalAbortController
-      vi.useFakeTimers()
-    })
-  })
+      const { searchAnime } = useAnimeSearch();
+      const promise1 = searchAnime('test1');
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      const promise2 = searchAnime('test2');
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(abortSpy).toHaveBeenCalled();
+
+      global.AbortController = originalAbortController;
+      vi.useFakeTimers();
+    });
+  });
 
   describe('debouncedSearch', () => {
     it('should debounce search requests', async () => {
-      const { debouncedSearch } = useAnimeSearch()
-      
-      debouncedSearch('t')
-      debouncedSearch('te')
-      debouncedSearch('test')
+      const { debouncedSearch } = useAnimeSearch();
 
-      expect(global.fetch).not.toHaveBeenCalled()
+      debouncedSearch('t');
+      debouncedSearch('te');
+      debouncedSearch('test');
 
-      vi.advanceTimersByTime(500)
+      expect(global.fetch).not.toHaveBeenCalled();
 
-      expect(global.fetch).toHaveBeenCalledTimes(1)
-    })
-  })
+      vi.advanceTimersByTime(500);
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+  });
 
   describe('loadMore', () => {
     it('should load next page of results', async () => {
@@ -130,7 +130,7 @@ describe('useAnimeSearch', () => {
           last_visible_page: 2,
           has_next_page: true,
         },
-      }
+      };
 
       vi.mocked(global.fetch)
         .mockResolvedValueOnce({
@@ -140,37 +140,36 @@ describe('useAnimeSearch', () => {
         .mockResolvedValueOnce({
           ok: true,
           json: async () => mockResponse,
-        } as Response)
+        } as Response);
 
-      const { searchAnime, loadMoreResults } = useAnimeSearch()
-      await searchAnime('test')
-      await loadMoreResults()
+      const { searchAnime, loadMoreResults } = useAnimeSearch();
+      await searchAnime('test');
+      await loadMoreResults();
 
-      expect(global.fetch).toHaveBeenCalledTimes(2)
-    })
-  })
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+    });
+  });
 
   describe('clearSearch', () => {
     it('should clear search results', async () => {
       const mockResponse = {
         data: [{ mal_id: 1, title: 'Test' }],
         pagination: { has_next_page: false },
-      }
+      };
 
       vi.mocked(global.fetch).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response)
+      } as Response);
 
-      const { searchAnime, searchResults, clearSearch } = useAnimeSearch()
-      await searchAnime('test')
-      
-      expect(searchResults.value.length).toBeGreaterThan(0)
-      
-      clearSearch()
-      
-      expect(searchResults.value).toEqual([])
-    })
-  })
-})
+      const { searchAnime, searchResults, clearSearch } = useAnimeSearch();
+      await searchAnime('test');
 
+      expect(searchResults.value.length).toBeGreaterThan(0);
+
+      clearSearch();
+
+      expect(searchResults.value).toEqual([]);
+    });
+  });
+});

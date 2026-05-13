@@ -379,9 +379,7 @@ export class PartyListsService {
       item.createdByUserId === currentUser.id;
 
     if (!canDeleteItem) {
-      throw new ForbiddenException(
-        'No tenés permisos para eliminar este item de la lista',
-      );
+      throw new ForbiddenException('No tenés permisos para eliminar este item de la lista');
     }
 
     await this.prisma.partyListItem.delete({
@@ -401,9 +399,7 @@ export class PartyListsService {
     }
 
     if (normalized.length > 80) {
-      throw new BadRequestException(
-        'El nombre de la lista no puede superar 80 caracteres',
-      );
+      throw new BadRequestException('El nombre de la lista no puede superar 80 caracteres');
     }
 
     return normalized;
@@ -427,9 +423,7 @@ export class PartyListsService {
     }
 
     if (title.length > 140) {
-      throw new BadRequestException(
-        'El título del item no puede superar 140 caracteres',
-      );
+      throw new BadRequestException('El título del item no puede superar 140 caracteres');
     }
 
     return title;
@@ -645,10 +639,7 @@ export class PartyListsService {
     };
   }
 
-  private buildUsername(user: {
-    clerkUserId: string;
-    email: string | null;
-  }): string {
+  private buildUsername(user: { clerkUserId: string; email: string | null }): string {
     if (user.email && user.email.includes('@')) {
       const username = user.email.split('@')[0];
       if (username && username.length > 0) {

@@ -1,26 +1,26 @@
-import { getPrisma } from "../../../utils/prisma";
+import { getPrisma } from '../../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
-  const workoutId = getRouterParam(event, "id");
+  const workoutId = getRouterParam(event, 'id');
   const body = await readBody(event);
 
   if (!workoutId) {
     throw createError({
       statusCode: 400,
-      message: "Workout ID is required",
+      message: 'Workout ID is required',
     });
   }
 
   if (!body.exercise_name || !body.exercise_name.trim()) {
     throw createError({
       statusCode: 400,
-      message: "Exercise name is required",
+      message: 'Exercise name is required',
     });
   }
 
   try {
     const prisma = await getPrisma();
-    
+
     const workout = await prisma.workout.findUnique({
       where: { id: workoutId },
       include: {
@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
     if (!workout) {
       throw createError({
         statusCode: 404,
-        message: "Workout not found",
+        message: 'Workout not found',
       });
     }
 
@@ -57,8 +57,7 @@ export default defineEventHandler(async (event) => {
     }
     throw createError({
       statusCode: 500,
-      message: "Error adding exercise",
+      message: 'Error adding exercise',
     });
   }
 });
-
