@@ -1,10 +1,18 @@
 import { AppError } from '@/utils/error-handling';
 
-type FetchOptions = Parameters<typeof $fetch>[1];
-
-export interface ApiRequestOptions extends Omit<FetchOptions, 'headers'> {
+/**
+ * Minimal request-options shape. Avoids re-exporting Nuxt's strict route-aware
+ * `$fetch` parameter type, which produces TS2321 'excessive stack depth' when
+ * used with generic endpoint strings.
+ */
+export interface ApiRequestOptions {
   headers?: Record<string, string>;
   requireOrg?: boolean;
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  body?: unknown;
+  query?: Record<string, unknown> | URLSearchParams;
+  params?: Record<string, unknown>;
+  baseURL?: string;
 }
 
 function getDefaultErrorMessage(statusCode?: number): string {
@@ -90,11 +98,17 @@ export function useApiClient() {
     }
 
     try {
-      return await $fetch<T>(endpoint, {
-        ...options,
-        baseURL,
-        headers,
-      });
+      // Cast to `never` to bypass Nuxt's strict route-aware $fetch typing —
+      // we always call with dynamic endpoint strings and a custom baseURL.
+      const result = await ($fetch as unknown as typeof $fetch<T, never>)(
+        endpoint as never,
+        {
+          ...options,
+          baseURL,
+          headers,
+        } as never,
+      );
+      return result as T;
     } catch (error) {
       throw normalizeApiError(error);
     }

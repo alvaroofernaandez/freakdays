@@ -24,8 +24,8 @@ export function getTimeRemaining(quest: Quest): string {
     ? new Date(`${quest.dueDate.toISOString().split('T')[0]}T${quest.dueTime}`)
     : new Date(quest.dueDate);
   dueDateTime.setHours(
-    quest.dueTime ? parseInt(quest.dueTime.split(':')[0]) : 23,
-    quest.dueTime ? parseInt(quest.dueTime.split(':')[1]) : 59,
+    quest.dueTime ? parseInt(quest.dueTime.split(':')[0] ?? '0', 10) : 23,
+    quest.dueTime ? parseInt(quest.dueTime.split(':')[1] ?? '0', 10) : 59,
     59,
   );
 

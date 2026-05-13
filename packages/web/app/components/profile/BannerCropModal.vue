@@ -130,8 +130,8 @@ function handleTouchStart(e: TouchEvent) {
   if (e.touches.length === 1) {
     isDragging.value = true;
     dragStart.value = {
-      x: e.touches[0].clientX - position.value.x,
-      y: e.touches[0].clientY - position.value.y,
+      x: (e.touches[0]?.clientX ?? 0) - position.value.x,
+      y: (e.touches[0]?.clientY ?? 0) - position.value.y,
     };
   }
 }
@@ -140,8 +140,8 @@ function handleTouchMove(e: TouchEvent) {
   if (!isDragging.value || e.touches.length !== 1) return;
   e.preventDefault();
   position.value = {
-    x: e.touches[0].clientX - dragStart.value.x,
-    y: e.touches[0].clientY - dragStart.value.y,
+    x: (e.touches[0]?.clientX ?? 0) - dragStart.value.x,
+    y: (e.touches[0]?.clientY ?? 0) - dragStart.value.y,
   };
 }
 

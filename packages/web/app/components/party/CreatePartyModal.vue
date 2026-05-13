@@ -63,7 +63,7 @@ const emit = defineEmits<{
                   aria-invalid="false"
                   aria-describedby="name-helper name-count"
                   autofocus
-                  @update:model-value="emit('update:name', $event)"
+                  @update:model-value="emit('update:name', String($event))"
                   @keydown.enter.prevent="!isSubmitting && name.trim() && emit('submit')"
                 />
                 <div class="flex items-center justify-between">
@@ -89,7 +89,7 @@ const emit = defineEmits<{
                   maxlength="200"
                   :disabled="isSubmitting"
                   aria-describedby="description-helper description-count"
-                  @update:model-value="emit('update:description', $event)"
+                  @update:model-value="emit('update:description', String($event))"
                   @keydown.enter.prevent="!isSubmitting && name.trim() && emit('submit')"
                 />
                 <div class="flex items-center justify-between">

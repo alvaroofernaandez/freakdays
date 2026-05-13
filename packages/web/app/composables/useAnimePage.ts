@@ -94,7 +94,9 @@ export function useAnimePage() {
     addingAnime.value = true;
 
     try {
-      const animeData = parseJikanAnimeToDTO(selectedAnimeForAdd.value, status);
+      const parserStatus =
+        status === 'rewatching' ? 'watching' : (status as Exclude<AnimeStatus, 'rewatching'>);
+      const animeData = parseJikanAnimeToDTO(selectedAnimeForAdd.value, parserStatus);
 
       if (!animeData.title || !animeData.title.trim()) {
         toast.error('El título del anime es requerido');

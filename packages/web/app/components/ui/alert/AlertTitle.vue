@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 interface Props {
   class?: HTMLAttributes['class'];
 }
+
+const props = defineProps<Props>();
 </script>
 
 <template>

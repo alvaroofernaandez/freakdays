@@ -48,7 +48,7 @@ onMounted(() => {
       >
         <AvatarImage
           v-if="avatarPreview || profile.avatarUrl"
-          :src="avatarPreview || profile.avatarUrl"
+          :src="(avatarPreview || profile.avatarUrl) ?? ''"
           :alt="profile.displayName || profile.username"
           class="object-cover"
         />
