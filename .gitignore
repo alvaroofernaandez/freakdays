@@ -52,4 +52,4 @@ Thumbs.db
 
 # ── AI / dev tooling local state ────────────────────────────────────────────
 .code-review-graph
-.claude/local
+.claude
