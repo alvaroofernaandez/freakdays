@@ -1,0 +1,11 @@
+{
+  "packages/web/**/*.{js,mjs,cjs,ts,vue}": [
+    "prettier --write",
+    "pnpm --filter freak-days exec eslint --fix --no-warn-ignored"
+  ],
+  "packages/api/**/*.{js,mjs,cjs,ts}": [
+    "prettier --write",
+    "pnpm --filter freak-days-api exec eslint --fix --no-warn-ignored"
+  ],
+  "*.{json,md,yml,yaml,html,css}": ["prettier --write"]
+}

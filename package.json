@@ -11,7 +11,8 @@
     "test": "pnpm -r test",
     "typecheck": "pnpm --filter freak-days typecheck",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "pnpm": {
     "overrides": {
@@ -47,6 +48,10 @@
   },
   "packageManager": "pnpm@10.6.3",
   "devDependencies": {
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.4",
     "prettier": "^3.5.3"
   }
 }
