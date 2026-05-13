@@ -96,8 +96,9 @@ jobs:
       fail-fast: false
       matrix:
         package: [freak-days, freak-days-api]
-    # NOTE: Web tests have 7 known pre-existing failures (see #10 backlog).
-    # Step is non-blocking until that debt is resolved.
+    # NOTE: Web tests have 5 known pre-existing failures (useIndexPage,
+    # useOrganizationContext x3, profile). Step is non-blocking until that
+    # debt is resolved.
     continue-on-error: ${{ matrix.package == 'freak-days' }}
     steps:
       - uses: actions/checkout@v4
@@ -110,6 +111,38 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter ${{ matrix.package }} test
+
+  coverage:
+    name: Coverage (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    needs: install
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [freak-days, freak-days-api]
+    # Web coverage is non-blocking while the 5 pre-existing test failures
+    # block report generation. API coverage gates at the (low) thresholds
+    # declared in packages/api/jest.config.js.
+    continue-on-error: ${{ matrix.package == 'freak-days' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter ${{ matrix.package }} test:coverage
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.package }}
+          path: packages/${{ matrix.package == 'freak-days' && 'web' || 'api' }}/coverage
+          retention-days: 14
+          if-no-files-found: ignore
 
   build:
     name: Build (${{ matrix.package }})
