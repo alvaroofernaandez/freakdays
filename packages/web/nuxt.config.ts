@@ -32,9 +32,6 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss(), supabaseWarningsFilter()],
-    optimizeDeps: {
-      exclude: ['@prisma/client'],
-    },
   },
 
   nitro: {
@@ -59,7 +56,6 @@ export default defineNuxtConfig({
       apiUrl: process.env.NUXT_PUBLIC_API_URL,
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
-      databaseUrl: process.env.DATABASE_URL,
     },
   },
 
