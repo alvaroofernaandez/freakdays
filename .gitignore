@@ -1,24 +1,54 @@
-# Nuxt dev/build outputs
+# ── Nuxt / Vite / Nitro build outputs ────────────────────────────────────────
 .output
 .data
 .nuxt
 .nitro
 .cache
 dist
+build
 
-# Node dependencies
+# ── Node ────────────────────────────────────────────────────────────────────
 node_modules
+.pnpm-store
+*.tsbuildinfo
 
-# Logs
+# ── Logs ────────────────────────────────────────────────────────────────────
 logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Misc
-.DS_Store
-.fleet
-.idea
+# ── Testing / Coverage ──────────────────────────────────────────────────────
+coverage
+.nyc_output
+*.lcov
+playwright-report
+playwright/.cache
+test-results
 
-# Local env files
+# ── Local env files ─────────────────────────────────────────────────────────
 .env
 .env.*
 !.env.example
+
+# ── OS / Editor / IDE ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.fleet
+.idea
+*.swp
+*.swo
+*~
+
+# ── Tooling caches ──────────────────────────────────────────────────────────
+.eslintcache
+.stylelintcache
+.turbo
+.parcel-cache
+
+# ── AI / dev tooling local state ────────────────────────────────────────────
+.code-review-graph
+.claude/local
