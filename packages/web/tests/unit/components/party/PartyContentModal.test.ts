@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
-import PartyContentModal from '../../../../../app/components/party/PartyContentModal.vue';
+import PartyContentModal from '../../../../app/components/party/PartyContentModal.vue';
 
 vi.mock('@/composables/usePartyLists', () => ({
   usePartyLists: () => ({

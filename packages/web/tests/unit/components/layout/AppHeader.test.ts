@@ -2,11 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import AppHeader from '../../../../app/components/layout/AppHeader.vue';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-}));
+vi.mock('vue-router', async () => {
+  const actual = await vi.importActual<typeof import('vue-router')>('vue-router');
+  return {
+    ...actual,
+    useRouter: () => ({ push: vi.fn() }),
+  };
+});
 
 describe('AppHeader.vue', () => {
   const baseProps = {
