@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty } from '@/components/ui/empty';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useSupabase } from '@/composables/useSupabase';
 import { useToast } from '@/composables/useToast';
 import { AlertCircle, Plus, RefreshCw, Search, Tv, X } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
@@ -23,7 +22,7 @@ const addingAnime = ref(false);
 const deletingItemId = ref<string | null>(null);
 const error = ref<string | null>(null);
 const toast = useToast();
-const supabase = useSupabase();
+const authContext = useAuthContext();
 
 const stats = computed(() => {
   const watching = items.value.filter((i) => i.status === 'watching').length;
@@ -33,14 +32,8 @@ const stats = computed(() => {
 });
 
 async function getAuthToken(): Promise<string | null> {
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  } catch {
-    return null;
-  }
+  await authContext.refresh();
+  return authContext.getAccessToken();
 }
 
 async function fetchItems() {
