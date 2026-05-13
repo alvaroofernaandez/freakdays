@@ -1,34 +1,24 @@
-import { getPrisma } from '../../utils/prisma';
+/**
+ * PATCH /api/quests/:id — proxies to NestJS PATCH /v1/quests/:id.
+ *
+ * S5.e of the supabase→clerk+nestjs migration.
+ */
+import { createError, defineEventHandler, getRouterParam, readBody } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
-  const body = await readBody(event);
 
   if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'Quest ID is required',
-    });
+    throw createError({ statusCode: 400, statusMessage: 'Quest ID is required' });
   }
 
-  try {
-    const prisma = await getPrisma();
-    const updateData: {
-      active?: boolean;
-    } = {};
+  const apiClient = createApiClient(event);
+  const body = await readBody(event);
 
-    if (body.active !== undefined) updateData.active = body.active;
-
-    await prisma.quest.update({
-      where: { id },
-      data: updateData,
-    });
-
-    return { success: true };
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error updating quest',
-    });
-  }
+  return apiClient(`/v1/quests/${id}`, {
+    method: 'PATCH',
+    body,
+  });
 });

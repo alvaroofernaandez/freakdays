@@ -1,43 +1,17 @@
-import type { Quest } from '@prisma/client';
-import { getPrisma } from '../../utils/prisma';
+/**
+ * GET /api/quests — proxies to NestJS GET /v1/quests.
+ *
+ * S5.e of the supabase→clerk+nestjs migration.
+ */
+import { defineEventHandler, getQuery } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
-  const userId = getQuery(event).userId as string;
+  const apiClient = createApiClient(event);
+  const query = getQuery(event);
 
-  if (!userId) {
-    throw createError({
-      statusCode: 400,
-      message: 'User ID is required',
-    });
-  }
-
-  try {
-    const prisma = await getPrisma();
-    const data = await prisma.quest.findMany({
-      where: {
-        userId,
-        active: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return data.map((row: Quest) => ({
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      difficulty: row.difficulty,
-      expReward: row.expReward,
-      dueDate: row.dueDate,
-      dueTime: row.dueTime,
-      reminderMinutesBefore: row.reminderMinutesBefore,
-      createdAt: row.createdAt,
-    }));
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error fetching quests',
-    });
-  }
+  return apiClient('/v1/quests', {
+    query: query.status ? { status: query.status } : undefined,
+  });
 });
