@@ -1,0 +1,32 @@
+# CODEOWNERS — automatic review requests
+#
+# Order matters: last matching pattern wins.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default fallback — everything not matched below.
+*                                  @alvaroofernaandez
+
+# CI, hooks, and repo-wide tooling.
+/.github/                          @alvaroofernaandez
+/.husky/                           @alvaroofernaandez
+/Makefile                          @alvaroofernaandez
+/commitlint.config.mjs             @alvaroofernaandez
+/.lintstagedrc.json                @alvaroofernaandez
+/.prettierrc                       @alvaroofernaandez
+/.prettierignore                   @alvaroofernaandez
+/.editorconfig                     @alvaroofernaandez
+
+# Documentation — review threshold lower; anyone can contribute prose
+# but architecture / decision docs still go through the owner.
+/docs/                             @alvaroofernaandez
+/docs/architecture/decisions/      @alvaroofernaandez
+
+# Web package (Nuxt 4).
+/packages/web/                     @alvaroofernaandez
+
+# API package (NestJS 11).
+/packages/api/                     @alvaroofernaandez
+
+# Database schemas and migrations — extra-careful review.
+/packages/api/prisma/              @alvaroofernaandez
+/packages/api/prisma/migrations/   @alvaroofernaandez
