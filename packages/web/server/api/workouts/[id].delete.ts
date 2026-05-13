@@ -1,26 +1,15 @@
-import { getPrisma } from '../../utils/prisma';
+/**
+ * DELETE /api/workouts/:id — proxies to NestJS DELETE /v1/workouts/:id.
+ *
+ * S5.f of the supabase→clerk+nestjs migration.
+ */
+import { createError, defineEventHandler, getRouterParam } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
+  if (!id) throw createError({ statusCode: 400, statusMessage: 'Workout ID is required' });
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'Workout ID is required',
-    });
-  }
-
-  try {
-    const prisma = await getPrisma();
-    await prisma.workout.delete({
-      where: { id },
-    });
-
-    return { success: true };
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error deleting workout',
-    });
-  }
+  return createApiClient(event)(`/v1/workouts/${id}`, { method: 'DELETE' });
 });
