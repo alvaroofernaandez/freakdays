@@ -1,0 +1,57 @@
+name: Release
+
+# Maintained automatically by Changesets:
+# - When PRs with .changeset/*.md files land on `main`, this workflow opens
+#   a "Version Packages" PR that bumps versions + updates CHANGELOGs.
+# - Merging that PR creates git tags. Publishing to npm is disabled because
+#   the packages are private; the tags are the release artefact.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10.6.3'
+
+jobs:
+  release:
+    name: Open / merge release PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Required so changesets can compute version bumps from the
+          # unreleased changeset files plus the existing CHANGELOGs.
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Create release PR or update versions
+        uses: changesets/action@v1
+        with:
+          # 'version' runs `changeset version` (consumes .changeset/*.md,
+          # bumps versions, updates CHANGELOGs).
+          version: pnpm changeset:version
+          # No `publish` step: packages are private.
+          # Tagging happens through the action's built-in git tag flow.
+          commit: 'chore(release): version packages'
+          title: 'chore(release): version packages'
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

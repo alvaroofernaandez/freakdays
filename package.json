@@ -13,6 +13,9 @@
     "typecheck": "pnpm --filter freak-days-api typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:status": "changeset status",
     "prepare": "husky"
   },
   "pnpm": {
@@ -50,6 +53,8 @@
   },
   "packageManager": "pnpm@10.6.3",
   "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
     "husky": "^9.1.7",

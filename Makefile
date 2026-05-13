@@ -13,7 +13,7 @@
         clean clean-all \
         ci-local \
         prisma-generate prisma-migrate prisma-studio prisma-deploy \
-        release release-dry
+        changeset changeset-status release release-dry
 
 # Color helpers (internal — not displayed by the help target).
 CYAN   := \033[36m
@@ -147,14 +147,15 @@ prisma-studio: ## Open Prisma Studio against the API database
 prisma-deploy: ## Apply pending migrations to a production database
 	pnpm --filter freak-days-api prisma:migrate:deploy
 
-# ── Release ─────────────────────────────────────────────────────────────────
-# NOTE: Changesets-based release automation lands in Phase 8.
-# These targets are placeholders pointing at the manual flow for now.
-release: ## Placeholder — Phase 8 introduces Changesets-driven releases
-	@echo "$(YELLOW)Release automation (Changesets) is scheduled for Phase 8.$(RESET)"
-	@echo "Until then, releases are manual: tag + GitHub release."
-	@exit 1
+# ── Release (Changesets) ────────────────────────────────────────────────────
+changeset: ## Create a new changeset describing the current PR's release impact
+	pnpm changeset
 
-release-dry: ## Placeholder — dry-run for the future release flow
-	@echo "$(YELLOW)Release automation (Changesets) is scheduled for Phase 8.$(RESET)"
-	@exit 1
+changeset-status: ## Show pending changesets and projected version bumps
+	pnpm changeset:status
+
+release: ## Apply all pending changesets locally (bumps versions + CHANGELOGs)
+	pnpm changeset:version
+
+release-dry: ## Show what would happen on the next release without writing files
+	pnpm changeset:status --verbose

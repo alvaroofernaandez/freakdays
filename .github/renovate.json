@@ -1,0 +1,106 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":dependencyDashboard",
+    "group:monorepos",
+    "group:recommended",
+    ":prHourlyLimit2",
+    ":prConcurrentLimit10"
+  ],
+  "timezone": "Europe/Madrid",
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Auto-merge non-major devDependency updates after CI is green.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Auto-merge patch-level production dependency updates.",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash"
+    },
+    {
+      "description": "Pin GitHub Actions to commit SHAs (recommended by GitHub's security hardening guide).",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
+    },
+    {
+      "description": "Group all Nuxt/Vue ecosystem bumps into one PR — they tend to release in lockstep.",
+      "matchPackagePatterns": [
+        "^@nuxt/",
+        "^nuxt$",
+        "^@vue/",
+        "^vue$",
+        "^vue-router$",
+        "^@pinia/",
+        "^pinia$"
+      ],
+      "groupName": "nuxt + vue"
+    },
+    {
+      "description": "Group NestJS ecosystem.",
+      "matchPackagePatterns": ["^@nestjs/"],
+      "groupName": "nestjs"
+    },
+    {
+      "description": "Group Prisma client + CLI.",
+      "matchPackageNames": ["@prisma/client", "prisma"],
+      "groupName": "prisma"
+    },
+    {
+      "description": "Group testing stack.",
+      "matchPackagePatterns": [
+        "^@playwright/",
+        "^@testing-library/",
+        "^@vitest/",
+        "^@vue/test-utils$",
+        "^vitest$",
+        "^happy-dom$",
+        "^jest$",
+        "^ts-jest$",
+        "^@types/jest$"
+      ],
+      "groupName": "testing"
+    },
+    {
+      "description": "Group ESLint + Prettier toolchain.",
+      "matchPackagePatterns": [
+        "^eslint",
+        "^@typescript-eslint/",
+        "^prettier",
+        "^lint-staged$",
+        "^@commitlint/",
+        "^husky$"
+      ],
+      "groupName": "lint + format toolchain"
+    },
+    {
+      "description": "Hold major Node version bumps for manual review.",
+      "matchPackageNames": ["node", "@types/node"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    }
+  ],
+  "rangeStrategy": "bump",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on the first day of the month"],
+    "automerge": true
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  },
+  "ignoreDeps": []
+}
