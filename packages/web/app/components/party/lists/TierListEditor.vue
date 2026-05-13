@@ -2,7 +2,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useSupabase } from '@/composables/useSupabase';
 import { useToast } from '@/composables/useToast';
 import {
   AlertCircle,
@@ -26,6 +25,7 @@ const props = defineProps<{
 
 const toast = useToast();
 const authStore = useAuthStore();
+const authContext = useAuthContext();
 const isSaving = ref(false);
 const isDragging = ref(false);
 
@@ -97,15 +97,8 @@ async function save() {
 }
 
 async function getAuthToken(): Promise<string | null> {
-  try {
-    const supabase = useSupabase();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    return session?.access_token || null;
-  } catch {
-    return null;
-  }
+  await authContext.refresh();
+  return authContext.getAccessToken();
 }
 
 function addItem() {
