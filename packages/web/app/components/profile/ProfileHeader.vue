@@ -104,7 +104,7 @@ onMounted(() => {
         accept="image/*"
         class="hidden"
         @change="emit('avatarUpload', $event)"
-      >
+      />
     </div>
 
     <div class="flex-1 text-center sm:text-left space-y-2 min-w-0">

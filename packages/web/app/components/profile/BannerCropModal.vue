@@ -306,7 +306,7 @@ onUnmounted(() => {
                     objectFit: 'contain',
                   }"
                   draggable="false"
-                >
+                />
                 <div
                   class="absolute inset-0 border-2 border-dashed border-primary/50 pointer-events-none"
                 />
