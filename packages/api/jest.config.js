@@ -23,9 +23,15 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'json-summary', 'html', 'lcov'],
-  // NOTE: thresholds intentionally omitted. jest@29.7's threshold checker
-  // crashes on Node 22 (reading 'sync' of undefined inside CoverageReporter).
-  // Coverage is still collected, reported, and uploaded as a CI artifact.
-  // Reinstate thresholds once jest is upgraded (likely jest 30+ or a
-  // patched 29.x).
+  // Floor — baseline is ~3% (only 3 tests exist today). Floor sits 1pp below
+  // baseline so legitimate refactors don't false-fail, but anything dropping
+  // coverage beyond rounding does. Raise as test count grows.
+  coverageThreshold: {
+    global: {
+      lines: 2,
+      functions: 3,
+      branches: 1,
+      statements: 2,
+    },
+  },
 };
