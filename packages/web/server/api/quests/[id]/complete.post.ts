@@ -1,64 +1,24 @@
-import { getPrisma } from '../../../utils/prisma';
+/**
+ * POST /api/quests/:id/complete — proxies to NestJS POST /v1/quests/:id/complete.
+ *
+ * S5.e of the supabase→clerk+nestjs migration.
+ */
+import { createError, defineEventHandler, getRouterParam, readBody } from 'h3';
+
+import { createApiClient } from '../../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
-  const body = await readBody(event);
 
   if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'Quest ID is required',
-    });
+    throw createError({ statusCode: 400, statusMessage: 'Quest ID is required' });
   }
 
-  if (!body.userId) {
-    throw createError({
-      statusCode: 400,
-      message: 'User ID is required',
-    });
-  }
+  const apiClient = createApiClient(event);
+  const body = await readBody(event);
 
-  try {
-    const prisma = await getPrisma();
-    const quest = await prisma.quest.findUnique({
-      where: { id },
-    });
-
-    if (!quest) {
-      throw createError({
-        statusCode: 404,
-        message: 'Quest not found',
-      });
-    }
-
-    const expEarned = quest.expReward;
-    const streakCount = body.streakCount || 1;
-
-    await prisma.$transaction(async (tx) => {
-      await tx.questCompletion.create({
-        data: {
-          questId: id,
-          userId: body.userId,
-          expEarned,
-          streakCount,
-        },
-      });
-
-      await tx.profile.update({
-        where: { id: body.userId },
-        data: {
-          totalExp: {
-            increment: expEarned,
-          },
-        },
-      });
-    });
-
-    return { expEarned };
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error completing quest',
-    });
-  }
+  return apiClient(`/v1/quests/${id}/complete`, {
+    method: 'POST',
+    body,
+  });
 });
