@@ -107,8 +107,8 @@ function handleEnterParty(partyId: string) {
           variant="outline"
           size="sm"
           class="flex-1 sm:flex-none min-h-[44px] sm:min-h-0"
-          @click="joinModal.open()"
           aria-label="Unirse a una party con código de invitación"
+          @click="joinModal.open()"
         >
           <UserPlus class="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span class="hidden sm:inline">Unirse</span>
@@ -117,8 +117,8 @@ function handleEnterParty(partyId: string) {
         <Button
           size="sm"
           class="flex-1 sm:flex-none glow-primary min-h-[44px] sm:min-h-0"
-          @click="createModal.open()"
           aria-label="Crear nueva party"
+          @click="createModal.open()"
         >
           <Plus class="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span class="hidden sm:inline">Crear Party</span>
@@ -185,17 +185,17 @@ function handleEnterParty(partyId: string) {
     </Transition>
 
     <CreatePartyModal
-      :open="createModal.isOpen.value"
       v-model:name="newParty.name"
       v-model:description="newParty.description"
+      :open="createModal.isOpen.value"
       :is-submitting="isSubmitting"
       @close="createModal.close()"
       @submit="handleCreateParty"
     />
 
     <JoinPartyModal
-      :open="joinModal.isOpen.value"
       v-model:code="joinCode"
+      :open="joinModal.isOpen.value"
       :is-submitting="isSubmitting"
       @close="joinModal.close()"
       @submit="handleJoinParty"

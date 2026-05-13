@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { AlertTriangle, Home, RefreshCw, ArrowLeft, Settings } from 'lucide-vue-next';
-
-const SettingsIcon = Settings;
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+const SettingsIcon = Settings;
 
 definePageMeta({
   layout: false,
@@ -101,24 +101,24 @@ function retry() {
 
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
           <Button
-            @click="goBack"
             variant="outline"
             class="flex-1 sm:flex-none hover:bg-muted/50 transition-all duration-300"
+            @click="goBack"
           >
             <ArrowLeft class="h-4 w-4 mr-2" />
             Volver
           </Button>
           <Button
-            @click="retry"
             variant="outline"
             class="flex-1 sm:flex-none hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-all duration-300"
+            @click="retry"
           >
             <RefreshCw class="h-4 w-4 mr-2" />
             Reintentar
           </Button>
           <Button
-            @click="goHome"
             class="flex-1 sm:flex-none glow-primary hover:glow-primary hover:scale-105 transition-all duration-300"
+            @click="goHome"
           >
             <Home class="h-4 w-4 mr-2" />
             Ir al inicio

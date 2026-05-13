@@ -258,8 +258,8 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: any }> = [
                 <Button
                   size="lg"
                   class="w-full h-12 text-base font-semibold mt-2"
-                  @click="addAnime"
                   :disabled="!newAnime.title.trim()"
+                  @click="addAnime"
                 >
                   <Plus class="h-5 w-5 mr-2" />
                   Añadir Anime

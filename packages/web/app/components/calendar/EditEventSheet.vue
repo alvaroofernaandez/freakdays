@@ -189,16 +189,16 @@ function handleClose() {
           <Button
             variant="outline"
             class="flex-1 min-h-[44px] touch-manipulation"
-            @click="handleClose"
             :disabled="isSubmitting"
+            @click="handleClose"
           >
             Cancelar
           </Button>
           <Button
             class="flex-1 min-h-[44px] text-sm font-semibold glow-primary touch-manipulation cursor-pointer"
-            @click="handleSave"
             :disabled="!editForm.title?.trim() || !editForm.release_date || isSubmitting"
             :aria-label="`Guardar cambios para ${release.title}`"
+            @click="handleSave"
           >
             <Save v-if="!isSubmitting" class="h-4 w-4 mr-2" aria-hidden="true" />
             <span v-else class="animate-spin mr-2" aria-hidden="true">⏳</span>

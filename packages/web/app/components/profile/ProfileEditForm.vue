@@ -43,9 +43,9 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
         <Input
           id="username"
           :model-value="form.username"
-          @update:model-value="updateField('username', $event)"
           placeholder="Tu nombre de usuario"
           class="w-full"
+          @update:model-value="updateField('username', $event)"
         />
       </div>
       <div class="space-y-2">
@@ -53,9 +53,9 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
         <Input
           id="displayName"
           :model-value="form.display_name"
-          @update:model-value="updateField('display_name', $event)"
           placeholder="Tu nombre público"
           class="w-full"
+          @update:model-value="updateField('display_name', $event)"
         />
       </div>
     </div>
@@ -65,9 +65,9 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
       <textarea
         id="bio"
         :model-value="form.bio"
-        @input="updateField('bio', ($event.target as HTMLTextAreaElement).value)"
         placeholder="Cuéntanos sobre ti..."
         class="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] resize-none"
+        @input="updateField('bio', ($event.target as HTMLTextAreaElement).value)"
       />
     </div>
 
@@ -77,8 +77,8 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
         <select
           id="favoriteAnime"
           :model-value="form.favorite_anime_id"
-          @change="updateField('favorite_anime_id', ($event.target as HTMLSelectElement).value)"
           class="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+          @change="updateField('favorite_anime_id', ($event.target as HTMLSelectElement).value)"
         >
           <option value="">Ninguno</option>
           <option v-for="anime in animeList" :key="anime.id" :value="anime.id">
@@ -91,8 +91,8 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
         <select
           id="favoriteManga"
           :model-value="form.favorite_manga_id"
-          @change="updateField('favorite_manga_id', ($event.target as HTMLSelectElement).value)"
           class="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+          @change="updateField('favorite_manga_id', ($event.target as HTMLSelectElement).value)"
         >
           <option value="">Ninguno</option>
           <option v-for="manga in mangaList" :key="manga.id" :value="manga.id">
@@ -111,9 +111,9 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
         <Input
           id="location"
           :model-value="form.location"
-          @update:model-value="updateField('location', $event)"
           placeholder="Tu ciudad o país"
           class="w-full"
+          @update:model-value="updateField('location', $event)"
         />
       </div>
       <div class="space-y-2">
@@ -124,10 +124,10 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
         <Input
           id="website"
           :model-value="form.website"
-          @update:model-value="updateField('website', $event)"
           placeholder="https://..."
           type="url"
           class="w-full"
+          @update:model-value="updateField('website', $event)"
         />
       </div>
     </div>
@@ -143,9 +143,9 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
           <Input
             id="twitter"
             :model-value="form.twitter"
-            @update:model-value="updateField('twitter', $event)"
             placeholder="@usuario"
             class="w-full"
+            @update:model-value="updateField('twitter', $event)"
           />
         </div>
         <div class="space-y-2">
@@ -156,9 +156,9 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
           <Input
             id="instagram"
             :model-value="form.instagram"
-            @update:model-value="updateField('instagram', $event)"
             placeholder="@usuario"
             class="w-full"
+            @update:model-value="updateField('instagram', $event)"
           />
         </div>
         <div class="space-y-2">
@@ -169,9 +169,9 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
           <Input
             id="discord"
             :model-value="form.discord"
-            @update:model-value="updateField('discord', $event)"
             placeholder="Usuario#1234"
             class="w-full"
+            @update:model-value="updateField('discord', $event)"
           />
         </div>
       </div>

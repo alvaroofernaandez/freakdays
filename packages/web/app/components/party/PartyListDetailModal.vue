@@ -45,7 +45,7 @@ const emit = defineEmits<{
         </DialogDescription>
       </DialogHeader>
 
-      <div class="flex-1 overflow-y-auto p-6" v-if="list">
+      <div v-if="list" class="flex-1 overflow-y-auto p-6">
         <PartyAnimeList v-if="list.listType === 'anime'" :list="list" :party-id="partyId" />
         <TierListEditor
           v-else-if="list.listType === 'tier_list'"

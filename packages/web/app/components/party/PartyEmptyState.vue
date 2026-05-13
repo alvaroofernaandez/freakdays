@@ -58,8 +58,8 @@ import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next';
             <Button
               size="lg"
               class="flex-1 sm:flex-none glow-primary group relative overflow-hidden min-h-[44px]"
-              @click="$emit('create')"
               aria-label="Crear tu primera party"
+              @click="$emit('create')"
             >
               <span class="relative z-10 flex items-center justify-center">
                 <Plus
@@ -76,8 +76,8 @@ import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next';
               variant="outline"
               size="lg"
               class="flex-1 sm:flex-none border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 min-h-[44px]"
-              @click="$emit('join')"
               aria-label="Unirse a una party existente con código de invitación"
+              @click="$emit('join')"
             >
               <UserPlus class="h-5 w-5 mr-2" aria-hidden="true" />
               <span>Unirse con Código</span>

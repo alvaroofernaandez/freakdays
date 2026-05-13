@@ -91,7 +91,7 @@ onMounted(() => {
     <div v-else class="space-y-4 sm:space-y-6">
       <div v-if="currentWorkout && currentWorkoutStats">
         <div class="flex items-center gap-2 mb-3 sm:mb-4">
-          <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+          <div class="w-2 h-2 rounded-full bg-primary animate-pulse" />
           <h2
             class="text-sm sm:text-base font-semibold text-muted-foreground uppercase tracking-wide"
           >
@@ -131,9 +131,9 @@ onMounted(() => {
 
     <ActiveWorkoutModal
       v-if="currentWorkout"
+      v-model:new-exercise-name="newExerciseName"
       :workout="currentWorkout"
       :elapsed-time="elapsedTime"
-      v-model:new-exercise-name="newExerciseName"
       :adding-exercise="addingExercise"
       :adding-sets="addingSets"
       :updating-sets="updatingSets"

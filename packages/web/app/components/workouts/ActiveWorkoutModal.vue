@@ -83,7 +83,7 @@ const stats = computed(() => {
           <div class="flex items-center justify-between gap-3">
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                <div class="w-2 h-2 rounded-full bg-primary animate-pulse" />
                 <CardTitle class="text-base sm:text-lg font-bold truncate flex items-center gap-2">
                   {{ workout.name }}
                 </CardTitle>
@@ -155,16 +155,16 @@ const stats = computed(() => {
             <div class="flex gap-2">
               <Input
                 :model-value="newExerciseName"
-                @update:model-value="emit('update:newExerciseName', $event)"
                 placeholder="Nombre del ejercicio"
                 class="flex-1 h-11 sm:h-12 text-base"
+                @update:model-value="emit('update:newExerciseName', $event)"
                 @keyup.enter="handleAddExercise"
               />
               <Button
                 size="lg"
                 class="h-11 sm:h-12 px-6 shrink-0"
-                @click="handleAddExercise"
                 :disabled="!newExerciseName.trim() || addingExercise"
+                @click="handleAddExercise"
               >
                 <Plus v-if="!addingExercise" class="h-5 w-5 mr-2" />
                 <Loader2 v-else class="h-5 w-5 mr-2 animate-spin" />

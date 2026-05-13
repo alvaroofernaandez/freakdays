@@ -30,11 +30,11 @@ const emit = defineEmits<{
           v-if="open && party"
           class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-background/95 backdrop-blur-sm overflow-y-auto"
           style="pointer-events: auto"
-          @click.self="emit('close')"
-          @keydown.esc="emit('close')"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-confirm-title"
+          @click.self="emit('close')"
+          @keydown.esc="emit('close')"
         >
           <Card
             class="w-full max-w-md shadow-xl border-2 border-destructive/20 my-auto"
@@ -67,17 +67,17 @@ const emit = defineEmits<{
               <Button
                 variant="outline"
                 class="flex-1 min-h-[44px] order-2 sm:order-1"
-                @click="emit('close')"
                 :disabled="isSubmitting"
+                @click="emit('close')"
               >
                 Cancelar
               </Button>
               <Button
                 variant="destructive"
                 class="flex-1 min-h-[44px] order-1 sm:order-2"
-                @click="emit('confirm', party.id)"
                 :disabled="isSubmitting"
                 aria-label="Confirmar eliminación de party {{ party.name }}"
+                @click="emit('confirm', party.id)"
               >
                 <Trash2 v-if="!isSubmitting" class="h-4 w-4 mr-2" aria-hidden="true" />
                 <span

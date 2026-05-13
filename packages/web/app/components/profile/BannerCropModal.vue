@@ -251,11 +251,11 @@ onUnmounted(() => {
           v-if="open && imageFile"
           class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-background/95 backdrop-blur-sm overflow-y-auto"
           style="pointer-events: auto"
-          @click.self="handleCancel"
-          @keydown.esc="handleCancel"
           role="dialog"
           aria-modal="true"
           aria-labelledby="crop-title"
+          @click.self="handleCancel"
+          @keydown.esc="handleCancel"
         >
           <Card class="w-full max-w-4xl shadow-xl border-2 my-auto" @click.stop>
             <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 p-4 sm:p-6">
@@ -267,8 +267,8 @@ onUnmounted(() => {
                 variant="ghost"
                 size="icon"
                 class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation"
-                @click="handleCancel"
                 aria-label="Cerrar"
+                @click="handleCancel"
               >
                 <X class="h-4 w-4" />
               </Button>
@@ -318,8 +318,8 @@ onUnmounted(() => {
                     variant="outline"
                     size="icon"
                     class="h-10 w-10 touch-manipulation"
-                    @click="handleZoomOut"
                     aria-label="Alejar"
+                    @click="handleZoomOut"
                   >
                     <ZoomOut class="h-4 w-4" />
                   </Button>
@@ -330,8 +330,8 @@ onUnmounted(() => {
                     variant="outline"
                     size="icon"
                     class="h-10 w-10 touch-manipulation"
-                    @click="handleZoomIn"
                     aria-label="Acercar"
+                    @click="handleZoomIn"
                   >
                     <ZoomIn class="h-4 w-4" />
                   </Button>
@@ -341,15 +341,15 @@ onUnmounted(() => {
                   <Button
                     variant="outline"
                     class="min-h-[44px] touch-manipulation"
-                    @click="handleCancel"
                     :disabled="isProcessing"
+                    @click="handleCancel"
                   >
                     Cancelar
                   </Button>
                   <Button
                     class="min-h-[44px] touch-manipulation glow-primary"
-                    @click="handleCrop"
                     :disabled="isProcessing"
+                    @click="handleCrop"
                   >
                     {{ isProcessing ? 'Procesando...' : 'Aplicar' }}
                   </Button>

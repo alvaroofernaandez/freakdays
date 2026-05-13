@@ -36,8 +36,8 @@ const colorMap: Record<ToastType, string> = {
               <component :is="iconMap[toast.type]" class="h-5 w-5 shrink-0" />
               <p class="text-sm font-medium flex-1">{{ toast.message }}</p>
               <button
-                @click="remove(toast.id)"
                 class="shrink-0 p-1 rounded hover:bg-black/10 transition-colors"
+                @click="remove(toast.id)"
               >
                 <X class="h-4 w-4" />
               </button>

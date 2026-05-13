@@ -186,8 +186,8 @@ function handleDayClick() {
               index === 2 ? 'sm:top-[3rem] md:top-[2.5rem] lg:top-[4rem]' : '',
             ]"
             @delete.stop="emit('delete', $event)"
-            @deleteRequest="emit('deleteRequest', $event)"
-            @editRequest="emit('editRequest', $event)"
+            @delete-request="emit('deleteRequest', $event)"
+            @edit-request="emit('editRequest', $event)"
             @dragstart="emit('dragstart', $event)"
             @dragend="emit('dragend')"
           />

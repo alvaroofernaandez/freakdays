@@ -102,13 +102,13 @@ const emit = defineEmits<{
           variant="ghost"
           size="icon"
           class="h-9 w-9 sm:h-8 sm:w-8 shrink-0 hover:bg-primary/10 hover:text-primary transition-colors touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-          @click.stop="emit('copyCode', party.inviteCode!)"
           :aria-label="
             copiedCode === party.inviteCode
               ? 'Código copiado al portapapeles'
               : 'Copiar código de invitación'
           "
           :aria-pressed="copiedCode === party.inviteCode"
+          @click.stop="emit('copyCode', party.inviteCode!)"
         >
           <Check
             v-if="copiedCode === party.inviteCode"
@@ -159,8 +159,8 @@ const emit = defineEmits<{
             variant="default"
             size="sm"
             class="h-8 px-3 text-xs min-h-[44px] sm:min-h-0"
-            @click.stop="emit('enter', party.id)"
             aria-label="Entrar a la party {{ party.name }}"
+            @click.stop="emit('enter', party.id)"
           >
             Entrar
           </Button>
@@ -168,8 +168,8 @@ const emit = defineEmits<{
             variant="ghost"
             size="icon"
             class="h-9 w-9 sm:h-8 sm:w-8 hover:bg-primary/10 hover:text-primary transition-colors touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-            @click.stop="emit('viewDetails', party)"
             aria-label="Ver detalles y configurar la party"
+            @click.stop="emit('viewDetails', party)"
           >
             <Settings class="h-4 w-4" aria-hidden="true" />
           </Button>
@@ -178,9 +178,9 @@ const emit = defineEmits<{
             variant="ghost"
             size="icon"
             class="h-9 w-9 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-            @click.stop="emit('leave', party.id)"
             :disabled="isSubmitting"
             aria-label="Salir de la party {{ party.name }}"
+            @click.stop="emit('leave', party.id)"
           >
             <LogOut class="h-4 w-4" aria-hidden="true" />
             <span v-if="isSubmitting" class="sr-only">Procesando...</span>

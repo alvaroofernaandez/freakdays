@@ -33,7 +33,7 @@ let scrollPosition = 0;
 watch(
   mobileMenuOpen,
   (isOpen) => {
-    if (process.client) {
+    if (import.meta.client) {
       if (isOpen) {
         scrollPosition = window.scrollY;
         document.body.style.overflow = 'hidden';
@@ -107,7 +107,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  if (process.client) {
+  if (import.meta.client) {
     document.body.style.overflow = '';
     document.body.style.position = '';
     document.body.style.top = '';
@@ -183,9 +183,9 @@ onBeforeUnmount(() => {
       <MobileHeader :profile="profile" :loading="loadingProfile" :menu-open="mobileMenuOpen" />
 
       <MobileNav
+        v-model:menu-open="mobileMenuOpen"
         :items="mobilePreviewItems"
         :is-active="isActive"
-        v-model:menu-open="mobileMenuOpen"
       />
 
       <main

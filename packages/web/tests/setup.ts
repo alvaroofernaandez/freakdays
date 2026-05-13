@@ -2,6 +2,10 @@
 import { config } from '@vue/test-utils';
 import { vi } from 'vitest';
 
+// Mock Pinia store
+import { createTestingPinia } from '@pinia/testing';
+import { ref } from 'vue';
+
 // Mock Nuxt runtime config
 vi.stubGlobal('useRuntimeConfig', () => ({
   public: {
@@ -58,10 +62,6 @@ vi.mock('#imports', async () => {
     defineNuxtRouteMiddleware: (handler: any) => handler,
   };
 });
-
-// Mock Pinia store
-import { createTestingPinia } from '@pinia/testing';
-import { ref } from 'vue';
 
 config.global.plugins = [
   createTestingPinia({

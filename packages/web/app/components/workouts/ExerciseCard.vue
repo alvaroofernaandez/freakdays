@@ -192,8 +192,8 @@ const hasUnsavedChanges = (setId: string) => {
         variant="ghost"
         size="sm"
         class="h-9 sm:h-10 px-3 sm:px-4 hover:bg-primary/10 hover:text-primary cursor-pointer shrink-0"
-        @click="emit('addSet', exercise.id)"
         :disabled="addingSet"
+        @click="emit('addSet', exercise.id)"
       >
         <Plus v-if="!addingSet" class="h-4 w-4 mr-1.5" />
         <Loader2 v-else class="h-4 w-4 mr-1.5 animate-spin" />
@@ -341,11 +341,11 @@ const hasUnsavedChanges = (setId: string) => {
             variant="ghost"
             size="icon"
             class="h-8 w-8 sm:h-9 sm:w-9 text-primary hover:text-primary hover:bg-primary/10 cursor-pointer"
-            @click="handleSaveSet(exercise.id, set.id)"
             :disabled="
               updatingSets && typeof updatingSets.has === 'function' && updatingSets.has(set.id)
             "
             aria-label="Guardar serie"
+            @click="handleSaveSet(exercise.id, set.id)"
           >
             <Save class="h-4 w-4" />
           </Button>
@@ -353,6 +353,7 @@ const hasUnsavedChanges = (setId: string) => {
             variant="ghost"
             size="icon"
             class="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+            aria-label="Eliminar serie"
             @click="
               () => {
                 if (!set.id || typeof set.id !== 'string' || set.id.length < 10) {
@@ -361,7 +362,6 @@ const hasUnsavedChanges = (setId: string) => {
                 emit('removeSet', exercise.id, set.id);
               }
             "
-            aria-label="Eliminar serie"
           >
             <Minus class="h-4 w-4" />
           </Button>

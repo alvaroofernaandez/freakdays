@@ -67,14 +67,14 @@ async function handleCreateList(data: { name: string; type: any }) {
 <template>
   <div class="space-y-6" role="main">
     <!-- Header -->
-    <header class="flex flex-col gap-4" v-if="party" role="banner">
+    <header v-if="party" class="flex flex-col gap-4" role="banner">
       <div class="flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
           class="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-          @click="router.push('/party')"
           aria-label="Volver a la lista de parties"
+          @click="router.push('/party')"
         >
           <ArrowLeft class="h-5 w-5" aria-hidden="true" />
         </Button>
@@ -124,7 +124,7 @@ async function handleCreateList(data: { name: string; type: any }) {
         class="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
         role="status"
         aria-label="Cargando"
-      ></div>
+      />
       <p class="text-muted-foreground text-sm">Cargando detalles...</p>
     </div>
 
@@ -155,8 +155,8 @@ async function handleCreateList(data: { name: string; type: any }) {
       </TabsList>
 
       <TabsContent
-        value="lists"
         id="lists-panel"
+        value="lists"
         class="space-y-4 mt-6"
         role="tabpanel"
         aria-labelledby="lists-tab"
@@ -171,9 +171,9 @@ async function handleCreateList(data: { name: string; type: any }) {
             </p>
           </div>
           <Button
-            @click="isCreateListOpen = true"
             class="min-h-[44px] sm:min-h-0 w-full sm:w-auto"
             aria-label="Crear nueva lista compartida"
+            @click="isCreateListOpen = true"
           >
             <Plus class="h-4 w-4 mr-2" aria-hidden="true" />
             Nueva Lista
@@ -184,8 +184,8 @@ async function handleCreateList(data: { name: string; type: any }) {
       </TabsContent>
 
       <TabsContent
-        value="members"
         id="members-panel"
+        value="members"
         class="mt-6"
         role="tabpanel"
         aria-labelledby="members-tab"

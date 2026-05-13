@@ -107,7 +107,7 @@ function handleClose() {
         </div>
 
         <div class="flex gap-2">
-          <Button class="flex-1" @click="handleSubmit" :disabled="!form.title.trim()">
+          <Button class="flex-1" :disabled="!form.title.trim()" @click="handleSubmit">
             Añadir Manga
           </Button>
           <Button variant="outline" @click="handleClose"> Cancelar </Button>

@@ -51,11 +51,11 @@ function togglePasswordVisibility() {
         <Input
           id="email"
           :model-value="email"
-          @update:model-value="emit('update:email', $event)"
           type="email"
           placeholder="tu@email.com"
           class="w-full pl-11 h-12 bg-background/50 border-border/50 focus:border-primary transition-all"
           required
+          @update:model-value="emit('update:email', $event)"
         />
       </div>
     </div>
@@ -69,11 +69,11 @@ function togglePasswordVisibility() {
         <Input
           id="password"
           :model-value="password"
-          @update:model-value="emit('update:password', $event)"
           :type="showPassword ? 'text' : 'password'"
           placeholder="Mínimo 6 caracteres"
           class="w-full pl-11 pr-12 h-12 bg-background/50 border-border/50 focus:border-primary transition-all"
           required
+          @update:model-value="emit('update:password', $event)"
         />
         <button
           type="button"
@@ -102,7 +102,6 @@ function togglePasswordVisibility() {
         <Input
           id="confirmPassword"
           :model-value="confirmPassword"
-          @update:model-value="emit('update:confirmPassword', $event)"
           type="password"
           placeholder="Repite la contraseña"
           class="w-full pl-11 h-12 bg-background/50 border-border/50 focus:border-primary transition-all"
@@ -110,6 +109,7 @@ function togglePasswordVisibility() {
             confirmPassword && !passwordsMatch ? 'border-destructive focus:border-destructive' : ''
           "
           required
+          @update:model-value="emit('update:confirmPassword', $event)"
         />
         <Check
           v-if="confirmPassword && passwordsMatch"

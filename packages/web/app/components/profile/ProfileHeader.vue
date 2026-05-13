@@ -69,8 +69,8 @@ onMounted(() => {
                 size="icon"
                 variant="secondary"
                 class="h-10 w-10"
-                @click="emit('triggerAvatarUpload')"
                 :disabled="uploadingAvatar"
+                @click="emit('triggerAvatarUpload')"
               >
                 <Upload class="h-5 w-5" />
               </Button>
@@ -86,8 +86,8 @@ onMounted(() => {
                 size="icon"
                 variant="destructive"
                 class="h-10 w-10"
-                @click="emit('deleteAvatar')"
                 :disabled="uploadingAvatar"
+                @click="emit('deleteAvatar')"
               >
                 <Trash2 class="h-5 w-5" />
               </Button>
@@ -122,17 +122,17 @@ onMounted(() => {
         v-if="!editing"
         variant="outline"
         size="sm"
-        @click="emit('startEditing')"
         class="gap-2"
+        @click="emit('startEditing')"
       >
         <Edit2 class="h-4 w-4" />
         Editar
       </Button>
       <template v-else>
-        <Button variant="ghost" size="sm" @click="emit('cancelEditing')" :disabled="saving">
+        <Button variant="ghost" size="sm" :disabled="saving" @click="emit('cancelEditing')">
           <X class="h-4 w-4" />
         </Button>
-        <Button size="sm" @click="emit('saveProfile')" :disabled="saving" class="gap-2">
+        <Button size="sm" :disabled="saving" class="gap-2" @click="emit('saveProfile')">
           <Save class="h-4 w-4" />
           {{ saving ? 'Guardando...' : 'Guardar' }}
         </Button>

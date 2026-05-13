@@ -167,8 +167,8 @@ function handleDeleteKeyboard(e: KeyboardEvent) {
 
 <template>
   <div
-    ref="cardElement"
     :id="`event-${release.id}`"
+    ref="cardElement"
     :class="[
       'group cursor-grab active:cursor-grabbing touch-manipulation w-full',
       'rounded-lg transition-all duration-200 select-none',
@@ -227,12 +227,12 @@ function handleDeleteKeyboard(e: KeyboardEvent) {
           <button
             class="transition-all p-0.5 sm:p-0.5 md:p-0.5 lg:p-1 hover:bg-white/20 active:bg-white/30 rounded shrink-0 touch-manipulation min-h-[28px] min-w-[28px] sm:min-h-[24px] sm:min-w-[24px] md:min-h-[20px] md:min-w-[20px] lg:min-h-[24px] lg:min-w-[24px] flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent"
             :class="config.color"
-            @click.stop="handleEdit"
-            @keydown.enter.stop="handleEditKeyboard"
-            @keydown.space.stop.prevent="handleEditKeyboard"
             :aria-label="`Editar evento: ${release.title}`"
             :aria-describedby="`event-${release.id}-description`"
             title="Editar evento"
+            @click.stop="handleEdit"
+            @keydown.enter.stop="handleEditKeyboard"
+            @keydown.space.stop.prevent="handleEditKeyboard"
           >
             <MoreVertical class="h-2.5 sm:h-2.5 w-2.5 md:h-2.5 lg:h-3 lg:w-3" aria-hidden="true" />
             <span class="sr-only">Editar evento {{ release.title }}</span>
@@ -240,12 +240,12 @@ function handleDeleteKeyboard(e: KeyboardEvent) {
           <button
             class="transition-all p-0.5 sm:p-0.5 md:p-0.5 lg:p-1 hover:bg-white/20 active:bg-white/30 rounded shrink-0 touch-manipulation min-h-[28px] min-w-[28px] sm:min-h-[24px] sm:min-w-[24px] md:min-h-[20px] md:min-w-[20px] lg:min-h-[24px] lg:min-w-[24px] flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent"
             :class="config.color"
-            @click.stop="handleDelete"
-            @keydown.enter.stop="handleDeleteKeyboard"
-            @keydown.space.stop.prevent="handleDeleteKeyboard"
             :aria-label="`Eliminar evento: ${release.title}`"
             :aria-describedby="`event-${release.id}-description`"
             title="Eliminar evento"
+            @click.stop="handleDelete"
+            @keydown.enter.stop="handleDeleteKeyboard"
+            @keydown.space.stop.prevent="handleDeleteKeyboard"
           >
             <Trash2 class="h-2.5 w-2.5 sm:h-2.5 md:h-2.5 lg:h-3 lg:w-3" aria-hidden="true" />
             <span class="sr-only">Eliminar evento {{ release.title }}</span>

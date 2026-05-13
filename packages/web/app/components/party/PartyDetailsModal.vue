@@ -55,11 +55,11 @@ const emit = defineEmits<{
           v-if="open && party"
           class="fixed inset-0 z-100 flex items-start sm:items-center justify-center p-0 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
           style="pointer-events: auto"
-          @click.self="emit('close')"
-          @keydown.esc="emit('close')"
           role="dialog"
           aria-modal="true"
           aria-labelledby="party-details-title"
+          @click.self="emit('close')"
+          @keydown.esc="emit('close')"
         >
           <Card
             class="w-full max-w-2xl min-h-screen sm:min-h-0 my-0 sm:my-8 shadow-xl border-0 sm:border-2 rounded-none sm:rounded-lg"
@@ -94,8 +94,8 @@ const emit = defineEmits<{
                 variant="ghost"
                 size="icon"
                 class="h-9 w-9 sm:h-8 sm:w-8 shrink-0 touch-manipulation"
-                @click="emit('close')"
                 aria-label="Cerrar"
+                @click="emit('close')"
               >
                 <X class="h-4 w-4" />
               </Button>
@@ -122,13 +122,13 @@ const emit = defineEmits<{
                       variant="ghost"
                       size="icon"
                       class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-                      @click="emit('copyCode', party.inviteCode!)"
                       :aria-label="
                         copiedCode === party.inviteCode
                           ? 'Código copiado al portapapeles'
                           : 'Copiar código de invitación'
                       "
                       :aria-pressed="copiedCode === party.inviteCode"
+                      @click="emit('copyCode', party.inviteCode!)"
                     >
                       <Check
                         v-if="copiedCode === party.inviteCode"
@@ -141,9 +141,9 @@ const emit = defineEmits<{
                       variant="ghost"
                       size="icon"
                       class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-                      @click="emit('regenerateCode', party.id)"
                       :disabled="isRegeneratingCode"
                       aria-label="Regenerar código de invitación"
+                      @click="emit('regenerateCode', party.id)"
                     >
                       <RefreshCw :class="['h-4 w-4', isRegeneratingCode && 'animate-spin']" />
                       <span v-if="isRegeneratingCode" class="sr-only">Regenerando código...</span>
@@ -203,8 +203,8 @@ const emit = defineEmits<{
                       variant="ghost"
                       size="icon"
                       class="h-9 w-9 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 transition-colors"
-                      @click="emit('removeMember', party, member)"
                       :aria-label="`Expulsar a ${member.profile?.displayName || member.profile?.username || 'este miembro'}`"
+                      @click="emit('removeMember', party, member)"
                     >
                       <UserMinus class="h-4 w-4" aria-hidden="true" />
                     </Button>
@@ -216,8 +216,8 @@ const emit = defineEmits<{
                 <Button
                   variant="destructive"
                   class="flex-1 min-h-[44px]"
-                  @click="emit('deleteParty', party)"
                   aria-label="Eliminar party"
+                  @click="emit('deleteParty', party)"
                 >
                   <Trash2 class="h-4 w-4 mr-2" />
                   Eliminar Party

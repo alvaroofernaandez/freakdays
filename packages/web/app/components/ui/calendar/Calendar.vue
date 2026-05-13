@@ -85,13 +85,13 @@ const weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
         variant="outline"
         size="icon"
         class="h-7 w-7"
-        @click="previousMonth"
         :disabled="disabled"
+        @click="previousMonth"
       >
         <ChevronLeft class="h-4 w-4" />
       </Button>
       <div class="font-semibold capitalize">{{ monthYear }}</div>
-      <Button variant="outline" size="icon" class="h-7 w-7" @click="nextMonth" :disabled="disabled">
+      <Button variant="outline" size="icon" class="h-7 w-7" :disabled="disabled" @click="nextMonth">
         <ChevronRight class="h-4 w-4" />
       </Button>
     </div>
