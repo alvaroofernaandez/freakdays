@@ -1,26 +1,22 @@
-import { getPrisma } from '../../utils/prisma';
+/**
+ * DELETE /api/manga/:id — proxies to NestJS DELETE /v1/manga/:id.
+ *
+ * S5.b of the supabase→clerk+nestjs migration.
+ */
+import { createError, defineEventHandler, getRouterParam } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id');
 
   if (!id) {
-    throw createError({
-      statusCode: 400,
-      message: 'Manga ID is required',
-    });
+    throw createError({ statusCode: 400, statusMessage: 'Manga ID is required' });
   }
 
-  try {
-    const prisma = await getPrisma();
-    await prisma.mangaEntry.delete({
-      where: { id },
-    });
+  const apiClient = createApiClient(event);
 
-    return { success: true };
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error deleting manga entry',
-    });
-  }
+  return apiClient(`/v1/manga/${id}`, {
+    method: 'DELETE',
+  });
 });

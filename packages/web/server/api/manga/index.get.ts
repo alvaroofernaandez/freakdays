@@ -1,43 +1,20 @@
-import { getPrisma } from '../../utils/prisma';
+/**
+ * GET /api/manga — proxies to NestJS GET /v1/manga.
+ *
+ * S5.b of the supabase→clerk+nestjs migration.
+ *
+ * NestJS scopes by the Clerk JWT subject; `userId` query param is ignored
+ * but tolerated for backward compatibility.
+ */
+import { defineEventHandler, getQuery } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
-  const userId = getQuery(event).userId as string;
+  const apiClient = createApiClient(event);
+  const query = getQuery(event);
 
-  if (!userId) {
-    throw createError({
-      statusCode: 400,
-      message: 'User ID is required',
-    });
-  }
-
-  try {
-    const prisma = await getPrisma();
-    const data = await prisma.mangaEntry.findMany({
-      where: {
-        userId,
-      },
-      orderBy: {
-        title: 'asc',
-      },
-    });
-
-    return data.map((row) => ({
-      id: row.id,
-      title: row.title,
-      author: row.author,
-      totalVolumes: row.totalVolumes,
-      ownedVolumes: row.ownedVolumes,
-      status: row.status,
-      score: row.score,
-      notes: row.notes,
-      coverUrl: row.coverUrl,
-      pricePerVolume: row.pricePerVolume,
-      totalCost: row.totalCost,
-    }));
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error fetching manga collection',
-    });
-  }
+  return apiClient('/v1/manga', {
+    query: query.status ? { status: query.status } : undefined,
+  });
 });
