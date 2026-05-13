@@ -9,33 +9,15 @@ import { ref } from 'vue';
 // Mock Nuxt runtime config
 vi.stubGlobal('useRuntimeConfig', () => ({
   public: {
-    supabase: {
-      url: 'https://example.supabase.co',
-      key: 'example-key',
-    },
-    supabaseUrl: 'https://example.supabase.co',
-    supabaseAnonKey: 'example-key',
+    apiUrl: 'http://localhost:3001',
   },
 }));
 
-// Mock Supabase User
-const mockSupabaseUser = {
+// Test user shape kept minimal — mirrors what auth store getters read.
+const mockUser = {
   id: 'test-user-id',
   email: 'test@example.com',
 };
-
-// Mock useSupabaseUser
-vi.stubGlobal('useSupabaseUser', () => ref(mockSupabaseUser));
-
-// Mock useSupabaseClient
-vi.stubGlobal('useSupabaseClient', () => ({
-  auth: {
-    getSession: vi.fn().mockResolvedValue({ data: { session: { user: mockSupabaseUser } } }),
-    getUser: vi.fn(),
-    signInWithPassword: vi.fn(),
-    signOut: vi.fn(),
-  },
-}));
 
 // Mock navigateTo
 vi.stubGlobal('navigateTo', vi.fn());
@@ -44,20 +26,13 @@ vi.stubGlobal('navigateTo', vi.fn());
 vi.mock('#imports', async () => {
   return {
     useNuxtApp: () => ({
-      $supabase: {},
       payload: {},
     }),
     useRuntimeConfig: () => ({
       public: {
-        supabase: {
-          url: 'https://example.supabase.co',
-          key: 'example-key',
-        },
-        supabaseUrl: 'https://example.supabase.co',
-        supabaseAnonKey: 'example-key',
+        apiUrl: 'http://localhost:3001',
       },
     }),
-    useSupabaseUser: () => ref(mockSupabaseUser),
     navigateTo: vi.fn(),
     defineNuxtRouteMiddleware: (handler: any) => handler,
   };
@@ -69,41 +44,19 @@ config.global.plugins = [
     stubActions: false,
     initialState: {
       auth: {
-        session: { user: mockSupabaseUser },
-        user: mockSupabaseUser,
+        session: { user: mockUser },
       },
     },
   }),
 ];
 
-// Mock useAuthStore specifically for middleware
+// Mock useAuthStore specifically for middleware tests.
 vi.mock('@/stores/auth', () => ({
   useAuthStore: () => ({
-    session: { user: mockSupabaseUser },
-    user: mockSupabaseUser,
+    session: { user: mockUser },
     reset: vi.fn(),
     setSession: vi.fn(),
     setLoading: vi.fn(),
     setError: vi.fn(),
-  }),
-}));
-
-// Mock useSupabase composable
-vi.mock('@/composables/useSupabase', () => ({
-  useSupabase: () => ({
-    auth: {
-      getSession: vi.fn().mockResolvedValue({ data: { session: { user: mockSupabaseUser } } }),
-      getUser: vi.fn().mockResolvedValue({ data: { user: mockSupabaseUser } }),
-      signInWithPassword: vi.fn(),
-      signOut: vi.fn(),
-    },
-    from: () => ({
-      select: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: {}, error: null }),
-    }),
   }),
 }));

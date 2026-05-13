@@ -4,8 +4,7 @@ export default defineVitestConfig({
   test: {
     environment: 'nuxt',
     env: {
-      SUPABASE_URL: 'https://example.supabase.co',
-      SUPABASE_ANON_KEY: 'example-key',
+      NUXT_PUBLIC_API_URL: 'http://localhost:3001',
     },
     environmentOptions: {
       nuxt: {

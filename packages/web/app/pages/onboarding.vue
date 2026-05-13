@@ -9,7 +9,6 @@ import { useModulesStore } from '~~/stores/modules';
 
 const modulesStore = useModulesStore();
 const authStore = useAuthStore();
-const supabase = useSupabase();
 const router = useRouter();
 const toast = useToast();
 const errorHandler = useErrorHandler();
@@ -43,16 +42,16 @@ async function completeOnboarding() {
 
   try {
     modulesStore.enableModules([...selectedModules.value]);
-    await modulesStore.syncToDatabase(supabase, authStore.userId);
+    await modulesStore.syncToDatabase();
 
-    // Force reload modules from database to ensure consistency
-    const { data, error: reloadError } = await supabase
-      .from('user_modules')
-      .select('module_id, enabled')
-      .eq('user_id', authStore.userId);
-
-    if (!reloadError && data && data.length > 0) {
-      modulesStore.setModulesFromDb(data);
+    // Reload modules to ensure store reflects backend state.
+    try {
+      const data = await $fetch<Array<{ module_id: ModuleId; enabled: boolean }>>('/api/modules');
+      if (data && data.length > 0) {
+        modulesStore.setModulesFromDb(data);
+      }
+    } catch (reloadError) {
+      console.error('Error reloading modules after sync:', reloadError);
     }
 
     toast.success('¡Configuración guardada! Bienvenido a FreakDays');
@@ -93,7 +92,7 @@ onMounted(() => {
         <div
           class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-2 animate-in fade-in slide-in-from-top-4 duration-500"
         >
-          <img src="/logo.png" alt="FreakDays" class="h-8 w-8 rounded-lg" width="32" height="32" />
+          <img src="/logo.png" alt="FreakDays" class="h-8 w-8 rounded-lg" width="32" height="32" >
         </div>
         <div class="space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
           <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Configura tu Aventura</h1>
