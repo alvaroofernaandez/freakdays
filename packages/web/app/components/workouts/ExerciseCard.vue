@@ -47,8 +47,8 @@ function initializeLocalValues() {
 watch(
   () => props.exercise.sets.map((s) => s.id),
   (newSetIds, oldSetIds) => {
-    const newIds = new Set(newSetIds);
-    const oldIds = oldSetIds ? new Set(oldSetIds) : new Set();
+    const newIds = new Set<string>(newSetIds);
+    const oldIds = oldSetIds ? new Set<string>(oldSetIds) : new Set<string>();
 
     props.exercise.sets.forEach((set) => {
       if (!oldIds.has(set.id)) {

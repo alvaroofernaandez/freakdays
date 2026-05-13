@@ -30,8 +30,8 @@ const emit = defineEmits<{
   'update:form': [value: EditForm];
 }>();
 
-function updateField<K extends keyof EditForm>(field: K, value: EditForm[K]) {
-  emit('update:form', { ...props.form, [field]: value });
+function updateField<K extends keyof EditForm>(field: K, value: EditForm[K] | number) {
+  emit('update:form', { ...props.form, [field]: value as EditForm[K] });
 }
 </script>
 

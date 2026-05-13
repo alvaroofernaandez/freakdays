@@ -18,9 +18,14 @@
  */
 import type { H3Event } from 'h3';
 import { createError, getRequestHeader } from 'h3';
-import type { $Fetch } from 'ofetch';
 
-export function createApiClient(event: H3Event): $Fetch {
+// Loose return type. Nuxt's `$fetch.create()` returns a slightly different
+// signature than ofetch's `$Fetch` (it omits the `native` helper) and inferring
+// the exact branded shape gets stuck in route-aware overloads. Callers use it
+// as a plain HTTP function.
+type ApiClient = ReturnType<typeof $fetch.create>;
+
+export function createApiClient(event: H3Event): ApiClient {
   const config = useRuntimeConfig();
   const baseURL = config.public.apiUrl;
 

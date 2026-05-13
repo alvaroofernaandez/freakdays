@@ -130,7 +130,7 @@ const stats = computed(() => {
           <ExerciseCard
             v-for="exercise in workout.exercises"
             :key="exercise.id"
-            :exercise="exercise"
+            :exercise="exercise as WorkoutExercise"
             :is-active="true"
             :adding-set="
               addingSets && typeof addingSets.has === 'function'
@@ -157,7 +157,7 @@ const stats = computed(() => {
                 :model-value="newExerciseName"
                 placeholder="Nombre del ejercicio"
                 class="flex-1 h-11 sm:h-12 text-base"
-                @update:model-value="emit('update:newExerciseName', $event)"
+                @update:model-value="emit('update:newExerciseName', String($event))"
                 @keyup.enter="handleAddExercise"
               />
               <Button

@@ -72,10 +72,8 @@ jobs:
       fail-fast: false
       matrix:
         package: [freak-days-api, freak-days]
-    # NOTE: Web typecheck has pre-existing TS errors (Vue overloads in
-    # RegisterForm, CreatePartyModal, etc.). Step is non-blocking until
-    # that debt is resolved.
-    continue-on-error: ${{ matrix.package == 'freak-days' }}
+    # Both packages now typecheck clean — the pre-existing Vue overload
+    # debt was cleared in this PR. Gating from here on.
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

@@ -144,7 +144,7 @@ export function useWorkoutsPage() {
   async function updateSet(
     exerciseId: string,
     setId: string,
-    updates: { reps?: number; weight_kg?: number },
+    updates: { reps?: number | string | null; weight_kg?: number | string | null },
   ) {
     if (!currentWorkout.value || !setId || setId.length < 10) return;
 
@@ -154,8 +154,14 @@ export function useWorkoutsPage() {
     const set = exercise.sets.find((s) => s.id === setId);
     if (!set) return;
 
-    set.reps = updates.reps !== undefined ? updates.reps : set.reps;
-    set.weightKg = updates.weight_kg !== undefined ? updates.weight_kg : set.weightKg;
+    set.reps =
+      updates.reps !== undefined && updates.reps !== null && updates.reps !== ''
+        ? Number(updates.reps)
+        : set.reps;
+    set.weightKg =
+      updates.weight_kg !== undefined && updates.weight_kg !== null && updates.weight_kg !== ''
+        ? Number(updates.weight_kg)
+        : set.weightKg;
 
     if (setUpdateTimeouts.has(setId)) {
       clearTimeout(setUpdateTimeouts.get(setId)!);
@@ -203,7 +209,7 @@ export function useWorkoutsPage() {
   async function saveSet(
     exerciseId: string,
     setId: string,
-    updates: { reps?: number; weight_kg?: number },
+    updates: { reps?: number | string | null; weight_kg?: number | string | null },
   ) {
     if (!currentWorkout.value || !setId || setId.length < 10) return;
 
@@ -276,7 +282,7 @@ export function useWorkoutsPage() {
   function openDeleteModal(workoutId: string) {
     const workout = workouts.value.find((w) => w.id === workoutId);
     if (workout) {
-      workoutToDelete.value = workout;
+      workoutToDelete.value = workout as Workout;
       deleteModal.open();
     }
   }
@@ -284,7 +290,7 @@ export function useWorkoutsPage() {
   function viewWorkoutDetail(workoutId: string) {
     const workout = workouts.value.find((w) => w.id === workoutId);
     if (workout) {
-      workoutToView.value = workout;
+      workoutToView.value = workout as Workout;
       detailModal.open();
     }
   }

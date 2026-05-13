@@ -48,7 +48,7 @@ onMounted(() => {
       >
         <AvatarImage
           v-if="avatarPreview || profile.avatarUrl"
-          :src="avatarPreview || profile.avatarUrl"
+          :src="(avatarPreview || profile.avatarUrl) ?? ''"
           :alt="profile.displayName || profile.username"
           class="object-cover"
         />
@@ -104,7 +104,7 @@ onMounted(() => {
         accept="image/*"
         class="hidden"
         @change="emit('avatarUpload', $event)"
-      />
+      >
     </div>
 
     <div class="flex-1 text-center sm:text-left space-y-2 min-w-0">

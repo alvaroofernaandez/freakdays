@@ -55,7 +55,7 @@ function togglePasswordVisibility() {
           placeholder="tu@email.com"
           class="w-full pl-11 h-12 bg-background/50 border-border/50 focus:border-primary transition-all"
           required
-          @update:model-value="emit('update:email', $event)"
+          @update:model-value="emit('update:email', String($event))"
         />
       </div>
     </div>
@@ -73,7 +73,7 @@ function togglePasswordVisibility() {
           placeholder="Mínimo 6 caracteres"
           class="w-full pl-11 pr-12 h-12 bg-background/50 border-border/50 focus:border-primary transition-all"
           required
-          @update:model-value="emit('update:password', $event)"
+          @update:model-value="emit('update:password', String($event))"
         />
         <button
           type="button"
@@ -109,7 +109,7 @@ function togglePasswordVisibility() {
             confirmPassword && !passwordsMatch ? 'border-destructive focus:border-destructive' : ''
           "
           required
-          @update:model-value="emit('update:confirmPassword', $event)"
+          @update:model-value="emit('update:confirmPassword', String($event))"
         />
         <Check
           v-if="confirmPassword && passwordsMatch"
