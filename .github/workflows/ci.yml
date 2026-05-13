@@ -171,3 +171,50 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter ${{ matrix.package }} build
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    needs: install
+    # Smoke E2E suite. Currently a single redirect-chain assertion; non-
+    # blocking while the surface stabilises and we wire a Clerk test
+    # session into CI secrets (auth happy path will graduate to gating
+    # once that secret exists).
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+      - run: pnpm --filter freak-days e2e:install
+      - name: Build web (preview server needs the .output)
+        run: pnpm --filter freak-days build
+      - run: pnpm --filter freak-days e2e
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: packages/web/playwright-report
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: packages/web/test-results
+          retention-days: 7
+          if-no-files-found: ignore
