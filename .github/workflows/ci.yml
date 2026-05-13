@@ -86,6 +86,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Force regeneration scoped to this matrix package. Both packages share
+      # @prisma/client in node_modules but ship divergent schemas, so the
+      # parallel postinstall race during 'pnpm install -r' may leave the
+      # client mid-state. Regenerating here pins the client to the package
+      # we're about to typecheck.
+      - run: pnpm --filter ${{ matrix.package }} prisma:generate
       - run: pnpm --filter ${{ matrix.package }} typecheck
 
   test:
@@ -109,6 +115,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter ${{ matrix.package }} prisma:generate
       - run: pnpm --filter ${{ matrix.package }} test
 
   build:
@@ -137,4 +144,5 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter ${{ matrix.package }} prisma:generate
       - run: pnpm --filter ${{ matrix.package }} build
