@@ -9,7 +9,13 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
-  modules: ["shadcn-nuxt", "@pinia/nuxt", "@nuxtjs/supabase"],
+  modules: ["shadcn-nuxt", "@pinia/nuxt", "@nuxtjs/supabase", "@nuxt/eslint"],
+
+  eslint: {
+    config: {
+      stylistic: false,
+    },
+  },
 
   shadcn: {
     prefix: "",
