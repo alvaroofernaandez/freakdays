@@ -23,10 +23,7 @@ export class PartyController {
   constructor(private readonly partyService: PartyService) {}
 
   @Get()
-  listMyParties(
-    @Req() request: Request,
-    @CurrentOrg() orgId: string | null,
-  ): Promise<PartyView[]> {
+  listMyParties(@Req() request: Request, @CurrentOrg() orgId: string | null): Promise<PartyView[]> {
     const user = this.getRequestUser(request);
 
     return this.partyService.listForCurrentUser(user.sub, orgId);
@@ -73,11 +70,7 @@ export class PartyController {
   ): Promise<{ inviteCode: string }> {
     const user = this.getRequestUser(request);
 
-    return this.partyService.regenerateInviteCode(
-      user.sub,
-      orgId,
-      partyId,
-    );
+    return this.partyService.regenerateInviteCode(user.sub, orgId, partyId);
   }
 
   @Delete(':partyId')
@@ -100,12 +93,7 @@ export class PartyController {
   ): Promise<{ success: true }> {
     const user = this.getRequestUser(request);
 
-    return this.partyService.removeMember(
-      user.sub,
-      orgId,
-      partyId,
-      memberUserId,
-    );
+    return this.partyService.removeMember(user.sub, orgId, partyId, memberUserId);
   }
 
   @Get(':partyId')

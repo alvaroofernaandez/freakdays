@@ -1,5 +1,5 @@
-import { ref } from "vue";
-import type { PartySharedList, SharedListType } from "~~/domain/types/party";
+import { ref } from 'vue';
+import type { PartySharedList, SharedListType } from '~~/domain/types/party';
 
 interface ApiPartyListItem {
   id: string;
@@ -85,7 +85,7 @@ export function usePartyLists(partyId: string) {
       listId: item.listId,
       addedBy: item.addedBy,
       title: item.title,
-      status: (item.status as any) || "plan_to_watch",
+      status: (item.status as any) || 'plan_to_watch',
       currentEpisode: item.currentEpisode ?? 0,
       totalEpisodes: item.totalEpisodes ?? null,
       score: item.score ?? null,
@@ -106,7 +106,7 @@ export function usePartyLists(partyId: string) {
       partyId: list.partyId,
       name: list.name,
       listType: list.listType,
-      content: (list.content as PartySharedList["content"]) ?? null,
+      content: (list.content as PartySharedList['content']) ?? null,
       createdBy: list.createdBy,
       createdAt: new Date(list.createdAt),
       creator: list.creator,
@@ -126,20 +126,17 @@ export function usePartyLists(partyId: string) {
     try {
       const idToUse = overridePartyId || partyId;
       if (!idToUse) {
-        throw new Error("Party ID is required");
+        throw new Error('Party ID is required');
       }
 
-      const data = await apiClient.get<ApiPartyList[]>(
-        `/v1/party/${idToUse}/lists`,
-        {
-          requireOrg: true,
-        }
-      );
+      const data = await apiClient.get<ApiPartyList[]>(`/v1/party/${idToUse}/lists`, {
+        requireOrg: true,
+      });
 
       lists.value = data.map(mapApiList);
     } catch (e: any) {
-      error.value = e.message || e.data?.message || "Error fetching lists";
-      console.error("Error fetching party lists:", e);
+      error.value = e.message || e.data?.message || 'Error fetching lists';
+      console.error('Error fetching party lists:', e);
     } finally {
       loading.value = false;
     }
@@ -158,14 +155,14 @@ export function usePartyLists(partyId: string) {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       const newList = mapApiList(created);
       lists.value.unshift(newList);
       return newList;
     } catch (e: any) {
-      error.value = e.message || e.data?.message || "Error creating list";
+      error.value = e.message || e.data?.message || 'Error creating list';
       throw e;
     } finally {
       loading.value = false;
@@ -188,18 +185,14 @@ export function usePartyLists(partyId: string) {
 
   async function updateList(
     listId: string,
-    payload: PartyListUpdatePayload
+    payload: PartyListUpdatePayload,
   ): Promise<PartySharedList> {
     await refreshAuthContext();
 
     try {
-      const updated = await apiClient.put<ApiPartyList>(
-        `/v1/party/lists/${listId}`,
-        payload,
-        {
-          requireOrg: true,
-        }
-      );
+      const updated = await apiClient.put<ApiPartyList>(`/v1/party/lists/${listId}`, payload, {
+        requireOrg: true,
+      });
 
       return mapApiList(updated);
     } catch (e) {
@@ -216,7 +209,7 @@ export function usePartyLists(partyId: string) {
         payload,
         {
           requireOrg: true,
-        }
+        },
       );
 
       return mapApiItem(created);
@@ -229,12 +222,9 @@ export function usePartyLists(partyId: string) {
     await refreshAuthContext();
 
     try {
-      await apiClient.del<{ success: true }>(
-        `/v1/party/lists/${listId}/items/${itemId}`,
-        {
-          requireOrg: true,
-        }
-      );
+      await apiClient.del<{ success: true }>(`/v1/party/lists/${listId}/items/${itemId}`, {
+        requireOrg: true,
+      });
     } catch (e) {
       throw e;
     }

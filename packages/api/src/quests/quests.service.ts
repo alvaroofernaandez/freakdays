@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   Prisma,
   Quest,
@@ -215,10 +211,7 @@ export class QuestsService {
       Object.prototype.hasOwnProperty.call(input, 'dueDate') ||
       Object.prototype.hasOwnProperty.call(input, 'due_date')
     ) {
-      data.dueDate = this.normalizeOptionalDate(
-        input.dueDate ?? input.due_date,
-        'dueDate',
-      );
+      data.dueDate = this.normalizeOptionalDate(input.dueDate ?? input.due_date, 'dueDate');
     }
 
     if (
@@ -326,10 +319,7 @@ export class QuestsService {
     return { expEarned };
   }
 
-  async listTodayCompletions(
-    clerkUserId: string,
-    orgId: string | null,
-  ): Promise<string[]> {
+  async listTodayCompletions(clerkUserId: string, orgId: string | null): Promise<string[]> {
     const { currentUser, organization } = await this.resolveIdentityInOrganization(
       clerkUserId,
       orgId,

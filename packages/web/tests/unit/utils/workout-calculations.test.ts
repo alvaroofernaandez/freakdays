@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { calculateWorkoutStats } from '../../../app/utils/workout-calculations'
-import type { Workout } from '../../../app/composables/useWorkouts'
+import { describe, it, expect } from 'vitest';
+import { calculateWorkoutStats } from '../../../app/utils/workout-calculations';
+import type { Workout } from '../../../app/composables/useWorkouts';
 
 describe('workout-calculations', () => {
   describe('calculateWorkoutStats', () => {
@@ -13,16 +13,16 @@ describe('workout-calculations', () => {
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.totalExercises).toBe(0)
-      expect(stats.totalSets).toBe(0)
-      expect(stats.totalReps).toBe(0)
-      expect(stats.totalVolume).toBe(0)
-      expect(stats.avgWeight).toBe(0)
-    })
+      expect(stats.totalExercises).toBe(0);
+      expect(stats.totalSets).toBe(0);
+      expect(stats.totalReps).toBe(0);
+      expect(stats.totalVolume).toBe(0);
+      expect(stats.avgWeight).toBe(0);
+    });
 
     it('should calculate total exercises', () => {
       const workout: Workout = {
@@ -44,12 +44,12 @@ describe('workout-calculations', () => {
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.totalExercises).toBe(2)
-    })
+      expect(stats.totalExercises).toBe(2);
+    });
 
     it('should calculate total sets', () => {
       const workout: Workout = {
@@ -68,20 +68,18 @@ describe('workout-calculations', () => {
           {
             id: '2',
             name: 'Exercise 2',
-            sets: [
-              { id: '3', reps: 8, weightKg: 30 },
-            ],
+            sets: [{ id: '3', reps: 8, weightKg: 30 }],
           },
         ],
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.totalSets).toBe(3)
-    })
+      expect(stats.totalSets).toBe(3);
+    });
 
     it('should calculate total reps', () => {
       const workout: Workout = {
@@ -101,12 +99,12 @@ describe('workout-calculations', () => {
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.totalReps).toBe(22)
-    })
+      expect(stats.totalReps).toBe(22);
+    });
 
     it('should calculate total volume', () => {
       const workout: Workout = {
@@ -126,12 +124,12 @@ describe('workout-calculations', () => {
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.totalVolume).toBe(450)
-    })
+      expect(stats.totalVolume).toBe(450);
+    });
 
     it('should calculate average weight', () => {
       const workout: Workout = {
@@ -151,12 +149,12 @@ describe('workout-calculations', () => {
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.avgWeight).toBe(25)
-    })
+      expect(stats.avgWeight).toBe(25);
+    });
 
     it('should handle null reps and weight', () => {
       const workout: Workout = {
@@ -176,13 +174,13 @@ describe('workout-calculations', () => {
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.totalReps).toBe(10)
-      expect(stats.totalVolume).toBe(200)
-    })
+      expect(stats.totalReps).toBe(10);
+      expect(stats.totalVolume).toBe(200);
+    });
 
     it('should round average weight to one decimal', () => {
       const workout: Workout = {
@@ -202,12 +200,11 @@ describe('workout-calculations', () => {
         status: 'completed',
         createdAt: new Date(),
         updatedAt: new Date(),
-      }
+      };
 
-      const stats = calculateWorkoutStats(workout)
+      const stats = calculateWorkoutStats(workout);
 
-      expect(stats.avgWeight).toBe(25.5)
-    })
-  })
-})
-
+      expect(stats.avgWeight).toBe(25.5);
+    });
+  });
+});

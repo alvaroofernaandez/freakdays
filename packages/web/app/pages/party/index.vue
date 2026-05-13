@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import CreatePartyModal from '@/components/party/CreatePartyModal.vue'
-import DeletePartyConfirmModal from '@/components/party/DeletePartyConfirmModal.vue'
-import JoinPartyModal from '@/components/party/JoinPartyModal.vue'
-import PartyCard from '@/components/party/PartyCard.vue'
-import PartyCardSkeleton from '@/components/party/PartyCardSkeleton.vue'
-import PartyDetailsModal from '@/components/party/PartyDetailsModal.vue'
-import PartyEmptyState from '@/components/party/PartyEmptyState.vue'
-import RemoveMemberConfirmModal from '@/components/party/RemoveMemberConfirmModal.vue'
-import { Button } from '@/components/ui/button'
-import { usePartyPage } from '@/composables/usePartyPage'
-import { Plus, UserPlus, Users } from 'lucide-vue-next'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '~~/stores/auth'
+import CreatePartyModal from '@/components/party/CreatePartyModal.vue';
+import DeletePartyConfirmModal from '@/components/party/DeletePartyConfirmModal.vue';
+import JoinPartyModal from '@/components/party/JoinPartyModal.vue';
+import PartyCard from '@/components/party/PartyCard.vue';
+import PartyCardSkeleton from '@/components/party/PartyCardSkeleton.vue';
+import PartyDetailsModal from '@/components/party/PartyDetailsModal.vue';
+import PartyEmptyState from '@/components/party/PartyEmptyState.vue';
+import RemoveMemberConfirmModal from '@/components/party/RemoveMemberConfirmModal.vue';
+import { Button } from '@/components/ui/button';
+import { usePartyPage } from '@/composables/usePartyPage';
+import { Plus, UserPlus, Users } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '~~/stores/auth';
 
-const authStore = useAuthStore()
-const router = useRouter()
+const authStore = useAuthStore();
+const router = useRouter();
 
 const {
   parties,
@@ -45,51 +45,54 @@ const {
   canManageMembers,
   getMemberRoleLabel,
   initialize,
-} = usePartyPage()
+} = usePartyPage();
 
-const hasParties = computed(() => !loading.value && parties.value.length > 0)
-const isEmpty = computed(() => !loading.value && parties.value.length === 0)
+const hasParties = computed(() => !loading.value && parties.value.length > 0);
+const isEmpty = computed(() => !loading.value && parties.value.length === 0);
 
 onMounted(() => {
-  initialize()
-})
+  initialize();
+});
 
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat('es-ES', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  }).format(date)
+  }).format(date);
 }
 
 function handleCreateParty() {
-  createParty()
+  createParty();
 }
 
 function handleJoinParty() {
-  joinParty()
+  joinParty();
 }
 
 function handleDeleteParty(partyId: string) {
-  deleteParty(partyId)
+  deleteParty(partyId);
 }
 
 function handleRemoveMember(partyId: string, memberId: string) {
-  removeMember(partyId, memberId)
+  removeMember(partyId, memberId);
 }
 
 function handleRegenerateCode(partyId: string) {
-  regenerateInviteCode(partyId)
+  regenerateInviteCode(partyId);
 }
 
 function handleEnterParty(partyId: string) {
-  router.push(`/party/${partyId}`)
+  router.push(`/party/${partyId}`);
 }
 </script>
 
 <template>
   <div class="space-y-4 sm:space-y-6 px-1 sm:px-0" role="main">
-    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4" role="banner">
+    <header
+      class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+      role="banner"
+    >
       <div>
         <h1 class="text-lg sm:text-xl md:text-2xl font-bold flex items-center gap-2">
           <Users class="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" aria-hidden="true" />
@@ -100,14 +103,23 @@ function handleEnterParty(partyId: string) {
         </p>
       </div>
       <div class="flex gap-2 sm:gap-2" role="group" aria-label="Acciones principales">
-        <Button variant="outline" size="sm" class="flex-1 sm:flex-none min-h-[44px] sm:min-h-0"
-          @click="joinModal.open()" aria-label="Unirse a una party con código de invitación">
+        <Button
+          variant="outline"
+          size="sm"
+          class="flex-1 sm:flex-none min-h-[44px] sm:min-h-0"
+          @click="joinModal.open()"
+          aria-label="Unirse a una party con código de invitación"
+        >
           <UserPlus class="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span class="hidden sm:inline">Unirse</span>
           <span class="sm:hidden">Unirse</span>
         </Button>
-        <Button size="sm" class="flex-1 sm:flex-none glow-primary min-h-[44px] sm:min-h-0" @click="createModal.open()"
-          aria-label="Crear nueva party">
+        <Button
+          size="sm"
+          class="flex-1 sm:flex-none glow-primary min-h-[44px] sm:min-h-0"
+          @click="createModal.open()"
+          aria-label="Crear nueva party"
+        >
           <Plus class="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span class="hidden sm:inline">Crear Party</span>
           <span class="sm:hidden">Crear</span>
@@ -115,8 +127,16 @@ function handleEnterParty(partyId: string) {
       </div>
     </header>
 
-    <section v-if="loading" class="space-y-3 sm:space-y-4" role="status" aria-live="polite" aria-label="Cargando parties">
-      <h2 class="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
+    <section
+      v-if="loading"
+      class="space-y-3 sm:space-y-4"
+      role="status"
+      aria-live="polite"
+      aria-label="Cargando parties"
+    >
+      <h2
+        class="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider px-1"
+      >
         Cargando...
       </h2>
       <div class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" role="list">
@@ -127,17 +147,34 @@ function handleEnterParty(partyId: string) {
     </section>
 
     <section v-else-if="hasParties" class="space-y-3 sm:space-y-4">
-      <h2 class="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
+      <h2
+        class="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider px-1"
+      >
         Tus Parties ({{ parties.length }})
       </h2>
 
-      <div class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" role="list" aria-label="Lista de parties">
+      <div
+        class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        role="list"
+        aria-label="Lista de parties"
+      >
         <TransitionGroup name="list" tag="div" class="contents">
-          <div v-for="(party, index) in parties" :key="party.id" role="listitem"
-            :style="{ animationDelay: `${index * 50}ms` }">
-            <PartyCard :party="party" :is-owner="isOwner(party)" :copied-code="copiedCode"
-              :is-submitting="isSubmitting" @copy-code="copyInviteCode" @view-details="openDetails"
-              @leave="leaveParty" @enter="handleEnterParty" />
+          <div
+            v-for="(party, index) in parties"
+            :key="party.id"
+            role="listitem"
+            :style="{ animationDelay: `${index * 50}ms` }"
+          >
+            <PartyCard
+              :party="party"
+              :is-owner="isOwner(party)"
+              :copied-code="copiedCode"
+              :is-submitting="isSubmitting"
+              @copy-code="copyInviteCode"
+              @view-details="openDetails"
+              @leave="leaveParty"
+              @enter="handleEnterParty"
+            />
           </div>
         </TransitionGroup>
       </div>
@@ -147,28 +184,60 @@ function handleEnterParty(partyId: string) {
       <PartyEmptyState v-if="isEmpty" @create="createModal.open()" @join="joinModal.open()" />
     </Transition>
 
-    <CreatePartyModal :open="createModal.isOpen.value" v-model:name="newParty.name"
-      v-model:description="newParty.description" :is-submitting="isSubmitting" @close="createModal.close()"
-      @submit="handleCreateParty" />
+    <CreatePartyModal
+      :open="createModal.isOpen.value"
+      v-model:name="newParty.name"
+      v-model:description="newParty.description"
+      :is-submitting="isSubmitting"
+      @close="createModal.close()"
+      @submit="handleCreateParty"
+    />
 
-    <JoinPartyModal :open="joinModal.isOpen.value" v-model:code="joinCode" :is-submitting="isSubmitting"
-      @close="joinModal.close()" @submit="handleJoinParty" />
+    <JoinPartyModal
+      :open="joinModal.isOpen.value"
+      v-model:code="joinCode"
+      :is-submitting="isSubmitting"
+      @close="joinModal.close()"
+      @submit="handleJoinParty"
+    />
 
-    <PartyDetailsModal :open="detailsModal.isOpen.value" :party="selectedParty" :member-to-remove="memberToRemove"
-      :copied-code="copiedCode" :is-owner="selectedParty ? isOwner(selectedParty) : false"
-      :can-manage-members="selectedParty ? canManageMembers(selectedParty) : false" :is-submitting="isSubmitting"
-      :is-regenerating-code="isRegeneratingCode" :current-user-id="authStore.userId"
-      :get-member-role-label="(role: string) => getMemberRoleLabel(role as 'owner' | 'admin' | 'member')"
-      :format-date="formatDate" @close="detailsModal.close()" @copy-code="copyInviteCode"
-      @regenerate-code="handleRegenerateCode" @remove-member="openRemoveMemberConfirm"
-      @delete-party="openDeleteConfirm" />
+    <PartyDetailsModal
+      :open="detailsModal.isOpen.value"
+      :party="selectedParty"
+      :member-to-remove="memberToRemove"
+      :copied-code="copiedCode"
+      :is-owner="selectedParty ? isOwner(selectedParty) : false"
+      :can-manage-members="selectedParty ? canManageMembers(selectedParty) : false"
+      :is-submitting="isSubmitting"
+      :is-regenerating-code="isRegeneratingCode"
+      :current-user-id="authStore.userId"
+      :get-member-role-label="
+        (role: string) => getMemberRoleLabel(role as 'owner' | 'admin' | 'member')
+      "
+      :format-date="formatDate"
+      @close="detailsModal.close()"
+      @copy-code="copyInviteCode"
+      @regenerate-code="handleRegenerateCode"
+      @remove-member="openRemoveMemberConfirm"
+      @delete-party="openDeleteConfirm"
+    />
 
-    <DeletePartyConfirmModal :open="deleteConfirmModal.isOpen.value" :party="selectedParty as any"
-      :is-submitting="isSubmitting" @close="deleteConfirmModal.close()" @confirm="handleDeleteParty" />
+    <DeletePartyConfirmModal
+      :open="deleteConfirmModal.isOpen.value"
+      :party="selectedParty as any"
+      :is-submitting="isSubmitting"
+      @close="deleteConfirmModal.close()"
+      @confirm="handleDeleteParty"
+    />
 
-    <RemoveMemberConfirmModal :open="removeMemberModal.isOpen.value" :party="selectedParty as any"
-      :member="memberToRemove as any" :is-submitting="isSubmitting" @close="removeMemberModal.close()"
-      @confirm="handleRemoveMember" />
+    <RemoveMemberConfirmModal
+      :open="removeMemberModal.isOpen.value"
+      :party="selectedParty as any"
+      :member="memberToRemove as any"
+      :is-submitting="isSubmitting"
+      @close="removeMemberModal.close()"
+      @confirm="handleRemoveMember"
+    />
   </div>
 </template>
 
@@ -184,7 +253,9 @@ function handleEnterParty(partyId: string) {
 }
 
 .fade-enter-active {
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
 
 .fade-enter-from {
@@ -193,7 +264,9 @@ function handleEnterParty(partyId: string) {
 }
 
 .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .fade-leave-to {
@@ -224,7 +297,6 @@ function handleEnterParty(partyId: string) {
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0px);

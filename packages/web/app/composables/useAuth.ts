@@ -1,9 +1,9 @@
-import { useAuthStore } from "~~/stores/auth";
-import { useModulesStore } from "~~/stores/modules";
-import { useOrganizationContext } from "@/composables/useOrganizationContext";
+import { useAuthStore } from '~~/stores/auth';
+import { useModulesStore } from '~~/stores/modules';
+import { useOrganizationContext } from '@/composables/useOrganizationContext';
 
-type OAuthProvider = "google" | "github" | "discord";
-type ClerkOAuthStrategy = "oauth_google" | "oauth_github" | "oauth_discord";
+type OAuthProvider = 'google' | 'github' | 'discord';
+type ClerkOAuthStrategy = 'oauth_google' | 'oauth_github' | 'oauth_discord';
 
 interface ClerkOAuthRedirectOptions {
   strategy: ClerkOAuthStrategy;
@@ -15,15 +15,15 @@ interface ClerkOAuthBridge {
 }
 
 const CLERK_OAUTH_STRATEGY_MAP: Record<OAuthProvider, ClerkOAuthStrategy> = {
-  google: "oauth_google",
-  github: "oauth_github",
-  discord: "oauth_discord",
+  google: 'oauth_google',
+  github: 'oauth_github',
+  discord: 'oauth_discord',
 };
 
 const OAUTH_PROVIDER_LABELS: Record<OAuthProvider, string> = {
-  google: "Google",
-  github: "GitHub",
-  discord: "Discord",
+  google: 'Google',
+  github: 'GitHub',
+  discord: 'Discord',
 };
 
 export function useAuth() {
@@ -32,8 +32,7 @@ export function useAuth() {
   const modulesStore = useModulesStore();
   const organizationContext = useOrganizationContext();
   const router = useRouter();
-  const LEGACY_AUTH_MESSAGE =
-    "Auth legacy email/password fue removido. Usá Clerk para continuar.";
+  const LEGACY_AUTH_MESSAGE = 'Auth legacy email/password fue removido. Usá Clerk para continuar.';
 
   async function initialize() {
     authStore.setLoading(true);
@@ -41,7 +40,7 @@ export function useAuth() {
       await authContext.refresh();
       authStore.setSession(null);
     } catch (err) {
-      authStore.setError("Error initializing auth");
+      authStore.setError('Error initializing auth');
     } finally {
       authStore.setLoading(false);
     }
@@ -50,9 +49,7 @@ export function useAuth() {
   async function ensureProfileExists(userId: string, email: string) {
     void userId;
     void email;
-    throw new Error(
-      "ensureProfileExists legacy no soportado en runtime Clerk-only."
-    );
+    throw new Error('ensureProfileExists legacy no soportado en runtime Clerk-only.');
   }
 
   async function signUp(email: string, password: string) {
@@ -65,7 +62,7 @@ export function useAuth() {
       authStore.setError(LEGACY_AUTH_MESSAGE);
       return { success: false, error: LEGACY_AUTH_MESSAGE };
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error signing up";
+      const message = err instanceof Error ? err.message : 'Error signing up';
       authStore.setError(message);
       return { success: false, error: message };
     } finally {
@@ -83,7 +80,7 @@ export function useAuth() {
       authStore.setError(LEGACY_AUTH_MESSAGE);
       return { success: false, error: LEGACY_AUTH_MESSAGE };
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error signing in";
+      const message = err instanceof Error ? err.message : 'Error signing in';
       authStore.setError(message);
       return { success: false, error: message };
     } finally {
@@ -98,9 +95,9 @@ export function useAuth() {
       modulesStore.reset();
       authContext.clear();
       organizationContext.clearActiveOrgId();
-      router.push("/login");
+      router.push('/login');
     } catch (err) {
-      authStore.setError("Error signing out");
+      authStore.setError('Error signing out');
     } finally {
       authStore.setLoading(false);
     }
@@ -109,19 +106,19 @@ export function useAuth() {
   async function createProfile(userId: string, email: string) {
     void userId;
     void email;
-    throw new Error("createProfile legacy no soportado en runtime Clerk-only.");
+    throw new Error('createProfile legacy no soportado en runtime Clerk-only.');
   }
 
   async function signInWithGoogle() {
-    return signInWithOAuthProvider("google");
+    return signInWithOAuthProvider('google');
   }
 
   async function signInWithGitHub() {
-    return signInWithOAuthProvider("github");
+    return signInWithOAuthProvider('github');
   }
 
   async function signInWithDiscord() {
-    return signInWithOAuthProvider("discord");
+    return signInWithOAuthProvider('discord');
   }
 
   async function attemptClerkOAuthBridge(provider: OAuthProvider): Promise<boolean> {
@@ -131,13 +128,13 @@ export function useAuth() {
 
     const maybeClerk = window.Clerk;
 
-    if (!maybeClerk || typeof maybeClerk !== "object") {
+    if (!maybeClerk || typeof maybeClerk !== 'object') {
       return false;
     }
 
     const clerk = maybeClerk as ClerkOAuthBridge;
 
-    if (typeof clerk.redirectToSignIn !== "function") {
+    if (typeof clerk.redirectToSignIn !== 'function') {
       return false;
     }
 
@@ -164,7 +161,7 @@ export function useAuth() {
 
       if (!clerkBridgeHandled) {
         throw new Error(
-          "Clerk bridge no disponible. Configurá NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY y verificá inicialización de Clerk para OAuth."
+          'Clerk bridge no disponible. Configurá NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY y verificá inicialización de Clerk para OAuth.',
         );
       }
     } catch (err: unknown) {

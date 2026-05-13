@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { setActivePinia, createPinia } from 'pinia'
-import ProfilePage from '../../../app/pages/profile.vue'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mount } from '@vue/test-utils';
+import { setActivePinia, createPinia } from 'pinia';
+import ProfilePage from '../../../app/pages/profile.vue';
 
 vi.mock('../../../app/composables/useProfilePage', () => ({
   useProfilePage: () => ({
@@ -40,18 +40,18 @@ vi.mock('../../../app/composables/useProfilePage', () => ({
     handleDisableAll: vi.fn(),
     initialize: vi.fn(),
   }),
-}))
+}));
 
 vi.mock('../../../stores/modules', () => ({
   useModulesStore: () => ({
     enabledModules: [],
   }),
-}))
+}));
 
 describe('profile.vue', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
-  })
+    setActivePinia(createPinia());
+  });
 
   it('should render profile page', () => {
     const wrapper = mount(ProfilePage, {
@@ -76,13 +76,13 @@ describe('profile.vue', () => {
           NuxtLink: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.text()).toContain('Mi Perfil')
-  })
+    expect(wrapper.text()).toContain('Mi Perfil');
+  });
 
   it('should render page with initialize function', () => {
-    const initialize = vi.fn()
+    const initialize = vi.fn();
     vi.doMock('../../../app/composables/useProfilePage', () => ({
       useProfilePage: () => ({
         profile: { value: null },
@@ -120,7 +120,7 @@ describe('profile.vue', () => {
         handleDisableAll: vi.fn(),
         initialize,
       }),
-    }))
+    }));
 
     const wrapper = mount(ProfilePage, {
       global: {
@@ -144,10 +144,10 @@ describe('profile.vue', () => {
           NuxtLink: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
+    expect(wrapper.exists()).toBe(true);
+  });
 
   it('should show loading skeleton when loading', () => {
     const wrapper = mount(ProfilePage, {
@@ -172,10 +172,10 @@ describe('profile.vue', () => {
           NuxtLink: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
+    expect(wrapper.exists()).toBe(true);
+  });
 
   it('should show edit form when editing', () => {
     vi.doMock('../../../app/composables/useProfilePage', () => ({
@@ -184,7 +184,7 @@ describe('profile.vue', () => {
         profile: { value: { id: '1', username: 'test' } },
         loading: { value: false },
       }),
-    }))
+    }));
 
     const wrapper = mount(ProfilePage, {
       global: {
@@ -208,9 +208,8 @@ describe('profile.vue', () => {
           NuxtLink: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
-})
-
+    expect(wrapper.exists()).toBe(true);
+  });
+});

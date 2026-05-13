@@ -1,5 +1,5 @@
-import type { ModuleId } from "~~/domain/types";
-import { useAuthStore } from "~~/stores/auth";
+import type { ModuleId } from '~~/domain/types';
+import { useAuthStore } from '~~/stores/auth';
 
 export interface UserModulePreference {
   module_id: ModuleId;
@@ -43,7 +43,7 @@ export function useUserModules() {
     }
 
     try {
-      const modules = await apiClient.get<ApiUserModulePreference[]>("/v1/modules/me", {
+      const modules = await apiClient.get<ApiUserModulePreference[]>('/v1/modules/me', {
         requireOrg: true,
       });
 
@@ -53,9 +53,7 @@ export function useUserModules() {
     }
   }
 
-  async function saveUserModules(
-    modules: UserModulePreference[]
-  ): Promise<UserModulePreference[]> {
+  async function saveUserModules(modules: UserModulePreference[]): Promise<UserModulePreference[]> {
     await refreshAuthContext();
 
     if (!authStore.userId && !authContext.getAccessToken()) {
@@ -64,7 +62,7 @@ export function useUserModules() {
 
     try {
       const response = await apiClient.put<ApiSaveUserModulesResponse>(
-        "/v1/modules/me",
+        '/v1/modules/me',
         {
           modules: modules.map((module) => ({
             moduleId: module.module_id,
@@ -73,7 +71,7 @@ export function useUserModules() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       return mapApiToLegacyShape(response.modules);

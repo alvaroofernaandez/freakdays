@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -45,10 +41,7 @@ export class CalendarService {
     private readonly identityContext: IdentityContextService,
   ) {}
 
-  async listReleases(
-    clerkUserId: string,
-    orgId: string | null,
-  ): Promise<CalendarReleaseView[]> {
+  async listReleases(clerkUserId: string, orgId: string | null): Promise<CalendarReleaseView[]> {
     const { currentUser, organization } = await this.resolveIdentityInOrganization(
       clerkUserId,
       orgId,
@@ -237,9 +230,7 @@ export class CalendarService {
     }
 
     if (normalized.length > 120) {
-      throw new BadRequestException(
-        'El título del evento no puede superar 120 caracteres',
-      );
+      throw new BadRequestException('El título del evento no puede superar 120 caracteres');
     }
 
     return normalized;

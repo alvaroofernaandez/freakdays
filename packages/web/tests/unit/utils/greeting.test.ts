@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getGreeting } from "../../../app/utils/greeting";
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getGreeting } from '../../../app/utils/greeting';
 
-describe("greeting", () => {
+describe('greeting', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -10,7 +10,7 @@ describe("greeting", () => {
     vi.useRealTimers();
   });
 
-  describe("getGreeting", () => {
+  describe('getGreeting', () => {
     it('should return "¡Buenos días" for morning hours', () => {
       const morningHours = [0, 6, 11];
 
@@ -18,7 +18,7 @@ describe("greeting", () => {
         const date = new Date(2024, 0, 15, hour, 0, 0);
         vi.setSystemTime(date);
 
-        expect(getGreeting()).toBe("¡Buenos días");
+        expect(getGreeting()).toBe('¡Buenos días');
       });
     });
 
@@ -29,7 +29,7 @@ describe("greeting", () => {
         const date = new Date(2024, 0, 15, hour, 0, 0);
         vi.setSystemTime(date);
 
-        expect(getGreeting()).toBe("¡Buenas tardes");
+        expect(getGreeting()).toBe('¡Buenas tardes');
       });
     });
 
@@ -40,7 +40,7 @@ describe("greeting", () => {
         const date = new Date(2024, 0, 15, hour, 0, 0);
         vi.setSystemTime(date);
 
-        expect(getGreeting()).toBe("¡Buenas noches");
+        expect(getGreeting()).toBe('¡Buenas noches');
       });
     });
 
@@ -48,28 +48,28 @@ describe("greeting", () => {
       const date = new Date(2024, 0, 15, 11, 59, 59);
       vi.setSystemTime(date);
 
-      expect(getGreeting()).toBe("¡Buenos días");
+      expect(getGreeting()).toBe('¡Buenos días');
     });
 
     it('should return "¡Buenas tardes" at 12:00', () => {
       const date = new Date(2024, 0, 15, 12, 0, 0);
       vi.setSystemTime(date);
 
-      expect(getGreeting()).toBe("¡Buenas tardes");
+      expect(getGreeting()).toBe('¡Buenas tardes');
     });
 
     it('should return "¡Buenas tardes" at 17:59', () => {
       const date = new Date(2024, 0, 15, 17, 59, 59);
       vi.setSystemTime(date);
 
-      expect(getGreeting()).toBe("¡Buenas tardes");
+      expect(getGreeting()).toBe('¡Buenas tardes');
     });
 
     it('should return "¡Buenas noches" at 18:00', () => {
       const date = new Date(2024, 0, 15, 18, 0, 0);
       vi.setSystemTime(date);
 
-      expect(getGreeting()).toBe("¡Buenas noches");
+      expect(getGreeting()).toBe('¡Buenas noches');
     });
   });
 });

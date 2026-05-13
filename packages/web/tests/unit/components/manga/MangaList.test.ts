@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import MangaList from "../../../../app/components/manga/MangaList.vue";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import MangaList from '../../../../app/components/manga/MangaList.vue';
 
-describe("MangaList.vue", () => {
-  it("should render component", () => {
+describe('MangaList.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(MangaList, {
       props: {
         mangas: [],

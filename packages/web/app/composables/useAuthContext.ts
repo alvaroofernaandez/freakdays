@@ -1,6 +1,6 @@
-import { useAuthStore } from "~~/stores/auth";
+import { useAuthStore } from '~~/stores/auth';
 
-type AuthContextSource = "none" | "auth-store" | "clerk";
+type AuthContextSource = 'none' | 'auth-store' | 'clerk';
 
 interface LegacySessionLike {
   access_token?: string;
@@ -30,7 +30,7 @@ interface ClerkLike {
 
 function getMetadataValue(
   metadata: Record<string, unknown> | undefined,
-  keys: string[]
+  keys: string[],
 ): string | null {
   if (!metadata) {
     return null;
@@ -38,7 +38,7 @@ function getMetadataValue(
 
   for (const key of keys) {
     const value = metadata[key];
-    if (typeof value === "string" && value.length > 0) {
+    if (typeof value === 'string' && value.length > 0) {
       return value;
     }
   }
@@ -51,7 +51,7 @@ function resolveOrgIdFromSession(session: LegacySessionLike | null): string | nu
     return null;
   }
 
-  const metadataKeys = ["org_id", "orgId", "organization_id", "organizationId"];
+  const metadataKeys = ['org_id', 'orgId', 'organization_id', 'organizationId'];
 
   return (
     getMetadataValue(session.user.app_metadata, metadataKeys) ??
@@ -66,7 +66,7 @@ function getClerkBridge(): ClerkLike | null {
 
   const maybeClerk = window.Clerk;
 
-  if (!maybeClerk || typeof maybeClerk !== "object") {
+  if (!maybeClerk || typeof maybeClerk !== 'object') {
     return null;
   }
 
@@ -76,13 +76,13 @@ function getClerkBridge(): ClerkLike | null {
 async function getClerkToken(session: ClerkSessionLike): Promise<string | null> {
   const tokenGetter = session.getToken;
 
-  if (typeof tokenGetter !== "function") {
+  if (typeof tokenGetter !== 'function') {
     return null;
   }
 
   const token = await tokenGetter();
 
-  if (typeof token === "string" && token.length > 0) {
+  if (typeof token === 'string' && token.length > 0) {
     return token;
   }
 
@@ -92,9 +92,9 @@ async function getClerkToken(session: ClerkSessionLike): Promise<string | null> 
 export function useAuthContext() {
   const authStore = useAuthStore();
 
-  const token = useState<string | null>("auth-context:token", () => null);
-  const orgId = useState<string | null>("auth-context:org-id", () => null);
-  const source = useState<AuthContextSource>("auth-context:source", () => "none");
+  const token = useState<string | null>('auth-context:token', () => null);
+  const orgId = useState<string | null>('auth-context:org-id', () => null);
+  const source = useState<AuthContextSource>('auth-context:source', () => 'none');
 
   function getAccessToken(): string | null {
     return token.value;
@@ -105,15 +105,15 @@ export function useAuthContext() {
   }
 
   function setContext(next: AuthContextUpdate) {
-    if (Object.prototype.hasOwnProperty.call(next, "token")) {
+    if (Object.prototype.hasOwnProperty.call(next, 'token')) {
       token.value = next.token ?? null;
     }
 
-    if (Object.prototype.hasOwnProperty.call(next, "orgId")) {
+    if (Object.prototype.hasOwnProperty.call(next, 'orgId')) {
       orgId.value = next.orgId ?? null;
     }
 
-    if (Object.prototype.hasOwnProperty.call(next, "source") && next.source) {
+    if (Object.prototype.hasOwnProperty.call(next, 'source') && next.source) {
       source.value = next.source;
     }
   }
@@ -125,7 +125,7 @@ export function useAuthContext() {
   function clear() {
     token.value = null;
     orgId.value = null;
-    source.value = "none";
+    source.value = 'none';
   }
 
   async function refresh() {
@@ -135,14 +135,13 @@ export function useAuthContext() {
     if (clerkSession) {
       try {
         const clerkToken = await getClerkToken(clerkSession);
-        const clerkOrgId =
-          clerk?.organization?.id ?? clerkSession.lastActiveOrganizationId ?? null;
+        const clerkOrgId = clerk?.organization?.id ?? clerkSession.lastActiveOrganizationId ?? null;
 
         if (clerkToken || clerkOrgId) {
           setContext({
             token: clerkToken,
             orgId: clerkOrgId ?? orgId.value,
-            source: "clerk",
+            source: 'clerk',
           });
 
           return;
@@ -159,7 +158,7 @@ export function useAuthContext() {
       setContext({
         token: legacySession?.access_token ?? null,
         orgId: legacyOrgId ?? orgId.value,
-        source: "auth-store",
+        source: 'auth-store',
       });
 
       return;
@@ -168,7 +167,7 @@ export function useAuthContext() {
     setContext({
       token: null,
       orgId: null,
-      source: "none",
+      source: 'none',
     });
   }
 

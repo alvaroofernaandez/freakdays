@@ -109,6 +109,7 @@ Antes de contribuir, asegúrate de:
 ## 📦 Nuevas Funcionalidades
 
 ### Calendario con Drag and Drop
+
 - Calendario mensual completo con grid de días
 - Arrastrar y soltar eventos entre días
 - Mini cards compactas dentro de cada día
@@ -116,6 +117,7 @@ Antes de contribuir, asegúrate de:
 - Diseño responsive y mobile-first
 
 ### Sistema de Party Mejorado
+
 - Códigos de invitación únicos
 - Gestión completa de miembros (añadir, eliminar, roles)
 - Regeneración de códigos de invitación
@@ -123,9 +125,8 @@ Antes de contribuir, asegúrate de:
 - Diseño responsive y mobile-first
 
 ### Refactorización de Páginas
+
 - Separación de lógica en composables de página
 - Componentes modulares para register, profile, party, calendar
 - Mejora de mantenibilidad y escalabilidad
 - Composables genéricos: `usePageData`, `useModal`
-
-

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 </script>
 
 <template>
@@ -11,4 +11,3 @@ import { Skeleton } from '@/components/ui/skeleton'
     </Card>
   </div>
 </template>
-

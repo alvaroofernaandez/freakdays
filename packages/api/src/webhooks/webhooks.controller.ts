@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Controller,
-  HttpCode,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { BadRequestException, Controller, HttpCode, Post, Req } from '@nestjs/common';
 import type { Request } from 'express';
 
 import { Public } from '../auth/decorators/public.decorator';
@@ -21,9 +15,7 @@ export class WebhooksController {
   @Public()
   @Post('clerk')
   @HttpCode(200)
-  async handleClerkWebhook(
-    @Req() request: RawBodyRequest,
-  ): Promise<{ received: true }> {
+  async handleClerkWebhook(@Req() request: RawBodyRequest): Promise<{ received: true }> {
     const rawBody = request.rawBody;
     const svixId = this.readHeader(request, 'svix-id');
     const svixTimestamp = this.readHeader(request, 'svix-timestamp');

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Card, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 </script>
 
 <template>
-  <Card class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/10 via-background to-exp-legendary/10">
+  <Card
+    class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/10 via-background to-exp-legendary/10"
+  >
     <div class="absolute top-0 right-0 w-64 h-64 bg-exp-legendary/10 rounded-full blur-3xl" />
     <div class="absolute bottom-0 left-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
     <CardContent class="relative p-6">
@@ -27,4 +29,3 @@ import { Skeleton } from '@/components/ui/skeleton'
     </CardContent>
   </Card>
 </template>
-

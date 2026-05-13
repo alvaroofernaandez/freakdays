@@ -10,16 +10,16 @@ Guía paso a paso para implementar nuevas funcionalidades en FreakDays siguiendo
 
 ```typescript
 export interface EntityType {
-  id: string
-  title: string
-  description: string | null
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  title: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateEntityDTO {
-  title: string
-  description?: string
+  title: string;
+  description?: string;
 }
 ```
 
@@ -30,6 +30,7 @@ export interface CreateEntityDTO {
 Usa el template en `templates/composable.ts.template` como base.
 
 **Checklist:**
+
 - [ ] Verificar autenticación
 - [ ] Mapear datos de DB a tipos
 - [ ] Manejar errores
@@ -40,6 +41,7 @@ Usa el template en `templates/composable.ts.template` como base.
 **Ubicación**: `app/components/[module]/`
 
 **Componentes necesarios:**
+
 - `[Module]Card.vue` - Tarjeta individual
 - `[Module]List.vue` - Lista con filtros
 - `[Module]Stats.vue` - Estadísticas
@@ -56,6 +58,7 @@ Usa el template en `templates/component.vue.template` como base.
 Usa el template en `templates/page.vue.template` como base.
 
 **Checklist:**
+
 - [ ] Cargar datos con skeleton
 - [ ] Manejar estados vacíos
 - [ ] Integrar todos los componentes
@@ -107,22 +110,23 @@ Si es un módulo principal, actualizar:
 **Ubicación**: `tests/unit/[path]/[module].test.ts`
 
 ```typescript
-import { describe, it, expect } from 'vitest'
-import { functionToTest } from '~~/domain/modules/module'
+import { describe, it, expect } from 'vitest';
+import { functionToTest } from '~~/domain/modules/module';
 
 describe('Module', () => {
   describe('functionToTest', () => {
     it('should do something', () => {
-      const result = functionToTest(input)
-      expect(result).toBe(expected)
-    })
-  })
-})
+      const result = functionToTest(input);
+      expect(result).toBe(expected);
+    });
+  });
+});
 ```
 
 ### Paso 8: Documentación
 
 Actualizar:
+
 - `docs/composables.md` - Documentar nuevo composable
 - `docs/components.md` - Documentar nuevos componentes
 - `docs/pages.md` - Documentar nueva página
@@ -135,20 +139,20 @@ Actualizar:
 ```typescript
 // domain/types/books.ts
 export interface Book {
-  id: string
-  title: string
-  author: string
-  pages: number
-  readPages: number
-  status: 'reading' | 'completed' | 'want_to_read'
-  createdAt: Date
+  id: string;
+  title: string;
+  author: string;
+  pages: number;
+  readPages: number;
+  status: 'reading' | 'completed' | 'want_to_read';
+  createdAt: Date;
 }
 
 export interface CreateBookDTO {
-  title: string
-  author: string
-  pages: number
-  status?: 'reading' | 'completed' | 'want_to_read'
+  title: string;
+  author: string;
+  pages: number;
+  status?: 'reading' | 'completed' | 'want_to_read';
 }
 ```
 
@@ -156,33 +160,33 @@ export interface CreateBookDTO {
 
 ```typescript
 // app/composables/useBooks.ts
-import { useAuthStore } from "~~/stores/auth"
-import { useSupabase } from "./useSupabase"
-import type { Book, CreateBookDTO } from "~~/domain/types/books"
+import { useAuthStore } from '~~/stores/auth';
+import { useSupabase } from './useSupabase';
+import type { Book, CreateBookDTO } from '~~/domain/types/books';
 
 export function useBooks() {
-  const supabase = useSupabase()
-  const authStore = useAuthStore()
+  const supabase = useSupabase();
+  const authStore = useAuthStore();
 
   async function fetchBooks(): Promise<Book[]> {
-    if (!authStore.userId) return []
+    if (!authStore.userId) return [];
 
     const { data, error } = await supabase
-      .from("books")
-      .select("*")
-      .eq("user_id", authStore.userId)
-      .order("created_at", { ascending: false })
+      .from('books')
+      .select('*')
+      .eq('user_id', authStore.userId)
+      .order('created_at', { ascending: false });
 
-    if (error) throw error
+    if (error) throw error;
 
-    return (data ?? []).map(mapDbToBook)
+    return (data ?? []).map(mapDbToBook);
   }
 
   async function createBook(dto: CreateBookDTO): Promise<Book | null> {
-    if (!authStore.userId) return null
+    if (!authStore.userId) return null;
 
     const { data, error } = await supabase
-      .from("books")
+      .from('books')
       .insert({
         user_id: authStore.userId,
         title: dto.title,
@@ -192,11 +196,11 @@ export function useBooks() {
         status: dto.status || 'reading',
       })
       .select()
-      .single()
+      .single();
 
-    if (error) throw error
+    if (error) throw error;
 
-    return data ? mapDbToBook(data) : null
+    return data ? mapDbToBook(data) : null;
   }
 
   function mapDbToBook(data: any): Book {
@@ -208,13 +212,13 @@ export function useBooks() {
       readPages: data.read_pages,
       status: data.status,
       createdAt: new Date(data.created_at),
-    }
+    };
   }
 
   return {
     fetchBooks,
     createBook,
-  }
+  };
 }
 ```
 
@@ -223,14 +227,14 @@ export function useBooks() {
 ```vue
 <!-- app/components/books/BookCard.vue -->
 <script setup lang="ts">
-import type { Book } from "~~/domain/types/books"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import type { Book } from '~~/domain/types/books';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 interface Props {
-  book: Book
+  book: Book;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 </script>
 
 <template>
@@ -251,15 +255,15 @@ defineProps<Props>()
 ```vue
 <!-- app/pages/books.vue -->
 <script setup lang="ts">
-import { useBooks } from '@/composables/useBooks'
-import BookCard from '@/components/books/BookCard.vue'
+import { useBooks } from '@/composables/useBooks';
+import BookCard from '@/components/books/BookCard.vue';
 
-const booksApi = useBooks()
-const books = ref([])
+const booksApi = useBooks();
+const books = ref([]);
 
 onMounted(async () => {
-  books.value = await booksApi.fetchBooks()
-})
+  books.value = await booksApi.fetchBooks();
+});
 </script>
 
 <template>
@@ -306,5 +310,3 @@ Antes de considerar una implementación completa:
 ---
 
 **Última actualización**: Enero 2025
-
-

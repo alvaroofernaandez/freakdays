@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
-import { defineEventHandler, getRouterParam, readBody } from "h3";
+import { PrismaClient } from '@prisma/client';
+import { defineEventHandler, getRouterParam, readBody } from 'h3';
 
 const prisma = new PrismaClient();
 
@@ -9,7 +9,10 @@ export default defineEventHandler(async (event) => {
   try {
     // @ts-ignore - Nuxt Supabase module provides this
     const supabase = serverSupabaseClient(event);
-    const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
+    const {
+      data: { user: supabaseUser },
+      error,
+    } = await supabase.auth.getUser();
     if (!error && supabaseUser) {
       user = supabaseUser;
     }
@@ -17,14 +20,14 @@ export default defineEventHandler(async (event) => {
     // Fallback to custom helper
     user = await serverSupabaseUser(event);
   }
-  
+
   if (!user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
+    throw createError({ statusCode: 401, message: 'Unauthorized' });
   }
 
-  const partyId = getRouterParam(event, "partyId");
+  const partyId = getRouterParam(event, 'partyId');
   if (!partyId) {
-    throw createError({ statusCode: 400, message: "Party ID required" });
+    throw createError({ statusCode: 400, message: 'Party ID required' });
   }
 
   const body = await readBody(event);
@@ -33,7 +36,7 @@ export default defineEventHandler(async (event) => {
   if (!name || !listType) {
     throw createError({
       statusCode: 400,
-      message: "Name and Type are required",
+      message: 'Name and Type are required',
     });
   }
 
@@ -49,7 +52,7 @@ export default defineEventHandler(async (event) => {
   if (!membership) {
     throw createError({
       statusCode: 403,
-      message: "Not a member of this party",
+      message: 'Not a member of this party',
     });
   }
 
@@ -59,7 +62,7 @@ export default defineEventHandler(async (event) => {
       name,
       listType,
       createdBy: user.id,
-      content: listType === "tier_list" ? { tiers: [], pool: [] } : undefined,
+      content: listType === 'tier_list' ? { tiers: [], pool: [] } : undefined,
     },
   });
 

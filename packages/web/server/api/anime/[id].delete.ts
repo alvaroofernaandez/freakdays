@@ -1,12 +1,12 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
+  const id = getRouterParam(event, 'id');
 
   if (!id) {
     throw createError({
       statusCode: 400,
-      message: "Anime ID is required",
+      message: 'Anime ID is required',
     });
   }
 
@@ -20,8 +20,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error deleting anime entry",
+      message: 'Error deleting anime entry',
     });
   }
 });
-

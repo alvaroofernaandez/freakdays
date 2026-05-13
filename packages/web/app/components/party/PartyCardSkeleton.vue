@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { Card, CardHeader } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 </script>
 
 <template>
-  <Card class="group hover:border-primary/40 transition-all duration-300 animate-pulse" role="status"
-    aria-label="Cargando party" aria-live="polite">
+  <Card
+    class="group hover:border-primary/40 transition-all duration-300 animate-pulse"
+    role="status"
+    aria-label="Cargando party"
+    aria-live="polite"
+  >
     <CardHeader class="relative space-y-3 sm:space-y-4 p-4 sm:p-6">
       <div class="flex items-start gap-2 sm:gap-3">
         <Skeleton class="h-10 w-10 sm:h-12 sm:w-12 rounded-full shrink-0" />
@@ -27,8 +31,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 
       <div class="flex items-center justify-between gap-2 pt-2 sm:pt-3 border-t border-border/50">
         <div class="flex -space-x-2 flex-1 min-w-0">
-          <Skeleton v-for="i in 3" :key="i" class="h-7 w-7 sm:h-8 sm:w-8 rounded-full border-2 border-background"
-            :style="{ animationDelay: `${i * 100}ms` }" />
+          <Skeleton
+            v-for="i in 3"
+            :key="i"
+            class="h-7 w-7 sm:h-8 sm:w-8 rounded-full border-2 border-background"
+            :style="{ animationDelay: `${i * 100}ms` }"
+          />
         </div>
         <div class="flex gap-1">
           <Skeleton class="h-8 w-16 rounded" />
@@ -39,4 +47,3 @@ import { Skeleton } from '@/components/ui/skeleton'
     </CardHeader>
   </Card>
 </template>
-

@@ -1,24 +1,30 @@
 <script setup lang="ts">
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { DatePicker } from '@/components/ui/date-picker'
-import { Ticket, Tv, BookOpen, Save } from 'lucide-vue-next'
-import type { Release, ReleaseType, CreateReleaseDTO } from '@/composables/useCalendar'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Ticket, Tv, BookOpen, Save } from 'lucide-vue-next';
+import type { Release, ReleaseType, CreateReleaseDTO } from '@/composables/useCalendar';
 
 interface Props {
-  open: boolean
-  release: Release | null
-  isSubmitting: boolean
+  open: boolean;
+  release: Release | null;
+  isSubmitting: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-  save: [id: string, dto: Partial<CreateReleaseDTO>]
-}>()
+  'update:open': [value: boolean];
+  save: [id: string, dto: Partial<CreateReleaseDTO>];
+}>();
 
 const editForm = ref<Partial<CreateReleaseDTO>>({
   title: '',
@@ -26,40 +32,47 @@ const editForm = ref<Partial<CreateReleaseDTO>>({
   release_date: '',
   description: '',
   url: '',
-})
+});
 
 const typeConfig: Record<ReleaseType, { icon: any; color: string; label: string }> = {
   anime_episode: { icon: Tv, color: 'text-primary', label: 'Episodio Anime' },
   manga_volume: { icon: BookOpen, color: 'text-exp-easy', label: 'Tomo Manga' },
   event: { icon: Ticket, color: 'text-exp-legendary', label: 'Evento' },
-}
+};
 
-watch(() => props.release, (release) => {
-  if (release) {
-    editForm.value = {
-      title: release.title,
-      type: release.type,
-      release_date: release.releaseDate.toISOString().split('T')[0],
-      description: release.description || '',
-      url: release.url || '',
+watch(
+  () => props.release,
+  (release) => {
+    if (release) {
+      editForm.value = {
+        title: release.title,
+        type: release.type,
+        release_date: release.releaseDate.toISOString().split('T')[0],
+        description: release.description || '',
+        url: release.url || '',
+      };
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+);
 
-watch(() => props.open, (open) => {
-  if (open && props.release) {
-    editForm.value = {
-      title: props.release.title,
-      type: props.release.type,
-      release_date: props.release.releaseDate.toISOString().split('T')[0],
-      description: props.release.description || '',
-      url: props.release.url || '',
+watch(
+  () => props.open,
+  (open) => {
+    if (open && props.release) {
+      editForm.value = {
+        title: props.release.title,
+        type: props.release.type,
+        release_date: props.release.releaseDate.toISOString().split('T')[0],
+        description: props.release.description || '',
+        url: props.release.url || '',
+      };
     }
-  }
-})
+  },
+);
 
 function handleSave() {
-  if (!props.release || !editForm.value.title?.trim()) return
+  if (!props.release || !editForm.value.title?.trim()) return;
 
   const dto: Partial<CreateReleaseDTO> = {
     title: editForm.value.title,
@@ -67,13 +80,13 @@ function handleSave() {
     release_date: editForm.value.release_date,
     description: editForm.value.description || undefined,
     url: editForm.value.url || undefined,
-  }
+  };
 
-  emit('save', props.release.id, dto)
+  emit('save', props.release.id, dto);
 }
 
 function handleClose() {
-  emit('update:open', false)
+  emit('update:open', false);
 }
 </script>
 
@@ -120,7 +133,11 @@ function handleClose() {
 
         <div class="space-y-2">
           <Label class="text-sm font-semibold">Tipo *</Label>
-          <div class="grid grid-cols-3 gap-2 sm:gap-3" role="radiogroup" aria-label="Tipo de evento">
+          <div
+            class="grid grid-cols-3 gap-2 sm:gap-3"
+            role="radiogroup"
+            aria-label="Tipo de evento"
+          >
             <Button
               v-for="(config, type) in typeConfig"
               :key="type"
@@ -192,4 +209,3 @@ function handleClose() {
     </SheetContent>
   </Sheet>
 </template>
-

@@ -1,13 +1,13 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
+  const id = getRouterParam(event, 'id');
   const body = await readBody(event);
 
   if (!id) {
     throw createError({
       statusCode: 400,
-      message: "Quest ID is required",
+      message: 'Quest ID is required',
     });
   }
 
@@ -28,8 +28,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error updating quest",
+      message: 'Error updating quest',
     });
   }
 });
-

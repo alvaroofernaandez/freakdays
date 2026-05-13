@@ -1,4 +1,4 @@
-import { getPrisma } from "../../utils/prisma";
+import { getPrisma } from '../../utils/prisma';
 
 export default defineEventHandler(async (event) => {
   const userId = getQuery(event).userId as string;
@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   if (!userId) {
     throw createError({
       statusCode: 400,
-      message: "User ID is required",
+      message: 'User ID is required',
     });
   }
 
@@ -22,17 +22,17 @@ export default defineEventHandler(async (event) => {
           include: {
             sets: {
               orderBy: {
-                setNumber: "asc",
+                setNumber: 'asc',
               },
             },
           },
           orderBy: {
-            orderIndex: "asc",
+            orderIndex: 'asc',
           },
         },
       },
       orderBy: {
-        workoutDate: "desc",
+        workoutDate: 'desc',
       },
       take: limit,
     });
@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
       id: workout.id,
       name: workout.name,
       description: workout.description,
-      workout_date: workout.workoutDate.toISOString().split("T")[0],
+      workout_date: workout.workoutDate.toISOString().split('T')[0],
       duration_minutes: workout.durationMinutes,
       notes: workout.notes,
       status: workout.status,
@@ -56,17 +56,23 @@ export default defineEventHandler(async (event) => {
           id: set.id,
           set_number: set.setNumber,
           reps: set.reps !== null && set.reps !== undefined ? Number(set.reps) : null,
-          weight_kg: set.weightKg !== null && set.weightKg !== undefined ? Number(set.weightKg.toString()) : null,
-          rest_seconds: set.restSeconds !== null && set.restSeconds !== undefined ? Number(set.restSeconds) : null,
+          weight_kg:
+            set.weightKg !== null && set.weightKg !== undefined
+              ? Number(set.weightKg.toString())
+              : null,
+          rest_seconds:
+            set.restSeconds !== null && set.restSeconds !== undefined
+              ? Number(set.restSeconds)
+              : null,
           notes: set.notes,
         })),
       })),
     }));
   } catch (error: any) {
-    console.error("Error fetching workouts:", error);
+    console.error('Error fetching workouts:', error);
     throw createError({
       statusCode: 500,
-      message: error.message || "Error fetching workouts",
+      message: error.message || 'Error fetching workouts',
     });
   }
 });

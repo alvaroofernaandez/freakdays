@@ -87,15 +87,15 @@ chore: tareas de mantenimiento
 
 ```typescript
 // tests/unit/domain/feature.test.ts
-import { describe, it, expect } from 'vitest'
-import { functionToTest } from '~~/domain/modules/feature'
+import { describe, it, expect } from 'vitest';
+import { functionToTest } from '~~/domain/modules/feature';
 
 describe('functionToTest', () => {
   it('should do something', () => {
-    const result = functionToTest(input)
-    expect(result).toBe(expected)
-  })
-})
+    const result = functionToTest(input);
+    expect(result).toBe(expected);
+  });
+});
 ```
 
 ### Ejecutar Tests
@@ -164,5 +164,3 @@ Si tienes preguntas:
 ---
 
 **¡Gracias por contribuir a FreakDays!** 🎉
-
-

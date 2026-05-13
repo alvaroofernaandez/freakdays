@@ -1,6 +1,6 @@
-import { useAuthStore } from "~~/stores/auth";
+import { useAuthStore } from '~~/stores/auth';
 
-export type ReleaseType = "anime_episode" | "manga_volume" | "event";
+export type ReleaseType = 'anime_episode' | 'manga_volume' | 'event';
 
 export interface Release {
   id: string;
@@ -50,7 +50,7 @@ export function useCalendar() {
     await refreshAuthContext();
 
     try {
-      const releases = await apiClient.get<ApiRelease[]>("/v1/calendar/releases", {
+      const releases = await apiClient.get<ApiRelease[]>('/v1/calendar/releases', {
         requireOrg: true,
       });
 
@@ -70,7 +70,7 @@ export function useCalendar() {
         `/v1/calendar/releases/upcoming?daysAhead=${daysAhead}`,
         {
           requireOrg: true,
-        }
+        },
       );
 
       return upcoming.map(mapApiToRelease);
@@ -86,7 +86,7 @@ export function useCalendar() {
 
     try {
       const created = await apiClient.post<ApiRelease>(
-        "/v1/calendar/releases",
+        '/v1/calendar/releases',
         {
           title: dto.title,
           type: dto.type,
@@ -96,7 +96,7 @@ export function useCalendar() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       return mapApiToRelease(created);
@@ -107,7 +107,7 @@ export function useCalendar() {
 
   async function updateRelease(
     id: string,
-    dto: Partial<CreateReleaseDTO>
+    dto: Partial<CreateReleaseDTO>,
   ): Promise<Release | null> {
     if (!authStore.userId) return null;
 
@@ -121,13 +121,9 @@ export function useCalendar() {
     if (dto.url !== undefined) payload.url = dto.url;
 
     try {
-      const updated = await apiClient.put<ApiRelease>(
-        `/v1/calendar/releases/${id}`,
-        payload,
-        {
-          requireOrg: true,
-        }
-      );
+      const updated = await apiClient.put<ApiRelease>(`/v1/calendar/releases/${id}`, payload, {
+        requireOrg: true,
+      });
 
       return mapApiToRelease(updated);
     } catch (error) {

@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import JoinPartyModal from "../../../../app/components/party/JoinPartyModal";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import JoinPartyModal from '../../../../app/components/party/JoinPartyModal';
 
-describe("JoinPartyModal.vue", () => {
-  it("should render component", () => {
+describe('JoinPartyModal.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(JoinPartyModal, {
       global: {
         stubs: {

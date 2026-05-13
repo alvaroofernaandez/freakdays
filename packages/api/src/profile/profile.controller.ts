@@ -44,40 +44,28 @@ export class ProfileController {
   }
 
   @Post('me/avatar/upload-url')
-  requestAvatarUploadUrl(
-    @Req() request: Request,
-    @Body() body: RequestUploadUrlInput,
-  ) {
+  requestAvatarUploadUrl(@Req() request: Request, @Body() body: RequestUploadUrlInput) {
     const user = this.getRequestUser(request);
 
     return this.profileService.requestAvatarUploadUrl(user.sub, body);
   }
 
   @Post('me/banner/upload-url')
-  requestBannerUploadUrl(
-    @Req() request: Request,
-    @Body() body: RequestUploadUrlInput,
-  ) {
+  requestBannerUploadUrl(@Req() request: Request, @Body() body: RequestUploadUrlInput) {
     const user = this.getRequestUser(request);
 
     return this.profileService.requestBannerUploadUrl(user.sub, body);
   }
 
   @Post('me/avatar/confirm')
-  confirmAvatarUpload(
-    @Req() request: Request,
-    @Body() body: ConfirmProfileMediaInput,
-  ) {
+  confirmAvatarUpload(@Req() request: Request, @Body() body: ConfirmProfileMediaInput) {
     const user = this.getRequestUser(request);
 
     return this.profileService.confirmAvatarUpload(user.sub, body);
   }
 
   @Post('me/banner/confirm')
-  confirmBannerUpload(
-    @Req() request: Request,
-    @Body() body: ConfirmProfileMediaInput,
-  ) {
+  confirmBannerUpload(@Req() request: Request, @Body() body: ConfirmProfileMediaInput) {
     const user = this.getRequestUser(request);
 
     return this.profileService.confirmBannerUpload(user.sub, body);

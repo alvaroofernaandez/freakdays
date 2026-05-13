@@ -1,15 +1,8 @@
-import type { Component } from 'vue'
-import { 
-  Dumbbell, 
-  BookOpen, 
-  Tv, 
-  Swords, 
-  Users, 
-  Calendar 
-} from 'lucide-vue-next'
-import type { ModuleId } from '../types'
+import type { Component } from 'vue';
+import { Dumbbell, BookOpen, Tv, Swords, Users, Calendar } from 'lucide-vue-next';
+import type { ModuleId } from '../types';
 
-export type ModuleIconName = 'dumbbell' | 'book-open' | 'tv' | 'sword' | 'users' | 'calendar'
+export type ModuleIconName = 'dumbbell' | 'book-open' | 'tv' | 'sword' | 'users' | 'calendar';
 
 export const MODULE_ICONS: Record<ModuleIconName, Component> = {
   dumbbell: Dumbbell,
@@ -18,9 +11,8 @@ export const MODULE_ICONS: Record<ModuleIconName, Component> = {
   sword: Swords,
   users: Users,
   calendar: Calendar,
-} as const
+} as const;
 
 export function getModuleIcon(iconName: string): Component | undefined {
-  return MODULE_ICONS[iconName as ModuleIconName]
+  return MODULE_ICONS[iconName as ModuleIconName];
 }
-

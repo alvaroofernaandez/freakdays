@@ -1,45 +1,45 @@
 <script setup lang="ts">
-import { BookOpen } from 'lucide-vue-next'
-import type { MangaEntry } from '@/composables/useManga'
-import { Empty } from '@/components/ui/empty'
-import MangaCard from './MangaCard.vue'
-import MangaCardSkeleton from './MangaCardSkeleton.vue'
+import { BookOpen } from 'lucide-vue-next';
+import type { MangaEntry } from '@/composables/useManga';
+import { Empty } from '@/components/ui/empty';
+import MangaCard from './MangaCard.vue';
+import MangaCardSkeleton from './MangaCardSkeleton.vue';
 
 interface Props {
-  mangas: MangaEntry[]
-  loading?: boolean
+  mangas: MangaEntry[];
+  loading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
-})
+});
 
 const emit = defineEmits<{
-  addVolume: [id: string]
-  removeVolume: [id: string, volume: number]
-  delete: [id: string]
-  updatePrice: [id: string, price: number | null]
-  updateStatus: [id: string, status: MangaEntry['status']]
-}>()
+  addVolume: [id: string];
+  removeVolume: [id: string, volume: number];
+  delete: [id: string];
+  updatePrice: [id: string, price: number | null];
+  updateStatus: [id: string, status: MangaEntry['status']];
+}>();
 
 function handleAddVolume(id: string) {
-  emit('addVolume', id)
+  emit('addVolume', id);
 }
 
 function handleRemoveVolume(id: string, volume: number) {
-  emit('removeVolume', id, volume)
+  emit('removeVolume', id, volume);
 }
 
 function handleDelete(id: string) {
-  emit('delete', id)
+  emit('delete', id);
 }
 
 function handleUpdatePrice(id: string, price: number | null) {
-  emit('updatePrice', id, price)
+  emit('updatePrice', id, price);
 }
 
 function handleUpdateStatus(id: string, status: MangaEntry['status']) {
-  emit('updateStatus', id, status)
+  emit('updateStatus', id, status);
 }
 </script>
 
@@ -73,4 +73,3 @@ function handleUpdateStatus(id: string, status: MangaEntry['status']) {
     </template>
   </div>
 </template>
-

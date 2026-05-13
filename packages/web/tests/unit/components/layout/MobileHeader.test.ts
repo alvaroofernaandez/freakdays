@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import MobileHeader from "../../../../app/components/layout/MobileHeader";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import MobileHeader from '../../../../app/components/layout/MobileHeader';
 
-describe("MobileHeader.vue", () => {
-  it("should render component", () => {
+describe('MobileHeader.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(MobileHeader, {
       global: {
         stubs: {

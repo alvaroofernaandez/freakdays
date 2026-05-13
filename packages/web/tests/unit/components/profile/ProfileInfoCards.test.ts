@@ -1,16 +1,16 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import ProfileInfoCards from "../../../../app/components/profile/ProfileInfoCards.vue";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import ProfileInfoCards from '../../../../app/components/profile/ProfileInfoCards.vue';
 
-describe("ProfileInfoCards.vue", () => {
-  it("should render component", () => {
+describe('ProfileInfoCards.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(ProfileInfoCards, {
       props: {
         profile: {
-          id: "1",
-          userId: "user1",
-          username: "test",
-          displayName: "Test User",
+          id: '1',
+          userId: 'user1',
+          username: 'test',
+          displayName: 'Test User',
           bio: null,
           avatarUrl: null,
           level: 1,

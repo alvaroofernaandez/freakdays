@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
@@ -224,11 +220,7 @@ export class AnimeService {
     return this.toAnimeView(updated);
   }
 
-  async remove(
-    clerkUserId: string,
-    orgId: string | null,
-    id: string,
-  ): Promise<{ success: true }> {
+  async remove(clerkUserId: string, orgId: string | null, id: string): Promise<{ success: true }> {
     const { currentUser, organization } = await this.resolveIdentityInOrganization(
       clerkUserId,
       orgId,

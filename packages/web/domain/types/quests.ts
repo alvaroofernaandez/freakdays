@@ -1,6 +1,6 @@
-export type QuestDifficulty = "easy" | "medium" | "hard" | "legendary";
+export type QuestDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
 
-export type QuestStatus = "pending" | "completed" | "failed";
+export type QuestStatus = 'pending' | 'completed' | 'failed';
 
 export interface Quest {
   id: string;
@@ -30,10 +30,7 @@ export function calculateStreakBonus(streak: number): number {
   return Math.floor(streak / 7) * 5;
 }
 
-export function calculateTotalExp(
-  difficulty: QuestDifficulty,
-  streak: number
-): number {
+export function calculateTotalExp(difficulty: QuestDifficulty, streak: number): number {
   const baseExp = DIFFICULTY_EXP[difficulty];
   const bonus = calculateStreakBonus(streak);
   return baseExp + bonus;

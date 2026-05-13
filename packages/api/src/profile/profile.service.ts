@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma, Profile } from '@prisma/client';
 
 import {
@@ -74,10 +70,7 @@ export class ProfileService {
     return this.toProfileView(profile, user.clerkUserId);
   }
 
-  async updateMyProfile(
-    clerkUserId: string,
-    input: UpdateProfileInput,
-  ): Promise<ProfileView> {
+  async updateMyProfile(clerkUserId: string, input: UpdateProfileInput): Promise<ProfileView> {
     const { user, profile } = await this.ensureProfileForCurrentUser(clerkUserId);
     const updateData = this.buildProfileUpdateData(input);
 

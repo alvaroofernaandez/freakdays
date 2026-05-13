@@ -25,9 +25,9 @@
 
 El proyecto está organizado como **monorepo pnpm workspaces** con dos paquetes principales:
 
-| Paquete | Ruta | Descripción |
-|---------|------|-------------|
-| `freak-days` | `packages/web/` | Frontend — Nuxt 4, Vue 3, TypeScript |
+| Paquete          | Ruta            | Descripción                          |
+| ---------------- | --------------- | ------------------------------------ |
+| `freak-days`     | `packages/web/` | Frontend — Nuxt 4, Vue 3, TypeScript |
 | `freak-days-api` | `packages/api/` | Backend — NestJS, Prisma, PostgreSQL |
 
 ### ✨ Características Principales
@@ -47,28 +47,28 @@ El proyecto está organizado como **monorepo pnpm workspaces** con dos paquetes 
 
 **Frontend (`packages/web/`)**
 
-| Categoría | Tecnología |
-|-----------|-----------|
-| Framework | Nuxt 4, Vue 3 |
-| Lenguaje | TypeScript |
-| UI | Tailwind CSS 4, Shadcn-vue, Radix Vue |
-| Estado | Pinia + TanStack Query |
-| Auth | Clerk (client SDK) |
-| ORM | Prisma (conexión a Supabase legacy) |
-| Testing | Vitest, Testing Library |
-| Iconos | Lucide Icons |
+| Categoría | Tecnología                            |
+| --------- | ------------------------------------- |
+| Framework | Nuxt 4, Vue 3                         |
+| Lenguaje  | TypeScript                            |
+| UI        | Tailwind CSS 4, Shadcn-vue, Radix Vue |
+| Estado    | Pinia + TanStack Query                |
+| Auth      | Clerk (client SDK)                    |
+| ORM       | Prisma (conexión a Supabase legacy)   |
+| Testing   | Vitest, Testing Library               |
+| Iconos    | Lucide Icons                          |
 
 **Backend (`packages/api/`)**
 
-| Categoría | Tecnología |
-|-----------|-----------|
-| Framework | NestJS 10 |
-| Lenguaje | TypeScript |
-| ORM | Prisma + PostgreSQL |
-| Auth | Clerk (JWT verification) |
-| Storage | Cloudflare R2 (AWS S3 SDK) |
-| Email | Resend |
-| Testing | Jest |
+| Categoría | Tecnología                 |
+| --------- | -------------------------- |
+| Framework | NestJS 10                  |
+| Lenguaje  | TypeScript                 |
+| ORM       | Prisma + PostgreSQL        |
+| Auth      | Clerk (JWT verification)   |
+| Storage   | Cloudflare R2 (AWS S3 SDK) |
+| Email     | Resend                     |
+| Testing   | Jest                       |
 
 ---
 
@@ -258,23 +258,23 @@ make test-coverage
 make help   # Muestra todos los comandos disponibles con descripción
 ```
 
-| Comando | pnpm equivalente | Descripción |
-|---------|-----------------|-------------|
-| `make install` | `pnpm install` | Instalar dependencias del monorepo |
-| `make approve-builds` | `pnpm approve-builds` | Aprobar build scripts (primera vez) |
-| `make dev` | `pnpm dev` | Full stack coordinado |
-| `make dev-web` | `pnpm dev:web` | Solo frontend |
-| `make dev-api` | `pnpm dev:api` | Solo backend |
-| `make dev-down` | `pnpm dev:down` | Parar Docker (PostgreSQL) |
-| `make build` | `pnpm build` | Build todos los paquetes |
-| `make build-web` | `pnpm --filter freak-days build` | Build frontend |
-| `make build-api` | `pnpm --filter freak-days-api build` | Build backend |
-| `make lint` | `pnpm lint` | Lint todos los paquetes |
-| `make typecheck` | `pnpm typecheck` | Type-check frontend |
-| `make prisma-generate-web` | `pnpm --filter freak-days prisma:generate` | Generar cliente Prisma (web) |
-| `make prisma-generate-api` | `pnpm --filter freak-days-api prisma:generate` | Generar cliente Prisma (api) |
-| `make prisma-studio-web` | `pnpm --filter freak-days prisma:studio` | Prisma Studio (web) |
-| `make prisma-studio-api` | `pnpm --filter freak-days-api prisma:studio` | Prisma Studio (api) |
+| Comando                    | pnpm equivalente                               | Descripción                         |
+| -------------------------- | ---------------------------------------------- | ----------------------------------- |
+| `make install`             | `pnpm install`                                 | Instalar dependencias del monorepo  |
+| `make approve-builds`      | `pnpm approve-builds`                          | Aprobar build scripts (primera vez) |
+| `make dev`                 | `pnpm dev`                                     | Full stack coordinado               |
+| `make dev-web`             | `pnpm dev:web`                                 | Solo frontend                       |
+| `make dev-api`             | `pnpm dev:api`                                 | Solo backend                        |
+| `make dev-down`            | `pnpm dev:down`                                | Parar Docker (PostgreSQL)           |
+| `make build`               | `pnpm build`                                   | Build todos los paquetes            |
+| `make build-web`           | `pnpm --filter freak-days build`               | Build frontend                      |
+| `make build-api`           | `pnpm --filter freak-days-api build`           | Build backend                       |
+| `make lint`                | `pnpm lint`                                    | Lint todos los paquetes             |
+| `make typecheck`           | `pnpm typecheck`                               | Type-check frontend                 |
+| `make prisma-generate-web` | `pnpm --filter freak-days prisma:generate`     | Generar cliente Prisma (web)        |
+| `make prisma-generate-api` | `pnpm --filter freak-days-api prisma:generate` | Generar cliente Prisma (api)        |
+| `make prisma-studio-web`   | `pnpm --filter freak-days prisma:studio`       | Prisma Studio (web)                 |
+| `make prisma-studio-api`   | `pnpm --filter freak-days-api prisma:studio`   | Prisma Studio (api)                 |
 
 ---
 

@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import CalendarGrid from "../../../../app/components/calendar/CalendarGrid.vue";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import CalendarGrid from '../../../../app/components/calendar/CalendarGrid.vue';
 
-describe("CalendarGrid.vue", () => {
-  it("should render component", () => {
+describe('CalendarGrid.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(CalendarGrid, {
       props: {
         currentMonth: new Date(),

@@ -127,6 +127,7 @@ Vercel despliega automáticamente en cada push a `main`.
 2. **Variables de entorno**
 
 Configura en Netlify Dashboard:
+
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 
@@ -326,6 +327,7 @@ vercel rollback [deployment-url]
 ### Netlify
 
 En Netlify Dashboard:
+
 - Ve a Deploys
 - Selecciona deployment anterior
 - Click en "Publish deploy"
@@ -372,5 +374,3 @@ docker-compose up -d
 ---
 
 **Última actualización**: Enero 2025
-
-

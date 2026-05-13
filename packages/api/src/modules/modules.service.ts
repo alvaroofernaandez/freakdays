@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -176,8 +173,7 @@ export class ModulesService {
         throw new BadRequestException('Cada módulo debe ser un objeto válido');
       }
 
-      const moduleId =
-        typeof item.moduleId === 'string' ? item.moduleId.trim() : '';
+      const moduleId = typeof item.moduleId === 'string' ? item.moduleId.trim() : '';
 
       if (moduleId.length === 0) {
         throw new BadRequestException('moduleId es obligatorio y debe ser string');
@@ -195,5 +191,4 @@ export class ModulesService {
       enabled,
     }));
   }
-
 }

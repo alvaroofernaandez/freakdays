@@ -1,5 +1,5 @@
-import { useErrorHandler } from "@/composables/useErrorHandler";
-import type { CreateMangaDTO, MangaEntry } from "@/composables/useManga";
+import { useErrorHandler } from '@/composables/useErrorHandler';
+import type { CreateMangaDTO, MangaEntry } from '@/composables/useManga';
 
 export function useMangaPage() {
   const mangaApi = useManga();
@@ -15,11 +15,11 @@ export function useMangaPage() {
     fetcher: () => mangaApi.fetchCollection(),
     onError: (err) =>
       handleError(err, {
-        customMessage: "No se pudo cargar la colección de manga",
+        customMessage: 'No se pudo cargar la colección de manga',
       }),
   });
 
-  const activeTab = ref<"all" | "collecting" | "completed" | "wishlist">("all");
+  const activeTab = ref<'all' | 'collecting' | 'completed' | 'wishlist'>('all');
 
   const filteredMangas = computed(() => {
     const collection = mangaCollection.value || [];
@@ -27,7 +27,7 @@ export function useMangaPage() {
       ...m,
       ownedVolumes: [...m.ownedVolumes],
     }));
-    if (activeTab.value === "all") {
+    if (activeTab.value === 'all') {
       return mapped;
     }
     return mapped.filter((m) => m.status === activeTab.value);
@@ -40,12 +40,12 @@ export function useMangaPage() {
         await reloadManga();
         modal.close();
       } else {
-        handleError(new Error("No se pudo añadir el manga"), {
-          customMessage: "No se pudo añadir el manga a tu colección",
+        handleError(new Error('No se pudo añadir el manga'), {
+          customMessage: 'No se pudo añadir el manga a tu colección',
         });
       }
     } catch (err) {
-      handleError(err, { customMessage: "Error al añadir el manga" });
+      handleError(err, { customMessage: 'Error al añadir el manga' });
     }
   }
 
@@ -53,8 +53,7 @@ export function useMangaPage() {
     const manga = (mangaCollection.value || []).find((m) => m.id === id);
     if (!manga) return;
 
-    const nextVolume =
-      manga.ownedVolumes.length > 0 ? Math.max(...manga.ownedVolumes) + 1 : 1;
+    const nextVolume = manga.ownedVolumes.length > 0 ? Math.max(...manga.ownedVolumes) + 1 : 1;
 
     if (manga.totalVolumes && nextVolume > manga.totalVolumes) return;
 
@@ -63,12 +62,12 @@ export function useMangaPage() {
       if (success) {
         await reloadManga();
       } else {
-        handleError(new Error("No se pudo añadir el volumen"), {
-          customMessage: "No se pudo añadir el volumen",
+        handleError(new Error('No se pudo añadir el volumen'), {
+          customMessage: 'No se pudo añadir el volumen',
         });
       }
     } catch (err) {
-      handleError(err, { customMessage: "Error al añadir el volumen" });
+      handleError(err, { customMessage: 'Error al añadir el volumen' });
     }
   }
 
@@ -78,12 +77,12 @@ export function useMangaPage() {
       if (success) {
         await reloadManga();
       } else {
-        handleError(new Error("No se pudo eliminar el volumen"), {
-          customMessage: "No se pudo eliminar el volumen",
+        handleError(new Error('No se pudo eliminar el volumen'), {
+          customMessage: 'No se pudo eliminar el volumen',
         });
       }
     } catch (err) {
-      handleError(err, { customMessage: "Error al eliminar el volumen" });
+      handleError(err, { customMessage: 'Error al eliminar el volumen' });
     }
   }
 
@@ -93,12 +92,12 @@ export function useMangaPage() {
       if (success) {
         await reloadManga();
       } else {
-        handleError(new Error("No se pudo eliminar el manga"), {
-          customMessage: "No se pudo eliminar el manga",
+        handleError(new Error('No se pudo eliminar el manga'), {
+          customMessage: 'No se pudo eliminar el manga',
         });
       }
     } catch (err) {
-      handleError(err, { customMessage: "Error al eliminar el manga" });
+      handleError(err, { customMessage: 'Error al eliminar el manga' });
     }
   }
 
@@ -108,27 +107,27 @@ export function useMangaPage() {
       if (success) {
         await reloadManga();
       } else {
-        handleError(new Error("No se pudo actualizar el precio"), {
-          customMessage: "No se pudo actualizar el precio",
+        handleError(new Error('No se pudo actualizar el precio'), {
+          customMessage: 'No se pudo actualizar el precio',
         });
       }
     } catch (err) {
-      handleError(err, { customMessage: "Error al actualizar el precio" });
+      handleError(err, { customMessage: 'Error al actualizar el precio' });
     }
   }
 
-  async function handleUpdateStatus(id: string, status: MangaEntry["status"]) {
+  async function handleUpdateStatus(id: string, status: MangaEntry['status']) {
     try {
       const success = await mangaApi.updateStatus(id, status);
       if (success) {
         await reloadManga();
       } else {
-        handleError(new Error("No se pudo actualizar el estado"), {
-          customMessage: "No se pudo actualizar el estado del manga",
+        handleError(new Error('No se pudo actualizar el estado'), {
+          customMessage: 'No se pudo actualizar el estado del manga',
         });
       }
     } catch (err) {
-      handleError(err, { customMessage: "Error al actualizar el estado" });
+      handleError(err, { customMessage: 'Error al actualizar el estado' });
     }
   }
 

@@ -1,4 +1,4 @@
-import { useAuthStore } from "~~/stores/auth";
+import { useAuthStore } from '~~/stores/auth';
 
 export interface MangaEntry {
   id: string;
@@ -6,7 +6,7 @@ export interface MangaEntry {
   author: string | null;
   totalVolumes: number | null;
   ownedVolumes: number[];
-  status: "collecting" | "completed" | "dropped" | "wishlist";
+  status: 'collecting' | 'completed' | 'dropped' | 'wishlist';
   score: number | null;
   notes: string | null;
   coverUrl: string | null;
@@ -18,7 +18,7 @@ export interface CreateMangaDTO {
   title: string;
   author?: string;
   total_volumes?: number;
-  status?: "collecting" | "completed" | "dropped" | "wishlist";
+  status?: 'collecting' | 'completed' | 'dropped' | 'wishlist';
   price_per_volume?: number;
 }
 
@@ -28,7 +28,7 @@ interface ApiMangaEntry {
   author: string | null;
   totalVolumes: number | null;
   ownedVolumes: number[];
-  status: MangaEntry["status"];
+  status: MangaEntry['status'];
   score: number | null;
   notes: string | null;
   coverUrl: string | null;
@@ -57,7 +57,7 @@ export function useManga() {
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.get<ApiMangaEntry[]>("/v1/manga", {
+      const data = await apiClient.get<ApiMangaEntry[]>('/v1/manga', {
         requireOrg: true,
       });
       return data.map(mapApiToManga);
@@ -68,24 +68,24 @@ export function useManga() {
 
   async function addManga(dto: CreateMangaDTO): Promise<MangaEntry | null> {
     if (!authStore.userId) {
-      console.error("No user ID available");
+      console.error('No user ID available');
       return null;
     }
 
     if (!dto.title || !dto.title.trim()) {
-      console.error("Title is required");
+      console.error('Title is required');
       return null;
     }
 
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.post<ApiMangaEntry>("/v1/manga", dto, {
+      const data = await apiClient.post<ApiMangaEntry>('/v1/manga', dto, {
         requireOrg: true,
       });
       return mapApiToManga(data);
     } catch (error) {
-      console.error("Error in addManga:", error);
+      console.error('Error in addManga:', error);
       throw apiClient.normalizeApiError(error);
     }
   }
@@ -101,14 +101,12 @@ export function useManga() {
         volumes.sort((a, b) => a - b);
       }
 
-      const pricePerVolume = manga.pricePerVolume
-        ? Number(manga.pricePerVolume)
-        : null;
+      const pricePerVolume = manga.pricePerVolume ? Number(manga.pricePerVolume) : null;
       const totalCost = pricePerVolume
         ? Math.round(volumes.length * pricePerVolume * 100) / 100
         : manga.totalCost
-        ? Number(manga.totalCost)
-        : 0;
+          ? Number(manga.totalCost)
+          : 0;
 
       const updateData: {
         ownedVolumes: number[];
@@ -119,12 +117,12 @@ export function useManga() {
         totalCost,
       };
 
-      if (manga.status === "wishlist" && volumes.length > 0) {
-        updateData.status = "collecting";
+      if (manga.status === 'wishlist' && volumes.length > 0) {
+        updateData.status = 'collecting';
       }
 
       if (manga.totalVolumes && volumes.length === manga.totalVolumes) {
-        updateData.status = "completed";
+        updateData.status = 'completed';
       }
 
       await apiClient.patch<ApiMangaEntry>(`/v1/manga/${id}`, updateData, {
@@ -133,7 +131,7 @@ export function useManga() {
 
       return true;
     } catch (error) {
-      console.error("Error adding volume:", error);
+      console.error('Error adding volume:', error);
       return false;
     }
   }
@@ -145,9 +143,7 @@ export function useManga() {
 
       const volumes = manga.ownedVolumes.filter((v) => v !== volume);
 
-      const pricePerVolume = manga.pricePerVolume
-        ? Number(manga.pricePerVolume)
-        : null;
+      const pricePerVolume = manga.pricePerVolume ? Number(manga.pricePerVolume) : null;
       const totalCost = pricePerVolume
         ? Math.round(volumes.length * pricePerVolume * 100) / 100
         : 0;
@@ -161,11 +157,8 @@ export function useManga() {
         totalCost,
       };
 
-      if (
-        manga.status === "completed" &&
-        volumes.length < (manga.totalVolumes ?? Infinity)
-      ) {
-        updateData.status = "collecting";
+      if (manga.status === 'completed' && volumes.length < (manga.totalVolumes ?? Infinity)) {
+        updateData.status = 'collecting';
       }
 
       await apiClient.patch<ApiMangaEntry>(`/v1/manga/${id}`, updateData, {
@@ -174,7 +167,7 @@ export function useManga() {
 
       return true;
     } catch (error) {
-      console.error("Error removing volume:", error);
+      console.error('Error removing volume:', error);
       return false;
     }
   }
@@ -183,20 +176,21 @@ export function useManga() {
     await refreshAuthContext();
 
     try {
-      await apiClient.patch<ApiMangaEntry>(`/v1/manga/${id}`, { score }, {
-        requireOrg: true,
-      });
+      await apiClient.patch<ApiMangaEntry>(
+        `/v1/manga/${id}`,
+        { score },
+        {
+          requireOrg: true,
+        },
+      );
       return true;
     } catch (error) {
-      console.error("Error updating score:", error);
+      console.error('Error updating score:', error);
       return false;
     }
   }
 
-  async function updatePricePerVolume(
-    id: string,
-    price: number | null
-  ): Promise<boolean> {
+  async function updatePricePerVolume(id: string, price: number | null): Promise<boolean> {
     try {
       const manga = await getMangaById(id);
       if (!manga) return false;
@@ -214,20 +208,17 @@ export function useManga() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       return true;
     } catch (error) {
-      console.error("Error updating price:", error);
+      console.error('Error updating price:', error);
       return false;
     }
   }
 
-  async function updateStatus(
-    id: string,
-    status: MangaEntry["status"]
-  ): Promise<boolean> {
+  async function updateStatus(id: string, status: MangaEntry['status']): Promise<boolean> {
     try {
       const manga = await getMangaById(id);
       if (!manga) return false;
@@ -238,19 +229,14 @@ export function useManga() {
         totalCost?: number;
       } = { status };
 
-      if (status === "completed" && manga.totalVolumes) {
-        const allVolumes = Array.from(
-          { length: manga.totalVolumes },
-          (_, i) => i + 1
-        );
-        const pricePerVolume = manga.pricePerVolume
-          ? Number(manga.pricePerVolume)
-          : null;
+      if (status === 'completed' && manga.totalVolumes) {
+        const allVolumes = Array.from({ length: manga.totalVolumes }, (_, i) => i + 1);
+        const pricePerVolume = manga.pricePerVolume ? Number(manga.pricePerVolume) : null;
         const totalCost = pricePerVolume
           ? Math.round(manga.totalVolumes * pricePerVolume * 100) / 100
           : manga.totalCost
-          ? Number(manga.totalCost)
-          : 0;
+            ? Number(manga.totalCost)
+            : 0;
 
         updateData.ownedVolumes = allVolumes;
         updateData.totalCost = totalCost;
@@ -262,7 +248,7 @@ export function useManga() {
 
       return true;
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error('Error updating status:', error);
       return false;
     }
   }
@@ -272,7 +258,7 @@ export function useManga() {
       const collection = await fetchCollection();
       return collection.find((m) => m.id === id) || null;
     } catch (error) {
-      console.error("Error fetching manga:", error);
+      console.error('Error fetching manga:', error);
       return null;
     }
   }
@@ -286,7 +272,7 @@ export function useManga() {
       });
       return true;
     } catch (error) {
-      console.error("Error deleting manga:", error);
+      console.error('Error deleting manga:', error);
       return false;
     }
   }

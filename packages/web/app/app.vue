@@ -1,9 +1,9 @@
 <script setup lang="ts">
-const auth = useAuth()
+const auth = useAuth();
 
 onMounted(() => {
-  auth.initialize()
-})
+  auth.initialize();
+});
 </script>
 
 <template>

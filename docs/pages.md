@@ -20,6 +20,7 @@ Documentación de todas las páginas y rutas de la aplicación FreakDays.
 Dashboard principal de la aplicación.
 
 **Características:**
+
 - Muestra bienvenida personalizada
 - Tarjeta de perfil con nivel y EXP
 - Estadísticas rápidas (quests, anime, workouts)
@@ -27,6 +28,7 @@ Dashboard principal de la aplicación.
 - Prompt de configuración si es necesario
 
 **Componentes utilizados:**
+
 - `WelcomeSection`
 - `ProfileCard`
 - `ModuleGrid`
@@ -34,6 +36,7 @@ Dashboard principal de la aplicación.
 - `LoadingSpinner`
 
 **Datos cargados:**
+
 - Perfil del usuario
 - Módulos habilitados
 - Estadísticas rápidas
@@ -47,12 +50,14 @@ Dashboard principal de la aplicación.
 Página de inicio de sesión.
 
 **Características:**
+
 - Formulario de login
 - Validación de campos
 - Manejo de errores
 - Redirección automática si ya está autenticado
 
 **Funcionalidad:**
+
 - Usa `useAuth().signIn()`
 - Redirige a `/` o `/onboarding` después del login
 
@@ -65,6 +70,7 @@ Página de inicio de sesión.
 Página de registro.
 
 **Características:**
+
 - Formulario de registro con validación
 - Indicador de fortaleza de contraseña
 - Confirmación de contraseña
@@ -73,6 +79,7 @@ Página de registro.
 - Mensaje de éxito después del registro
 
 **Componentes utilizados:**
+
 - `RegisterHeader`
 - `RegisterForm`
 - `PasswordStrengthIndicator`
@@ -80,6 +87,7 @@ Página de registro.
 - `RegisterSuccessMessage`
 
 **Funcionalidad:**
+
 - Usa `useRegisterPage()` composable
 - Validación en tiempo real de contraseña
 - Crea perfil automáticamente
@@ -98,12 +106,14 @@ Todas las rutas protegidas requieren autenticación. El middleware `auth.global.
 Página de configuración inicial.
 
 **Características:**
+
 - Selección de módulos iniciales
 - Grid de módulos con descripciones
 - Guardado de preferencias
 - Redirección a `/` después de completar
 
 **Funcionalidad:**
+
 - Permite habilitar/deshabilitar módulos
 - Guarda en `user_modules`
 - Marca onboarding como completado
@@ -117,6 +127,7 @@ Página de configuración inicial.
 Página principal del módulo de anime.
 
 **Características:**
+
 - Vista de lista y marketplace
 - Estadísticas de anime
 - Filtros por estado (All, Watching, Completed, etc.)
@@ -124,6 +135,7 @@ Página principal del módulo de anime.
 - Añadir anime desde marketplace
 
 **Componentes utilizados:**
+
 - `AnimeStats`
 - `AnimeCard`
 - `AnimeMarketplace`
@@ -134,6 +146,7 @@ Página principal del módulo de anime.
 - Skeleton loaders
 
 **Funcionalidad:**
+
 - Carga lista de anime del usuario
 - Permite buscar y añadir nuevos animes
 - Filtra por estado
@@ -148,6 +161,7 @@ Página principal del módulo de anime.
 Página principal del módulo de manga.
 
 **Características:**
+
 - Estadísticas de colección
 - Lista de mangas con filtros
 - Gestión de volúmenes
@@ -155,6 +169,7 @@ Página principal del módulo de manga.
 - Wishlist
 
 **Componentes utilizados:**
+
 - `MangaStats`
 - `MangaList`
 - `MangaCard`
@@ -163,6 +178,7 @@ Página principal del módulo de manga.
 - Skeleton loaders
 
 **Funcionalidad:**
+
 - Carga colección de manga
 - Filtra por estado (All, Collecting, Completed, Wishlist)
 - Permite añadir/eliminar volúmenes
@@ -178,6 +194,7 @@ Página principal del módulo de manga.
 Página principal del módulo de quests.
 
 **Características:**
+
 - Estadísticas de quests
 - Lista de quests activas
 - Banner de quests vencidas
@@ -186,6 +203,7 @@ Página principal del módulo de quests.
 - Completar quests
 
 **Componentes utilizados:**
+
 - `QuestStats`
 - `QuestList`
 - `QuestCard`
@@ -196,6 +214,7 @@ Página principal del módulo de quests.
 - Skeleton loaders
 
 **Funcionalidad:**
+
 - Carga quests activas
 - Muestra quests completadas hoy
 - Detecta quests vencidas y próximas a vencer
@@ -211,6 +230,7 @@ Página principal del módulo de quests.
 Página principal del módulo de workouts.
 
 **Características:**
+
 - Estadísticas de entrenamientos
 - Lista de entrenamientos
 - Iniciar nuevo entrenamiento
@@ -218,6 +238,7 @@ Página principal del módulo de workouts.
 - Entrenamientos en curso
 
 **Componentes utilizados:**
+
 - `WorkoutStats`
 - `WorkoutList`
 - `WorkoutCard`
@@ -228,6 +249,7 @@ Página principal del módulo de workouts.
 - Skeleton loaders
 
 **Funcionalidad:**
+
 - Carga entrenamientos del usuario
 - Permite crear nuevos entrenamientos
 - Gestiona entrenamientos en curso
@@ -242,6 +264,7 @@ Página principal del módulo de workouts.
 Página principal del módulo de party system.
 
 **Características:**
+
 - Lista de parties del usuario con diseño responsive
 - Crear nuevo party con modal
 - Unirse a party por código de invitación
@@ -252,6 +275,7 @@ Página principal del módulo de party system.
 - Diseño mobile-first y responsive
 
 **Componentes utilizados:**
+
 - `PartyCard`
 - `PartyEmptyState`
 - `CreatePartyModal`
@@ -261,6 +285,7 @@ Página principal del módulo de party system.
 - `RemoveMemberConfirmModal`
 
 **Funcionalidad:**
+
 - Usa `usePartyPage()` composable
 - Carga parties del usuario con miembros
 - Permite crear parties con nombre y descripción
@@ -278,6 +303,7 @@ Página principal del módulo de party system.
 Página del calendario de lanzamientos con drag and drop.
 
 **Características:**
+
 - Vista de calendario mensual completo
 - Grid de días con eventos
 - Drag and drop para mover eventos entre días
@@ -288,6 +314,7 @@ Página del calendario de lanzamientos con drag and drop.
 - Normalización de fechas para evitar problemas de zona horaria
 
 **Componentes utilizados:**
+
 - `CalendarGrid`
 - `CalendarDay`
 - `CalendarEventCard`
@@ -296,6 +323,7 @@ Página del calendario de lanzamientos con drag and drop.
 - `Button`, `Card`, `Input`, `Label`
 
 **Funcionalidad:**
+
 - Usa `useCalendarPage()` composable
 - Carga todos los eventos del usuario
 - Permite añadir eventos con título, fecha, tipo, descripción y URL
@@ -314,6 +342,7 @@ Página del calendario de lanzamientos con drag and drop.
 Página de perfil del usuario.
 
 **Características:**
+
 - Información del perfil con diseño modular
 - Edición de datos con formulario
 - Subida y eliminación de avatar con preview
@@ -324,6 +353,7 @@ Página de perfil del usuario.
 - Diseño responsive
 
 **Componentes utilizados:**
+
 - `ProfileHeader`
 - `ProfileEditForm`
 - `ProfileStats`
@@ -333,6 +363,7 @@ Página de perfil del usuario.
 - `Avatar`, `Progress`, `Button`, `Input`
 
 **Funcionalidad:**
+
 - Usa `useProfilePage()` composable
 - Carga perfil del usuario
 - Modo edición con formulario completo
@@ -343,6 +374,7 @@ Página de perfil del usuario.
 - Guarda cambios con validación
 
 **Funcionalidad de Banner:**
+
 - Banner se muestra en la parte superior del perfil
 - En modo edición, permite subir nuevo banner
 - Modal de recorte permite ajustar posición y zoom
@@ -359,12 +391,14 @@ Página de perfil del usuario.
 Página de configuración.
 
 **Características:**
+
 - Habilitar/deshabilitar módulos
 - Información de módulos
 - Acciones rápidas
 - Confirmación al deshabilitar
 
 **Componentes utilizados:**
+
 - `SettingsHeader`
 - `ModuleList`
 - `ModuleCard`
@@ -373,6 +407,7 @@ Página de configuración.
 - `QuickActions`
 
 **Funcionalidad:**
+
 - Gestiona módulos habilitados
 - Muestra información de cada módulo
 - Confirma antes de deshabilitar módulos
@@ -388,6 +423,7 @@ Página de configuración.
 Página de error 404 (No encontrado).
 
 **Características:**
+
 - Diseño consistente con la aplicación
 - Mensaje de error amigable
 - Botón para volver al inicio
@@ -402,6 +438,7 @@ Página de error 404 (No encontrado).
 Página de error 500 (Error del servidor).
 
 **Características:**
+
 - Diseño consistente
 - Mensaje de error
 - Opciones de recuperación
@@ -415,6 +452,7 @@ Página de error 500 (Error del servidor).
 Página de error global de Nuxt.
 
 **Características:**
+
 - Captura errores no manejados
 - Muestra información del error
 - Opciones de navegación
@@ -430,6 +468,7 @@ Página de error global de Nuxt.
 Middleware global que protege todas las rutas.
 
 **Funcionalidad:**
+
 - Verifica autenticación en cada navegación
 - Redirige a `/login` si no está autenticado
 - Redirige a `/onboarding` si no ha completado la configuración
@@ -437,10 +476,12 @@ Middleware global que protege todas las rutas.
 - Gestiona sesiones de Supabase
 
 **Rutas públicas:**
+
 - `/login`
 - `/register`
 
 **Lógica:**
+
 1. Si no hay sesión y no es ruta pública → redirige a `/login`
 2. Si hay sesión y es ruta pública → redirige a `/`
 3. Si está autenticado pero no tiene módulos → redirige a `/onboarding`
@@ -456,10 +497,11 @@ La navegación se genera dinámicamente basándose en los módulos habilitados:
 
 ```typescript
 // app/utils/nav-items.ts
-export function getAllNavItems(modulesStore: ModulesStore): NavItem[]
+export function getAllNavItems(modulesStore: ModulesStore): NavItem[];
 ```
 
 **Módulos disponibles:**
+
 - Inicio (siempre visible)
 - Entrenamientos (si está habilitado)
 - Manga (si está habilitado)
@@ -491,8 +533,8 @@ Actualmente no hay rutas dinámicas, pero la estructura permite añadirlas fáci
 ```vue
 <!-- app/pages/anime/[id].vue -->
 <script setup>
-const route = useRoute()
-const animeId = route.params.id
+const route = useRoute();
+const animeId = route.params.id;
 </script>
 ```
 
@@ -530,5 +572,3 @@ const animeId = route.params.id
 ---
 
 **Última actualización**: Enero 2025
-
-

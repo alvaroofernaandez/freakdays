@@ -37,6 +37,7 @@ Documentación completa de todos los composables Vue utilizados en FreakDays. Lo
 ## useSupabase
 
 Proporciona el cliente de Supabase configurado. Se usa principalmente para:
+
 - Autenticación (Supabase Auth)
 - Storage (avatares, banners)
 - Funciones RPC específicas de Supabase
@@ -48,7 +49,7 @@ Proporciona el cliente de Supabase configurado. Se usa principalmente para:
 ### Uso
 
 ```typescript
-const supabase = useSupabase()
+const supabase = useSupabase();
 ```
 
 ### Retorna
@@ -59,13 +60,11 @@ const supabase = useSupabase()
 
 ```typescript
 // Storage
-const supabase = useSupabase()
-const { data, error } = await supabase.storage
-  .from('avatars')
-  .upload('path/to/file', file)
+const supabase = useSupabase();
+const { data, error } = await supabase.storage.from('avatars').upload('path/to/file', file);
 
 // RPC Functions
-const { data } = await supabase.rpc('check_overdue_quests')
+const { data } = await supabase.rpc('check_overdue_quests');
 ```
 
 ---
@@ -83,8 +82,8 @@ Gestiona la autenticación del usuario.
 Inicializa el sistema de autenticación y configura listeners.
 
 ```typescript
-const auth = useAuth()
-await auth.initialize()
+const auth = useAuth();
+await auth.initialize();
 ```
 
 #### `signUp(email: string, password: string)`
@@ -92,7 +91,7 @@ await auth.initialize()
 Registra un nuevo usuario.
 
 ```typescript
-await auth.signUp('user@example.com', 'password123')
+await auth.signUp('user@example.com', 'password123');
 ```
 
 #### `signIn(email: string, password: string)`
@@ -100,7 +99,7 @@ await auth.signUp('user@example.com', 'password123')
 Inicia sesión con email y contraseña.
 
 ```typescript
-await auth.signIn('user@example.com', 'password123')
+await auth.signIn('user@example.com', 'password123');
 ```
 
 #### `signOut()`
@@ -108,7 +107,7 @@ await auth.signIn('user@example.com', 'password123')
 Cierra la sesión del usuario.
 
 ```typescript
-await auth.signOut()
+await auth.signOut();
 ```
 
 ### Retorna
@@ -132,21 +131,21 @@ Gestiona el perfil del usuario. Las operaciones CRUD se ejecutan a través de AP
 
 ```typescript
 interface UserProfile {
-  id: string
-  username: string | null
-  displayName: string | null
-  avatarUrl: string | null
-  bannerUrl: string | null
-  totalExp: number
-  level: number
-  bio: string | null
-  favoriteAnimeId: string | null
-  favoriteMangaId: string | null
-  location: string | null
-  website: string | null
-  socialLinks: Record<string, string>
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  username: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
+  bannerUrl: string | null;
+  totalExp: number;
+  level: number;
+  bio: string | null;
+  favoriteAnimeId: string | null;
+  favoriteMangaId: string | null;
+  location: string | null;
+  website: string | null;
+  socialLinks: Record<string, string>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
@@ -157,8 +156,8 @@ interface UserProfile {
 Obtiene el perfil del usuario actual. Llama a `GET /api/profile/:id`.
 
 ```typescript
-const profileApi = useProfile()
-const profile = await profileApi.fetchProfile()
+const profileApi = useProfile();
+const profile = await profileApi.fetchProfile();
 ```
 
 #### `updateProfile(data: Partial<UserProfile>)`
@@ -168,8 +167,8 @@ Actualiza el perfil del usuario. Llama a `PUT /api/profile/:id`.
 ```typescript
 await profileApi.updateProfile({
   displayName: 'Nuevo Nombre',
-  bio: 'Mi biografía'
-})
+  bio: 'Mi biografía',
+});
 ```
 
 #### `uploadAvatar(file: File)`
@@ -177,8 +176,8 @@ await profileApi.updateProfile({
 Sube un avatar del usuario.
 
 ```typescript
-const file = event.target.files[0]
-const avatarUrl = await profileApi.uploadAvatar(file)
+const file = event.target.files[0];
+const avatarUrl = await profileApi.uploadAvatar(file);
 ```
 
 #### `deleteAvatar()`
@@ -186,7 +185,7 @@ const avatarUrl = await profileApi.uploadAvatar(file)
 Elimina el avatar del usuario.
 
 ```typescript
-await profileApi.deleteAvatar()
+await profileApi.deleteAvatar();
 ```
 
 #### `uploadBanner(file: File)`
@@ -194,8 +193,8 @@ await profileApi.deleteAvatar()
 Sube un banner del usuario con recorte automático.
 
 ```typescript
-const file = event.target.files[0]
-const bannerUrl = await profileApi.uploadBanner(file)
+const file = event.target.files[0];
+const bannerUrl = await profileApi.uploadBanner(file);
 ```
 
 **Nota**: La imagen se sube al bucket `banners` de Supabase Storage. Se recomienda usar `BannerCropModal` para recortar la imagen antes de subirla.
@@ -205,7 +204,7 @@ const bannerUrl = await profileApi.uploadBanner(file)
 Elimina el banner del usuario.
 
 ```typescript
-await profileApi.deleteBanner()
+await profileApi.deleteBanner();
 ```
 
 #### `expForNextLevel(currentExp: number)`
@@ -213,7 +212,7 @@ await profileApi.deleteBanner()
 Calcula el progreso de EXP para el siguiente nivel.
 
 ```typescript
-const progress = profileApi.expForNextLevel(profile.totalExp)
+const progress = profileApi.expForNextLevel(profile.totalExp);
 // Retorna: { current: number, needed: number, progress: number }
 ```
 
@@ -240,29 +239,35 @@ Gestiona la lista de anime del usuario. Todas las operaciones se ejecutan a trav
 ### Tipos
 
 ```typescript
-type AnimeStatus = 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch' | 'rewatching'
+type AnimeStatus =
+  | 'watching'
+  | 'completed'
+  | 'on_hold'
+  | 'dropped'
+  | 'plan_to_watch'
+  | 'rewatching';
 
 interface AnimeEntry {
-  id: string
-  title: string
-  status: AnimeStatus
-  currentEpisode: number
-  totalEpisodes: number | null
-  score: number | null
-  notes: string | null
-  coverUrl: string | null
-  startDate: Date | null
-  endDate: Date | null
-  rewatchCount: number
+  id: string;
+  title: string;
+  status: AnimeStatus;
+  currentEpisode: number;
+  totalEpisodes: number | null;
+  score: number | null;
+  notes: string | null;
+  coverUrl: string | null;
+  startDate: Date | null;
+  endDate: Date | null;
+  rewatchCount: number;
 }
 
 interface CreateAnimeDTO {
-  title: string
-  status: AnimeStatus
-  total_episodes?: number
-  score?: number
-  cover_url?: string
-  notes?: string
+  title: string;
+  status: AnimeStatus;
+  total_episodes?: number;
+  score?: number;
+  cover_url?: string;
+  notes?: string;
 }
 ```
 
@@ -273,8 +278,8 @@ interface CreateAnimeDTO {
 Obtiene toda la lista de anime del usuario. Llama a `GET /api/anime`.
 
 ```typescript
-const animeApi = useAnime()
-const animeList = await animeApi.fetchAnimeList()
+const animeApi = useAnime();
+const animeList = await animeApi.fetchAnimeList();
 ```
 
 #### `fetchByStatus(status: AnimeStatus)`
@@ -282,7 +287,7 @@ const animeList = await animeApi.fetchAnimeList()
 Obtiene anime filtrado por estado. Llama a `GET /api/anime?status=...`.
 
 ```typescript
-const watching = await animeApi.fetchByStatus('watching')
+const watching = await animeApi.fetchByStatus('watching');
 ```
 
 #### `addAnime(dto: CreateAnimeDTO)`
@@ -293,8 +298,8 @@ Añade un nuevo anime a la lista. Llama a `POST /api/anime`.
 await animeApi.addAnime({
   title: 'One Piece',
   status: 'watching',
-  total_episodes: 1000
-})
+  total_episodes: 1000,
+});
 ```
 
 #### `updateProgress(id: string, episode: number)`
@@ -302,7 +307,7 @@ await animeApi.addAnime({
 Actualiza el progreso de episodios. Llama a `PATCH /api/anime/:id`.
 
 ```typescript
-await animeApi.updateProgress(animeId, 50)
+await animeApi.updateProgress(animeId, 50);
 ```
 
 #### `updateStatus(id: string, status: AnimeStatus)`
@@ -310,7 +315,7 @@ await animeApi.updateProgress(animeId, 50)
 Actualiza el estado del anime. Llama a `PATCH /api/anime/:id`.
 
 ```typescript
-await animeApi.updateStatus(animeId, 'completed')
+await animeApi.updateStatus(animeId, 'completed');
 ```
 
 #### `deleteAnime(id: string)`
@@ -318,7 +323,7 @@ await animeApi.updateStatus(animeId, 'completed')
 Elimina un anime de la lista. Llama a `DELETE /api/anime/:id`.
 
 ```typescript
-await animeApi.deleteAnime(animeId)
+await animeApi.deleteAnime(animeId);
 ```
 
 ### Notas
@@ -339,18 +344,18 @@ Gestiona la búsqueda de anime mediante Jikan API.
 
 ```typescript
 interface AnimeSearchResult {
-  mal_id: number
-  title: string
-  title_english: string | null
-  title_japanese: string | null
+  mal_id: number;
+  title: string;
+  title_english: string | null;
+  title_japanese: string | null;
   images: {
-    jpg: { image_url: string; small_image_url: string; large_image_url: string }
-    webp: { image_url: string; small_image_url: string; large_image_url: string }
-  }
-  synopsis: string | null
-  type: string
-  episodes: number | null
-  score: number | null
+    jpg: { image_url: string; small_image_url: string; large_image_url: string };
+    webp: { image_url: string; small_image_url: string; large_image_url: string };
+  };
+  synopsis: string | null;
+  type: string;
+  episodes: number | null;
+  score: number | null;
   // ... más campos
 }
 ```
@@ -369,8 +374,8 @@ interface AnimeSearchResult {
 Busca anime con debounce automático (500ms).
 
 ```typescript
-const animeSearch = useAnimeSearch()
-animeSearch.debouncedSearch('One Piece')
+const animeSearch = useAnimeSearch();
+animeSearch.debouncedSearch('One Piece');
 ```
 
 #### `searchAnime(query: string, page?: number)`
@@ -378,7 +383,7 @@ animeSearch.debouncedSearch('One Piece')
 Busca anime directamente.
 
 ```typescript
-await animeSearch.searchAnime('Naruto', 1)
+await animeSearch.searchAnime('Naruto', 1);
 ```
 
 #### `loadMoreResults()`
@@ -386,7 +391,7 @@ await animeSearch.searchAnime('Naruto', 1)
 Carga la siguiente página de resultados.
 
 ```typescript
-await animeSearch.loadMoreResults()
+await animeSearch.loadMoreResults();
 ```
 
 #### `clearSearch()`
@@ -394,7 +399,7 @@ await animeSearch.loadMoreResults()
 Limpia la búsqueda actual.
 
 ```typescript
-animeSearch.clearSearch()
+animeSearch.clearSearch();
 ```
 
 #### `getAnimeDetails(malId: number)`
@@ -402,7 +407,7 @@ animeSearch.clearSearch()
 Obtiene detalles completos de un anime.
 
 ```typescript
-const details = await animeSearch.getAnimeDetails(12345)
+const details = await animeSearch.getAnimeDetails(12345);
 ```
 
 ---
@@ -418,28 +423,28 @@ Gestiona la colección de manga del usuario. Todas las operaciones se ejecutan a
 ### Tipos
 
 ```typescript
-type MangaStatus = 'collecting' | 'completed' | 'dropped' | 'wishlist'
+type MangaStatus = 'collecting' | 'completed' | 'dropped' | 'wishlist';
 
 interface MangaEntry {
-  id: string
-  title: string
-  author: string | null
-  totalVolumes: number | null
-  ownedVolumes: number[]
-  status: MangaStatus
-  score: number | null
-  notes: string | null
-  coverUrl: string | null
-  pricePerVolume: number | null
-  totalCost: number
+  id: string;
+  title: string;
+  author: string | null;
+  totalVolumes: number | null;
+  ownedVolumes: number[];
+  status: MangaStatus;
+  score: number | null;
+  notes: string | null;
+  coverUrl: string | null;
+  pricePerVolume: number | null;
+  totalCost: number;
 }
 
 interface CreateMangaDTO {
-  title: string
-  author?: string
-  total_volumes?: number
-  status?: MangaStatus
-  price_per_volume?: number
+  title: string;
+  author?: string;
+  total_volumes?: number;
+  status?: MangaStatus;
+  price_per_volume?: number;
 }
 ```
 
@@ -450,8 +455,8 @@ interface CreateMangaDTO {
 Obtiene toda la colección de manga. Llama a `GET /api/manga`.
 
 ```typescript
-const mangaApi = useManga()
-const collection = await mangaApi.fetchCollection()
+const mangaApi = useManga();
+const collection = await mangaApi.fetchCollection();
 ```
 
 #### `addManga(dto: CreateMangaDTO)`
@@ -463,8 +468,8 @@ await mangaApi.addManga({
   title: 'One Piece',
   total_volumes: 100,
   status: 'collecting',
-  price_per_volume: 8.99
-})
+  price_per_volume: 8.99,
+});
 ```
 
 #### `addVolume(id: string, volume: number)`
@@ -472,7 +477,7 @@ await mangaApi.addManga({
 Añade un volumen a la colección. Llama a `PATCH /api/manga/:id`.
 
 ```typescript
-await mangaApi.addVolume(mangaId, 5)
+await mangaApi.addVolume(mangaId, 5);
 ```
 
 #### `removeVolume(id: string, volume: number)`
@@ -480,7 +485,7 @@ await mangaApi.addVolume(mangaId, 5)
 Elimina un volumen de la colección. Llama a `PATCH /api/manga/:id`.
 
 ```typescript
-await mangaApi.removeVolume(mangaId, 5)
+await mangaApi.removeVolume(mangaId, 5);
 ```
 
 #### `updatePricePerVolume(id: string, price: number)`
@@ -488,7 +493,7 @@ await mangaApi.removeVolume(mangaId, 5)
 Actualiza el precio por volumen. Llama a `PATCH /api/manga/:id`.
 
 ```typescript
-await mangaApi.updatePricePerVolume(mangaId, 9.99)
+await mangaApi.updatePricePerVolume(mangaId, 9.99);
 ```
 
 #### `updateStatus(id: string, status: MangaStatus)`
@@ -496,7 +501,7 @@ await mangaApi.updatePricePerVolume(mangaId, 9.99)
 Actualiza el estado del manga. Si se marca como 'completed', añade automáticamente todos los volúmenes faltantes. Llama a `PATCH /api/manga/:id`.
 
 ```typescript
-await mangaApi.updateStatus(mangaId, 'completed')
+await mangaApi.updateStatus(mangaId, 'completed');
 ```
 
 #### `deleteManga(id: string)`
@@ -504,7 +509,7 @@ await mangaApi.updateStatus(mangaId, 'completed')
 Elimina un manga de la colección. Llama a `DELETE /api/manga/:id`.
 
 ```typescript
-await mangaApi.deleteManga(mangaId)
+await mangaApi.deleteManga(mangaId);
 ```
 
 ### Notas
@@ -526,35 +531,35 @@ Gestiona las misiones diarias (quests) del usuario. Las operaciones CRUD se ejec
 ### Tipos
 
 ```typescript
-type QuestDifficulty = 'easy' | 'medium' | 'hard' | 'legendary'
+type QuestDifficulty = 'easy' | 'medium' | 'hard' | 'legendary';
 
 interface Quest {
-  id: string
-  title: string
-  description: string
-  difficulty: QuestDifficulty
-  exp: number
-  status: 'pending' | 'completed' | 'failed'
-  streak: number
-  dueDate: Date | null
-  dueTime: string | null
-  reminderMinutesBefore: number | null
-  createdAt: Date
-  completedAt: Date | null
-  isOverdue?: boolean
-  isDueSoon?: boolean
+  id: string;
+  title: string;
+  description: string;
+  difficulty: QuestDifficulty;
+  exp: number;
+  status: 'pending' | 'completed' | 'failed';
+  streak: number;
+  dueDate: Date | null;
+  dueTime: string | null;
+  reminderMinutesBefore: number | null;
+  createdAt: Date;
+  completedAt: Date | null;
+  isOverdue?: boolean;
+  isDueSoon?: boolean;
 }
 
 interface CreateQuestDTO {
-  title: string
-  description?: string
-  difficulty: QuestDifficulty
-  exp_reward: number
-  is_recurring?: boolean
-  recurrence_pattern?: string
-  due_date?: string
-  due_time?: string
-  reminder_minutes_before?: number
+  title: string;
+  description?: string;
+  difficulty: QuestDifficulty;
+  exp_reward: number;
+  is_recurring?: boolean;
+  recurrence_pattern?: string;
+  due_date?: string;
+  due_time?: string;
+  reminder_minutes_before?: number;
 }
 ```
 
@@ -565,8 +570,8 @@ interface CreateQuestDTO {
 Obtiene todas las quests activas del usuario. Llama a `GET /api/quests`.
 
 ```typescript
-const questsApi = useQuests()
-const quests = await questsApi.fetchQuests()
+const questsApi = useQuests();
+const quests = await questsApi.fetchQuests();
 ```
 
 #### `fetchTodayCompletions()`
@@ -574,7 +579,7 @@ const quests = await questsApi.fetchQuests()
 Obtiene los IDs de las quests completadas hoy.
 
 ```typescript
-const completedIds = await questsApi.fetchTodayCompletions()
+const completedIds = await questsApi.fetchTodayCompletions();
 ```
 
 #### `createQuest(dto: CreateQuestDTO)`
@@ -586,8 +591,8 @@ await questsApi.createQuest({
   title: 'Hacer ejercicio',
   difficulty: 'medium',
   exp_reward: 25,
-  due_date: '2025-01-15'
-})
+  due_date: '2025-01-15',
+});
 ```
 
 #### `completeQuest(questId: string, streakCount?: number)`
@@ -595,7 +600,7 @@ await questsApi.createQuest({
 Completa una quest y otorga EXP usando transacciones de Prisma. Llama a `POST /api/quests/:id/complete`.
 
 ```typescript
-const expEarned = await questsApi.completeQuest(questId, 1)
+const expEarned = await questsApi.completeQuest(questId, 1);
 ```
 
 #### `deleteQuest(questId: string)`
@@ -603,7 +608,7 @@ const expEarned = await questsApi.completeQuest(questId, 1)
 Elimina una quest (soft delete). Llama a `PATCH /api/quests/:id`.
 
 ```typescript
-await questsApi.deleteQuest(questId)
+await questsApi.deleteQuest(questId);
 ```
 
 ### Notas
@@ -627,8 +632,8 @@ Gestiona los entrenamientos del usuario.
 Obtiene todos los entrenamientos del usuario.
 
 ```typescript
-const workoutsApi = useWorkouts()
-const workouts = await workoutsApi.fetchWorkouts()
+const workoutsApi = useWorkouts();
+const workouts = await workoutsApi.fetchWorkouts();
 ```
 
 #### `createWorkout(data: CreateWorkoutDTO)`
@@ -639,8 +644,8 @@ Crea un nuevo entrenamiento.
 await workoutsApi.createWorkout({
   name: 'Entrenamiento de piernas',
   workout_date: '2025-01-15',
-  duration_minutes: 60
-})
+  duration_minutes: 60,
+});
 ```
 
 #### `startWorkout(workoutId: string)`
@@ -648,7 +653,7 @@ await workoutsApi.createWorkout({
 Inicia un entrenamiento (cambia status a 'in_progress').
 
 ```typescript
-await workoutsApi.startWorkout(workoutId)
+await workoutsApi.startWorkout(workoutId);
 ```
 
 #### `completeWorkout(workoutId: string)`
@@ -656,7 +661,7 @@ await workoutsApi.startWorkout(workoutId)
 Completa un entrenamiento.
 
 ```typescript
-await workoutsApi.completeWorkout(workoutId)
+await workoutsApi.completeWorkout(workoutId);
 ```
 
 ---
@@ -671,27 +676,27 @@ Gestiona los grupos/parties del usuario.
 
 ```typescript
 interface Party {
-  id: string
-  name: string
-  description: string | null
-  inviteCode: string | null
-  ownerId: string
-  maxMembers: number
-  createdAt: Date
-  members: PartyMember[]
+  id: string;
+  name: string;
+  description: string | null;
+  inviteCode: string | null;
+  ownerId: string;
+  maxMembers: number;
+  createdAt: Date;
+  members: PartyMember[];
 }
 
 interface PartyMember {
-  id: string
-  partyId: string
-  userId: string
-  role: 'owner' | 'admin' | 'member'
-  joinedAt: Date
+  id: string;
+  partyId: string;
+  userId: string;
+  role: 'owner' | 'admin' | 'member';
+  joinedAt: Date;
   profile?: {
-    username: string
-    displayName: string | null
-    avatarUrl: string | null
-  }
+    username: string;
+    displayName: string | null;
+    avatarUrl: string | null;
+  };
 }
 ```
 
@@ -702,8 +707,8 @@ interface PartyMember {
 Obtiene todos los parties del usuario actual.
 
 ```typescript
-const partiesApi = useParties()
-const parties = await partiesApi.fetchUserParties()
+const partiesApi = useParties();
+const parties = await partiesApi.fetchUserParties();
 ```
 
 #### `createParty(name: string, description?: string)`
@@ -711,7 +716,7 @@ const parties = await partiesApi.fetchUserParties()
 Crea un nuevo party con código de invitación.
 
 ```typescript
-const party = await partiesApi.createParty('Mi Grupo', 'Descripción opcional')
+const party = await partiesApi.createParty('Mi Grupo', 'Descripción opcional');
 ```
 
 #### `joinByCode(inviteCode: string)`
@@ -719,7 +724,7 @@ const party = await partiesApi.createParty('Mi Grupo', 'Descripción opcional')
 Se une a un party mediante código de invitación.
 
 ```typescript
-const success = await partiesApi.joinByCode('ABC123')
+const success = await partiesApi.joinByCode('ABC123');
 ```
 
 #### `leaveParty(partyId: string)`
@@ -727,7 +732,7 @@ const success = await partiesApi.joinByCode('ABC123')
 Abandona un party.
 
 ```typescript
-await partiesApi.leaveParty(partyId)
+await partiesApi.leaveParty(partyId);
 ```
 
 #### `regenerateInviteCode(partyId: string)`
@@ -735,7 +740,7 @@ await partiesApi.leaveParty(partyId)
 Regenera el código de invitación de un party.
 
 ```typescript
-const newCode = await partiesApi.regenerateInviteCode(partyId)
+const newCode = await partiesApi.regenerateInviteCode(partyId);
 ```
 
 #### `removeMember(partyId: string, memberId: string)`
@@ -743,7 +748,7 @@ const newCode = await partiesApi.regenerateInviteCode(partyId)
 Elimina un miembro del party (solo owner/admin).
 
 ```typescript
-await partiesApi.removeMember(partyId, memberId)
+await partiesApi.removeMember(partyId, memberId);
 ```
 
 ---
@@ -757,23 +762,23 @@ Gestiona el calendario de lanzamientos y eventos.
 ### Tipos
 
 ```typescript
-type ReleaseType = "anime_episode" | "manga_volume" | "event" | "movie" | "game"
+type ReleaseType = 'anime_episode' | 'manga_volume' | 'event' | 'movie' | 'game';
 
 interface Release {
-  id: string
-  title: string
-  type: ReleaseType
-  releaseDate: Date
-  description: string | null
-  url: string | null
+  id: string;
+  title: string;
+  type: ReleaseType;
+  releaseDate: Date;
+  description: string | null;
+  url: string | null;
 }
 
 interface CreateReleaseDTO {
-  title: string
-  type: ReleaseType
-  release_date: string
-  description?: string
-  url?: string
+  title: string;
+  type: ReleaseType;
+  release_date: string;
+  description?: string;
+  url?: string;
 }
 ```
 
@@ -784,8 +789,8 @@ interface CreateReleaseDTO {
 Obtiene todos los eventos del calendario del usuario.
 
 ```typescript
-const calendarApi = useCalendar()
-const releases = await calendarApi.fetchReleases()
+const calendarApi = useCalendar();
+const releases = await calendarApi.fetchReleases();
 ```
 
 #### `fetchUpcoming(daysAhead?: number)`
@@ -793,7 +798,7 @@ const releases = await calendarApi.fetchReleases()
 Obtiene los eventos próximos.
 
 ```typescript
-const upcoming = await calendarApi.fetchUpcoming(30) // Próximos 30 días
+const upcoming = await calendarApi.fetchUpcoming(30); // Próximos 30 días
 ```
 
 #### `addRelease(dto: CreateReleaseDTO)`
@@ -806,8 +811,8 @@ const release = await calendarApi.addRelease({
   type: 'anime_episode',
   release_date: '2025-01-20',
   description: 'Nuevo episodio',
-  url: 'https://...'
-})
+  url: 'https://...',
+});
 ```
 
 #### `updateRelease(id: string, dto: Partial<CreateReleaseDTO>)`
@@ -816,8 +821,8 @@ Actualiza un evento existente (útil para drag and drop).
 
 ```typescript
 await calendarApi.updateRelease(eventId, {
-  release_date: '2025-01-21'
-})
+  release_date: '2025-01-21',
+});
 ```
 
 #### `deleteRelease(id: string)`
@@ -825,7 +830,7 @@ await calendarApi.updateRelease(eventId, {
 Elimina un evento del calendario.
 
 ```typescript
-await calendarApi.deleteRelease(eventId)
+await calendarApi.deleteRelease(eventId);
 ```
 
 #### `normalizeDate(date: Date)`
@@ -833,7 +838,7 @@ await calendarApi.deleteRelease(eventId)
 Normaliza una fecha a las 12:00 PM para evitar problemas de zona horaria.
 
 ```typescript
-const normalized = calendarApi.normalizeDate(new Date())
+const normalized = calendarApi.normalizeDate(new Date());
 ```
 
 ---
@@ -851,8 +856,8 @@ Gestiona las notificaciones toast.
 Muestra un toast de éxito.
 
 ```typescript
-const toast = useToast()
-toast.success('Operación exitosa')
+const toast = useToast();
+toast.success('Operación exitosa');
 ```
 
 #### `error(message: string)`
@@ -860,7 +865,7 @@ toast.success('Operación exitosa')
 Muestra un toast de error.
 
 ```typescript
-toast.error('Ha ocurrido un error')
+toast.error('Ha ocurrido un error');
 ```
 
 #### `info(message: string)`
@@ -868,7 +873,7 @@ toast.error('Ha ocurrido un error')
 Muestra un toast informativo.
 
 ```typescript
-toast.info('Información importante')
+toast.info('Información importante');
 ```
 
 ---
@@ -886,11 +891,11 @@ Gestiona el manejo centralizado de errores.
 Maneja un error de forma centralizada.
 
 ```typescript
-const errorHandler = useErrorHandler()
+const errorHandler = useErrorHandler();
 try {
   // código que puede fallar
 } catch (error) {
-  errorHandler.handleError(error)
+  errorHandler.handleError(error);
 }
 ```
 
@@ -900,8 +905,8 @@ Envuelve una función async para manejo automático de errores.
 
 ```typescript
 await errorHandler.handleAsyncError(async () => {
-  await someAsyncOperation()
-})
+  await someAsyncOperation();
+});
 ```
 
 ---
@@ -920,8 +925,8 @@ Composable genérico para cargar datos de página con estado de carga y error.
 const { data, loading, error, reload } = usePageData({
   fetcher: () => api.fetchData(),
   immediate: true,
-  onError: (err) => console.error(err)
-})
+  onError: (err) => console.error(err),
+});
 ```
 
 ### useModal
@@ -931,9 +936,9 @@ Composable para gestionar el estado de modales.
 **Ubicación**: `app/composables/useModal.ts`
 
 ```typescript
-const modal = useModal()
-modal.open()
-modal.close()
+const modal = useModal();
+modal.open();
+modal.close();
 // modal.isOpen.value es un ref<boolean>
 ```
 
@@ -944,6 +949,7 @@ Lógica de la página principal (dashboard).
 **Ubicación**: `app/composables/useIndexPage.ts`
 
 Retorna:
+
 - `profile`: Perfil del usuario
 - `modules`: Módulos habilitados
 - `loading`: Estado de carga
@@ -955,6 +961,7 @@ Lógica de la página de anime.
 **Ubicación**: `app/composables/useAnimePage.ts`
 
 Retorna:
+
 - `animeList`: Lista de anime
 - `activeView`: Vista activa ('list' | 'marketplace')
 - `activeTab`: Tab activo
@@ -969,6 +976,7 @@ Lógica de la página de manga.
 **Ubicación**: `app/composables/useMangaPage.ts`
 
 Retorna:
+
 - `mangaCollection`: Colección de manga
 - `activeTab`: Tab activo
 - `filteredMangas`: Mangas filtrados
@@ -981,6 +989,7 @@ Lógica de la página de quests.
 **Ubicación**: `app/composables/useQuestsPage.ts`
 
 Retorna:
+
 - `quests`: Quests activas
 - `completedIds`: IDs de quests completadas hoy
 - `notifications`: Notificaciones de quests
@@ -993,6 +1002,7 @@ Lógica de la página de workouts.
 **Ubicación**: `app/composables/useWorkoutsPage.ts`
 
 Retorna:
+
 - `workouts`: Entrenamientos completados
 - `currentWorkout`: Entrenamiento en curso
 - `stats`: Estadísticas semanales
@@ -1005,6 +1015,7 @@ Lógica de la página de party.
 **Ubicación**: `app/composables/usePartyPage.ts`
 
 Retorna:
+
 - `parties`: Parties del usuario
 - `loading`: Estado de carga
 - Modales para crear, unirse, gestionar
@@ -1017,6 +1028,7 @@ Lógica de la página de calendario.
 **Ubicación**: `app/composables/useCalendarPage.ts`
 
 Retorna:
+
 - `releases`: Eventos del calendario (computed)
 - `loading`: Estado de carga
 - `modal`: Modal para añadir eventos
@@ -1037,6 +1049,7 @@ Lógica de la página de perfil.
 **Ubicación**: `app/composables/useProfilePage.ts`
 
 Retorna:
+
 - `profile`: Perfil del usuario (computed)
 - `loading`: Estado de carga
 - `saving`: Estado de guardado
@@ -1081,6 +1094,7 @@ Lógica de la página de registro.
 **Ubicación**: `app/composables/useRegisterPage.ts`
 
 Retorna:
+
 - `form`: Formulario de registro
 - `passwordStrength`: Fortaleza de contraseña
 - `strengthLabel`: Etiqueta de fortaleza
@@ -1095,7 +1109,7 @@ Composable para transiciones de página.
 **Ubicación**: `app/composables/usePageTransition.ts`
 
 ```typescript
-const { transition } = usePageTransition()
+const { transition } = usePageTransition();
 ```
 
 ---
@@ -1107,8 +1121,8 @@ const { transition } = usePageTransition()
 Todos los composables que necesitan el usuario actual utilizan `useAuthStore`:
 
 ```typescript
-const authStore = useAuthStore()
-if (!authStore.userId) return []
+const authStore = useAuthStore();
+if (!authStore.userId) return [];
 ```
 
 ### Manejo de Errores
@@ -1117,9 +1131,9 @@ Los composables lanzan errores que deben ser capturados:
 
 ```typescript
 try {
-  const anime = await animeApi.addAnime(dto)
+  const anime = await animeApi.addAnime(dto);
 } catch (error) {
-  toast.error('Error al añadir anime')
+  toast.error('Error al añadir anime');
 }
 ```
 
@@ -1133,12 +1147,10 @@ function mapDbToAnime(data: any): AnimeEntry {
     id: data.id,
     title: data.title,
     // ... transformación
-  }
+  };
 }
 ```
 
 ---
 
 **Última actualización**: Enero 2025
-
-

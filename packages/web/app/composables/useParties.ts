@@ -1,5 +1,5 @@
-import { useAuthStore } from "~~/stores/auth";
-import { useToast } from "@/composables/useToast";
+import { useAuthStore } from '~~/stores/auth';
+import { useToast } from '@/composables/useToast';
 
 export interface Party {
   id: string;
@@ -16,7 +16,7 @@ export interface PartyMember {
   id: string;
   partyId: string;
   userId: string;
-  role: "owner" | "admin" | "member";
+  role: 'owner' | 'admin' | 'member';
   joinedAt: Date;
   profile?: {
     username: string;
@@ -29,7 +29,7 @@ interface ApiPartyMember {
   id: string;
   partyId: string;
   userId: string;
-  role: "owner" | "admin" | "member";
+  role: 'owner' | 'admin' | 'member';
   joinedAt: string;
   profile?: {
     username: string;
@@ -84,10 +84,10 @@ export function useParties() {
           profile: member.profile,
         }))
         .sort((a, b) => {
-          if (a.role === "owner") return -1;
-          if (b.role === "owner") return 1;
-          if (a.role === "admin") return -1;
-          if (b.role === "admin") return 1;
+          if (a.role === 'owner') return -1;
+          if (b.role === 'owner') return 1;
+          if (a.role === 'admin') return -1;
+          if (b.role === 'admin') return 1;
           return a.joinedAt.getTime() - b.joinedAt.getTime();
         }),
     };
@@ -99,7 +99,7 @@ export function useParties() {
     await refreshAuthContext();
 
     try {
-      const parties = await apiClient.get<ApiParty[]>("/v1/party", {
+      const parties = await apiClient.get<ApiParty[]>('/v1/party', {
         requireOrg: true,
       });
 
@@ -111,17 +111,17 @@ export function useParties() {
 
   async function createParty(name: string, description?: string): Promise<Party | null> {
     if (!authStore.userId) {
-      toast.error("Debes estar autenticado para crear una party");
+      toast.error('Debes estar autenticado para crear una party');
       return null;
     }
 
     if (!name.trim()) {
-      toast.error("El nombre de la party es obligatorio");
+      toast.error('El nombre de la party es obligatorio');
       return null;
     }
 
     if (name.length > 50) {
-      toast.error("El nombre no puede tener más de 50 caracteres");
+      toast.error('El nombre no puede tener más de 50 caracteres');
       return null;
     }
 
@@ -129,33 +129,33 @@ export function useParties() {
 
     try {
       const created = await apiClient.post<ApiParty>(
-        "/v1/party",
+        '/v1/party',
         {
           name: name.trim(),
           description: description?.trim() || null,
         },
-        { requireOrg: true }
+        { requireOrg: true },
       );
 
       const party = mapApiToParty(created);
-      toast.success("Party creada correctamente");
+      toast.success('Party creada correctamente');
       return party;
     } catch (error) {
       const normalized = apiClient.normalizeApiError(error);
-      toast.error(normalized.message || "Error al crear la party");
+      toast.error(normalized.message || 'Error al crear la party');
       return null;
     }
   }
 
   async function joinByCode(code: string): Promise<Party | null> {
     if (!authStore.userId) {
-      toast.error("Debes estar autenticado para unirte a una party");
+      toast.error('Debes estar autenticado para unirte a una party');
       return null;
     }
 
     const normalizedCode = code.trim().toUpperCase();
     if (normalizedCode.length !== 6) {
-      toast.error("El código debe tener 6 caracteres");
+      toast.error('El código debe tener 6 caracteres');
       return null;
     }
 
@@ -163,9 +163,9 @@ export function useParties() {
 
     try {
       const joined = await apiClient.post<ApiParty>(
-        "/v1/party/join",
+        '/v1/party/join',
         { inviteCode: normalizedCode },
-        { requireOrg: true }
+        { requireOrg: true },
       );
 
       const party = mapApiToParty(joined);
@@ -173,7 +173,7 @@ export function useParties() {
       return party;
     } catch (error) {
       const normalized = apiClient.normalizeApiError(error);
-      toast.error(normalized.message || "Error al unirte a la party");
+      toast.error(normalized.message || 'Error al unirte a la party');
       return null;
     }
   }
@@ -194,31 +194,29 @@ export function useParties() {
 
   async function leaveParty(partyId: string): Promise<boolean> {
     if (!authStore.userId) {
-      toast.error("Debes estar autenticado");
+      toast.error('Debes estar autenticado');
       return false;
     }
 
     await refreshAuthContext();
 
     try {
-      await apiClient.post<{ success: true }>(
-        `/v1/party/${partyId}/leave`,
-        undefined,
-        { requireOrg: true }
-      );
+      await apiClient.post<{ success: true }>(`/v1/party/${partyId}/leave`, undefined, {
+        requireOrg: true,
+      });
 
-      toast.success("Has salido de la party");
+      toast.success('Has salido de la party');
       return true;
     } catch (error) {
       const normalized = apiClient.normalizeApiError(error);
-      toast.error(normalized.message || "Error al salir de la party");
+      toast.error(normalized.message || 'Error al salir de la party');
       return false;
     }
   }
 
   async function regenerateInviteCode(partyId: string): Promise<string | null> {
     if (!authStore.userId) {
-      toast.error("Debes estar autenticado");
+      toast.error('Debes estar autenticado');
       return null;
     }
 
@@ -228,44 +226,43 @@ export function useParties() {
       const response = await apiClient.post<{ inviteCode: string }>(
         `/v1/party/${partyId}/regenerate-invite-code`,
         undefined,
-        { requireOrg: true }
+        { requireOrg: true },
       );
 
-      toast.success("Código de invitación regenerado");
+      toast.success('Código de invitación regenerado');
       return response.inviteCode;
     } catch (error) {
       const normalized = apiClient.normalizeApiError(error);
-      toast.error(normalized.message || "Error al regenerar el código");
+      toast.error(normalized.message || 'Error al regenerar el código');
       return null;
     }
   }
 
   async function removeMember(partyId: string, memberUserId: string): Promise<boolean> {
     if (!authStore.userId) {
-      toast.error("Debes estar autenticado");
+      toast.error('Debes estar autenticado');
       return false;
     }
 
     await refreshAuthContext();
 
     try {
-      await apiClient.del<{ success: true }>(
-        `/v1/party/${partyId}/members/${memberUserId}`,
-        { requireOrg: true }
-      );
+      await apiClient.del<{ success: true }>(`/v1/party/${partyId}/members/${memberUserId}`, {
+        requireOrg: true,
+      });
 
-      toast.success("Miembro expulsado correctamente");
+      toast.success('Miembro expulsado correctamente');
       return true;
     } catch (error) {
       const normalized = apiClient.normalizeApiError(error);
-      toast.error(normalized.message || "Error al expulsar al miembro");
+      toast.error(normalized.message || 'Error al expulsar al miembro');
       return false;
     }
   }
 
   async function deleteParty(partyId: string): Promise<boolean> {
     if (!authStore.userId) {
-      toast.error("Debes estar autenticado");
+      toast.error('Debes estar autenticado');
       return false;
     }
 
@@ -276,11 +273,11 @@ export function useParties() {
         requireOrg: true,
       });
 
-      toast.success("Party eliminada correctamente");
+      toast.success('Party eliminada correctamente');
       return true;
     } catch (error) {
       const normalized = apiClient.normalizeApiError(error);
-      toast.error(normalized.message || "Error al eliminar la party");
+      toast.error(normalized.message || 'Error al eliminar la party');
       return false;
     }
   }

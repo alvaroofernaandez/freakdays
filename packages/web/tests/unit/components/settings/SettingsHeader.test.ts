@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import SettingsHeader from "../../../../app/components/settings/SettingsHeader";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import SettingsHeader from '../../../../app/components/settings/SettingsHeader';
 
-describe("SettingsHeader.vue", () => {
-  it("should render component", () => {
+describe('SettingsHeader.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(SettingsHeader, {
       global: {
         stubs: {

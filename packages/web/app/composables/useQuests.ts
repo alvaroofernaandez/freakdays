@@ -1,5 +1,5 @@
-import type { Quest, QuestDifficulty } from "~~/domain/types";
-import { useAuthStore } from "~~/stores/auth";
+import type { Quest, QuestDifficulty } from '~~/domain/types';
+import { useAuthStore } from '~~/stores/auth';
 
 export interface CreateQuestDTO {
   title: string;
@@ -33,7 +33,7 @@ interface ApiQuestCompletionResult {
 interface ApiQuestNotification {
   id: string;
   quest_id: string;
-  notification_type: "overdue" | "reminder" | "due_soon";
+  notification_type: 'overdue' | 'reminder' | 'due_soon';
   message: string;
   sent_at: string;
   read_at: string | null;
@@ -58,12 +58,12 @@ export function useQuests() {
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.get<ApiQuest[]>("/v1/quests", {
+      const data = await apiClient.get<ApiQuest[]>('/v1/quests', {
         requireOrg: true,
       });
       return data.map(mapApiToQuest);
     } catch (error) {
-      console.error("Error fetching quests:", error);
+      console.error('Error fetching quests:', error);
       return [];
     }
   }
@@ -74,43 +74,40 @@ export function useQuests() {
     await refreshAuthContext();
 
     try {
-      return await apiClient.get<string[]>("/v1/quests/completions", {
+      return await apiClient.get<string[]>('/v1/quests/completions', {
         requireOrg: true,
       });
     } catch (error) {
-      console.error("Error fetching today completions:", error);
+      console.error('Error fetching today completions:', error);
       return [];
     }
   }
 
   async function createQuest(dto: CreateQuestDTO): Promise<Quest | null> {
     if (!authStore.userId) {
-      console.error("No user ID available");
+      console.error('No user ID available');
       return null;
     }
 
     if (!dto.title || !dto.title.trim()) {
-      console.error("Title is required");
+      console.error('Title is required');
       return null;
     }
 
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.post<ApiQuest>("/v1/quests", dto, {
+      const data = await apiClient.post<ApiQuest>('/v1/quests', dto, {
         requireOrg: true,
       });
       return mapApiToQuest(data);
     } catch (error) {
-      console.error("Error in createQuest:", error);
+      console.error('Error in createQuest:', error);
       throw apiClient.normalizeApiError(error);
     }
   }
 
-  async function completeQuest(
-    questId: string,
-    streakCount: number = 1
-  ): Promise<number> {
+  async function completeQuest(questId: string, streakCount: number = 1): Promise<number> {
     if (!authStore.userId) return 0;
 
     await refreshAuthContext();
@@ -123,12 +120,12 @@ export function useQuests() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
 
       return result.expEarned || 0;
     } catch (error) {
-      console.error("Error completing quest:", error);
+      console.error('Error completing quest:', error);
       return 0;
     }
   }
@@ -138,7 +135,7 @@ export function useQuests() {
       const quests = await fetchQuests();
       return quests.find((q) => q.id === id) || null;
     } catch (error) {
-      console.error("Error fetching quest:", error);
+      console.error('Error fetching quest:', error);
       return null;
     }
   }
@@ -154,11 +151,11 @@ export function useQuests() {
         },
         {
           requireOrg: true,
-        }
+        },
       );
       return true;
     } catch (error) {
-      console.error("Error deleting quest:", error);
+      console.error('Error deleting quest:', error);
       return false;
     }
   }
@@ -170,16 +167,16 @@ export function useQuests() {
       ? dueDate < now ||
         (dueDate.toDateString() === now.toDateString() &&
           row.dueTime &&
-          new Date(`${dueDate.toISOString().split("T")[0]}T${row.dueTime}`) < now)
+          new Date(`${dueDate.toISOString().split('T')[0]}T${row.dueTime}`) < now)
       : false;
 
     return {
       id: row.id,
       title: row.title,
-      description: row.description || "",
+      description: row.description || '',
       difficulty: row.difficulty,
       exp: row.expReward,
-      status: "pending",
+      status: 'pending',
       streak: 0,
       dueDate,
       dueTime: row.dueTime,
@@ -195,7 +192,7 @@ export function useQuests() {
     Array<{
       id: string;
       quest_id: string;
-      notification_type: "overdue" | "reminder" | "due_soon";
+      notification_type: 'overdue' | 'reminder' | 'due_soon';
       message: string;
       sent_at: Date;
       read_at: Date | null;
@@ -206,12 +203,9 @@ export function useQuests() {
     await refreshAuthContext();
 
     try {
-      const data = await apiClient.get<ApiQuestNotification[]>(
-        "/v1/quests/notifications",
-        {
-          requireOrg: true,
-        }
-      );
+      const data = await apiClient.get<ApiQuestNotification[]>('/v1/quests/notifications', {
+        requireOrg: true,
+      });
 
       return data.map((n) => ({
         id: n.id,
@@ -222,14 +216,12 @@ export function useQuests() {
         read_at: n.read_at ? new Date(n.read_at) : null,
       }));
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error('Error fetching notifications:', error);
       return [];
     }
   }
 
-  async function markNotificationRead(
-    notificationId: string
-  ): Promise<boolean> {
+  async function markNotificationRead(notificationId: string): Promise<boolean> {
     await refreshAuthContext();
 
     try {
@@ -238,11 +230,11 @@ export function useQuests() {
         undefined,
         {
           requireOrg: true,
-        }
+        },
       );
       return true;
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error('Error marking notification as read:', error);
       return false;
     }
   }
@@ -252,11 +244,11 @@ export function useQuests() {
 
     try {
       await apiClient.post<{ updatedCount: number }>(
-        "/v1/quests/notifications/overdue/check",
+        '/v1/quests/notifications/overdue/check',
         undefined,
         {
           requireOrg: true,
-        }
+        },
       );
     } catch (error) {
       throw apiClient.normalizeApiError(error);
@@ -268,11 +260,11 @@ export function useQuests() {
 
     try {
       await apiClient.post<{ updatedCount: number }>(
-        "/v1/quests/notifications/due-soon/check",
+        '/v1/quests/notifications/due-soon/check',
         undefined,
         {
           requireOrg: true,
-        }
+        },
       );
     } catch (error) {
       throw apiClient.normalizeApiError(error);

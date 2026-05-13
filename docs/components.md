@@ -30,6 +30,7 @@ Botón reutilizable con variantes.
 ```
 
 **Props:**
+
 - `variant`: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
 - `size`: 'default' | 'sm' | 'lg' | 'icon'
 
@@ -91,11 +92,7 @@ Alerta informativa.
 Estado vacío.
 
 ```vue
-<Empty 
-  title="No hay elementos"
-  description="Añade tu primer elemento"
-  :icon="Plus"
-/>
+<Empty title="No hay elementos" description="Añade tu primer elemento" :icon="Plus" />
 ```
 
 #### Sheet
@@ -105,6 +102,7 @@ Panel lateral deslizable (Sheet) basado en Radix Vue.
 **Ubicación**: `app/components/ui/sheet/`
 
 **Componentes:**
+
 - `Sheet`: Contenedor principal
 - `SheetTrigger`: Trigger para abrir el sheet
 - `SheetContent`: Contenido del sheet con overlay
@@ -130,9 +128,11 @@ Panel lateral deslizable (Sheet) basado en Radix Vue.
 ```
 
 **Props de SheetContent:**
+
 - `side`: `'top' | 'right' | 'bottom' | 'left'` (default: 'right')
 
 **Características:**
+
 - Animaciones de entrada/salida
 - Overlay con blur
 - Cierre con ESC o click fuera
@@ -165,11 +165,13 @@ Componente de skeleton loader para estados de carga. Usado extensivamente en la 
 ```
 
 **Uso:**
+
 - Headers: Skeletons para perfil, nivel y barra de progreso
 - Cards: Skeletons para contenido dinámico (anime, manga, quests)
 - Páginas: Skeletons para saludos y cards de nivel en la página de inicio
 
 **Características:**
+
 - Animación de pulso automática
 - Clases de Tailwind para personalización
 - Mantiene el layout durante la carga
@@ -187,18 +189,21 @@ Header principal para desktop (visible desde `md` breakpoint, ≥768px). Complet
 **Ubicación**: `app/components/layout/AppHeader.vue`
 
 **Props:**
+
 - `profile`: `UserProfile | null`
 - `loading`: `boolean` (opcional) - Muestra skeletons mientras carga el perfil
 - `expProgress`: `{ current: number, needed: number, progress: number }`
 - `isActive`: `(to: string) => boolean`
 
 **Slots:**
+
 - `nav`: Navegación principal
 
 **Características:**
+
 - **Responsive**: Se adapta a diferentes tamaños de pantalla
 - **Skeletons**: Muestra skeletons mientras carga el perfil
-- **Breakpoints**: 
+- **Breakpoints**:
   - Logo y texto se ajustan en pantallas medianas
   - Barra de progreso de EXP solo visible en `lg` (≥1024px)
   - Navegación con scroll horizontal en pantallas pequeñas
@@ -210,10 +215,12 @@ Header para dispositivos móviles (visible hasta `md` breakpoint, <768px).
 **Ubicación**: `app/components/layout/MobileHeader.vue`
 
 **Props:**
+
 - `profile`: `UserProfile | null`
 - `loading`: `boolean` (opcional) - Muestra skeletons mientras carga el perfil
 
 **Características:**
+
 - **Skeletons**: Muestra skeletons mientras carga el perfil
 - **Diseño compacto**: Optimizado para pantallas pequeñas
 
@@ -224,11 +231,13 @@ Navegación principal para desktop. Completamente responsive con scroll horizont
 **Ubicación**: `app/components/layout/DesktopNav.vue`
 
 **Props:**
+
 - `items`: `NavItem[]`
 - `isActive`: `(to: string) => boolean`
 
 **Características:**
-- **Responsive**: 
+
+- **Responsive**:
   - Texto de etiquetas oculto en pantallas pequeñas (`hidden sm:inline`)
   - Iconos y padding se ajustan según breakpoint
   - Scroll horizontal con `scrollbar-hide` en pantallas pequeñas
@@ -240,6 +249,7 @@ Navegación para móviles (barra inferior).
 **Ubicación**: `app/components/layout/MobileNav.vue`
 
 **Props:**
+
 - `items`: `NavItem[]`
 - `isActive`: `(to: string) => boolean`
 
@@ -250,11 +260,13 @@ Menú lateral para móviles.
 **Ubicación**: `app/components/layout/MobileMenu.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `items`: `NavItem[]`
 - `isActive`: `(to: string) => boolean`
 
 **Events:**
+
 - `close`: Cierra el menú
 - `logout`: Cierra sesión
 
@@ -271,9 +283,11 @@ Tarjeta que muestra un anime individual.
 **Ubicación**: `app/components/anime/AnimeCard.vue`
 
 **Props:**
+
 - `anime`: `AnimeEntry`
 
 **Events:**
+
 - `update-progress`: Actualiza el progreso
 - `update-status`: Actualiza el estado
 - `delete`: Elimina el anime
@@ -285,6 +299,7 @@ Estadísticas del módulo de anime.
 **Ubicación**: `app/components/anime/AnimeStats.vue`
 
 **Props:**
+
 - `animes`: `AnimeEntry[]`
 
 #### AnimeMarketplace
@@ -294,6 +309,7 @@ Marketplace para buscar y añadir anime.
 **Ubicación**: `app/components/anime/AnimeMarketplace.vue`
 
 **Events:**
+
 - `add-anime`: Añade un anime desde el marketplace
 
 #### AnimeSearchBar
@@ -303,9 +319,11 @@ Barra de búsqueda de anime.
 **Ubicación**: `app/components/anime/AnimeSearchBar.vue`
 
 **Props:**
+
 - `modelValue`: `string`
 
 **Events:**
+
 - `update:modelValue`: Actualiza el query
 
 #### AnimeSearchCard
@@ -315,9 +333,11 @@ Tarjeta de resultado de búsqueda.
 **Ubicación**: `app/components/anime/AnimeSearchCard.vue`
 
 **Props:**
+
 - `anime`: `AnimeSearchResult`
 
 **Events:**
+
 - `select`: Selecciona el anime
 
 #### AnimeCardSkeleton
@@ -341,9 +361,11 @@ Tarjeta que muestra un manga individual.
 **Ubicación**: `app/components/manga/MangaCard.vue`
 
 **Props:**
+
 - `manga`: `MangaEntry`
 
 **Events:**
+
 - `add-volume`: Añade un volumen
 - `remove-volume`: Elimina un volumen
 - `update-price`: Actualiza el precio
@@ -357,6 +379,7 @@ Estadísticas del módulo de manga.
 **Ubicación**: `app/components/manga/MangaStats.vue`
 
 **Props:**
+
 - `mangas`: `MangaEntry[]`
 
 #### MangaList
@@ -366,10 +389,12 @@ Lista de mangas con filtros.
 **Ubicación**: `app/components/manga/MangaList.vue`
 
 **Props:**
+
 - `mangas`: `MangaEntry[]`
 - `filter`: `'all' | 'collecting' | 'completed' | 'wishlist'`
 
 **Events:**
+
 - `add-volume`
 - `remove-volume`
 - `update-price`
@@ -383,9 +408,11 @@ Modal para añadir un nuevo manga.
 **Ubicación**: `app/components/manga/AddMangaModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 
 **Events:**
+
 - `update:open`
 - `add`: Añade el manga
 
@@ -410,10 +437,12 @@ Tarjeta que muestra una quest individual.
 **Ubicación**: `app/components/quests/QuestCard.vue`
 
 **Props:**
+
 - `quest`: `Quest`
 - `isCompleted`: `boolean`
 
 **Events:**
+
 - `complete`: Completa la quest
 - `delete`: Elimina la quest
 
@@ -424,6 +453,7 @@ Estadísticas del módulo de quests.
 **Ubicación**: `app/components/quests/QuestStats.vue`
 
 **Props:**
+
 - `quests`: `Quest[]`
 - `completedToday`: `number`
 
@@ -434,10 +464,12 @@ Lista de quests.
 **Ubicación**: `app/components/quests/QuestList.vue`
 
 **Props:**
+
 - `quests`: `Quest[]`
 - `completedIds`: `string[]`
 
 **Events:**
+
 - `complete`
 - `delete`
 
@@ -448,10 +480,12 @@ Modal para crear/editar quests.
 **Ubicación**: `app/components/quests/QuestFormModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `quest`: `Quest | null` (opcional, para edición)
 
 **Events:**
+
 - `update:open`
 - `save`: Guarda la quest
 
@@ -462,6 +496,7 @@ Panel de notificaciones de quests.
 **Ubicación**: `app/components/quests/NotificationPanel.vue`
 
 **Props:**
+
 - `overdueQuests`: `Quest[]`
 - `dueSoonQuests`: `Quest[]`
 
@@ -472,6 +507,7 @@ Banner para quests vencidas.
 **Ubicación**: `app/components/quests/OverdueBanner.vue`
 
 **Props:**
+
 - `count`: `number`
 
 #### QuestCardSkeleton
@@ -495,9 +531,11 @@ Tarjeta que muestra un entrenamiento.
 **Ubicación**: `app/components/workouts/WorkoutCard.vue`
 
 **Props:**
+
 - `workout`: `Workout`
 
 **Events:**
+
 - `view`: Ver detalles
 - `delete`: Eliminar
 
@@ -508,6 +546,7 @@ Estadísticas del módulo de workouts.
 **Ubicación**: `app/components/workouts/WorkoutStats.vue`
 
 **Props:**
+
 - `workouts`: `Workout[]`
 
 #### WorkoutList
@@ -517,9 +556,11 @@ Lista de entrenamientos.
 **Ubicación**: `app/components/workouts/WorkoutList.vue`
 
 **Props:**
+
 - `workouts`: `Workout[]`
 
 **Events:**
+
 - `view`
 - `delete`
 
@@ -530,9 +571,11 @@ Modal para iniciar un entrenamiento.
 **Ubicación**: `app/components/workouts/StartWorkoutModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 
 **Events:**
+
 - `update:open`
 - `start`: Inicia el entrenamiento
 
@@ -543,10 +586,12 @@ Modal para entrenamiento en curso.
 **Ubicación**: `app/components/workouts/ActiveWorkoutModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `workout`: `Workout`
 
 **Events:**
+
 - `update:open`
 - `complete`: Completa el entrenamiento
 
@@ -557,10 +602,12 @@ Modal con detalles del entrenamiento.
 **Ubicación**: `app/components/workouts/WorkoutDetailModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `workout`: `Workout`
 
 **Events:**
+
 - `update:open`
 
 #### ExerciseCard
@@ -570,6 +617,7 @@ Tarjeta de ejercicio dentro de un entrenamiento.
 **Ubicación**: `app/components/workouts/ExerciseCard.vue`
 
 **Props:**
+
 - `exercise`: `WorkoutExercise`
 
 #### WorkoutDetailStats
@@ -579,6 +627,7 @@ Estadísticas detalladas de un entrenamiento.
 **Ubicación**: `app/components/workouts/WorkoutDetailStats.vue`
 
 **Props:**
+
 - `workout`: `Workout`
 
 #### WorkoutCardSkeleton
@@ -602,9 +651,11 @@ Tarjeta que muestra un party individual.
 **Ubicación**: `app/components/party/PartyCard.vue`
 
 **Props:**
+
 - `party`: `Party | ReadonlyParty`
 
 **Events:**
+
 - `view`: Ver detalles del party
 - `delete`: Eliminar party
 - `leave`: Abandonar party
@@ -616,11 +667,13 @@ Modal con detalles del party y gestión de miembros.
 **Ubicación**: `app/components/party/PartyDetailsModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `party`: `Party | ReadonlyParty`
 - `getMemberRoleLabel`: `(role: PartyMember['role']) => string`
 
 **Events:**
+
 - `update:open`
 - `regenerate-code`: Regenera código de invitación
 - `remove-member`: Elimina un miembro
@@ -634,9 +687,11 @@ Modal para crear un nuevo party.
 **Ubicación**: `app/components/party/CreatePartyModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 
 **Events:**
+
 - `update:open`
 - `create`: Crea el party
 
@@ -647,9 +702,11 @@ Modal para unirse a un party mediante código de invitación.
 **Ubicación**: `app/components/party/JoinPartyModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 
 **Events:**
+
 - `update:open`
 - `join`: Se une al party
 
@@ -660,10 +717,12 @@ Modal de confirmación para eliminar un party.
 **Ubicación**: `app/components/party/DeletePartyConfirmModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `party`: `Party | ReadonlyParty`
 
 **Events:**
+
 - `update:open`
 - `confirm`: Confirma la eliminación
 
@@ -674,11 +733,13 @@ Modal de confirmación para eliminar un miembro del party.
 **Ubicación**: `app/components/party/RemoveMemberConfirmModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `party`: `Party | ReadonlyParty`
 - `member`: `PartyMember | Readonly<PartyMember>`
 
 **Events:**
+
 - `update:open`
 - `confirm`: Confirma la eliminación
 
@@ -689,6 +750,7 @@ Estado vacío cuando el usuario no tiene parties.
 **Ubicación**: `app/components/party/PartyEmptyState.vue`
 
 **Events:**
+
 - `create`: Abre modal de creación
 - `join`: Abre modal de unión
 
@@ -707,11 +769,13 @@ Grid principal del calendario mensual con navegación.
 **Ubicación**: `app/components/calendar/CalendarGrid.vue`
 
 **Props:**
+
 - `currentMonth`: `Date`
 - `events`: `Release[]`
 - `loading`: `boolean` (opcional)
 
 **Events:**
+
 - `update:currentMonth`: Cambia el mes
 - `update:event`: Actualiza la fecha de un evento (drag and drop)
 - `delete`: Elimina un evento
@@ -724,6 +788,7 @@ Tarjeta de un día individual en el calendario, actúa como drop zone.
 **Ubicación**: `app/components/calendar/CalendarDay.vue`
 
 **Props:**
+
 - `date`: `Date`
 - `events`: `Release[]`
 - `isToday`: `boolean`
@@ -732,6 +797,7 @@ Tarjeta de un día individual en el calendario, actúa como drop zone.
 - `isHovered`: `boolean` (opcional)
 
 **Events:**
+
 - `drop`: Evento soltado en este día
 - `delete`: Elimina un evento
 - `dragstart`: Inicia el arrastre de un evento
@@ -745,10 +811,12 @@ Mini card de evento arrastrable dentro de un día.
 **Ubicación**: `app/components/calendar/CalendarEventCard.vue`
 
 **Props:**
+
 - `release`: `Release`
 - `isDragging`: `boolean` (opcional)
 
 **Events:**
+
 - `delete`: Elimina el evento
 - `dragstart`: Inicia el arrastre
 - `dragend`: Termina el arrastre
@@ -760,6 +828,7 @@ Estado vacío cuando no hay eventos en el calendario.
 **Ubicación**: `app/components/calendar/CalendarEmptyState.vue`
 
 **Events:**
+
 - `add`: Abre modal para añadir evento
 
 #### CalendarGridSkeleton
@@ -779,6 +848,7 @@ Header del perfil con avatar y controles de edición.
 **Ubicación**: `app/components/profile/ProfileHeader.vue`
 
 **Props:**
+
 - `profile`: `UserProfile | null`
 - `isEditing`: `boolean`
 - `avatarPreview`: `string | null`
@@ -786,6 +856,7 @@ Header del perfil con avatar y controles de edición.
 - `saving`: `boolean`
 
 **Events:**
+
 - `upload-avatar`: Sube un avatar
 - `delete-avatar`: Elimina el avatar
 - `edit`: Activa modo edición
@@ -799,16 +870,19 @@ Modal para recortar y ajustar imágenes de banner antes de subirlas.
 **Ubicación**: `app/components/profile/BannerCropModal.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `imageFile`: `File | null`
 - `aspectRatio`: `number` (default: 16/9)
 
 **Events:**
+
 - `update:open`: Actualiza estado de apertura
 - `crop`: Emite el archivo recortado (`File`)
 - `cancel`: Cancela el recorte
 
 **Características:**
+
 - Permite arrastrar la imagen para posicionarla
 - Zoom in/out (50% - 300%)
 - Recorte automático al aspect ratio especificado
@@ -823,9 +897,11 @@ Formulario de edición del perfil.
 **Ubicación**: `app/components/profile/ProfileEditForm.vue`
 
 **Props:**
+
 - `form`: `Partial<UserProfile>`
 
 **Events:**
+
 - `update:form`: Actualiza el formulario
 - `save`: Guarda los cambios
 - `cancel`: Cancela la edición
@@ -837,6 +913,7 @@ Estadísticas del perfil del usuario.
 **Ubicación**: `app/components/profile/ProfileStats.vue`
 
 **Props:**
+
 - `profile`: `UserProfile | null`
 - `stats`: `{ quests: number; anime: number; workouts: number; manga: number }`
 
@@ -847,6 +924,7 @@ Tarjeta que muestra el progreso hacia el siguiente nivel.
 **Ubicación**: `app/components/profile/ProfileProgressCard.vue`
 
 **Props:**
+
 - `currentExp`: `number`
 - `neededExp`: `number`
 - `progress`: `number`
@@ -859,6 +937,7 @@ Tarjetas informativas del perfil (bio, ubicación, etc.).
 **Ubicación**: `app/components/profile/ProfileInfoCards.vue`
 
 **Props:**
+
 - `profile`: `UserProfile | null`
 
 ### Auth
@@ -870,10 +949,12 @@ Formulario de registro con validación de contraseña.
 **Ubicación**: `app/components/auth/RegisterForm.vue`
 
 **Props:**
+
 - `loading`: `boolean`
 - `error`: `string | null | undefined`
 
 **Events:**
+
 - `submit`: Envía el formulario de registro
 
 #### RegisterHeader
@@ -889,6 +970,7 @@ Mensaje de éxito después del registro.
 **Ubicación**: `app/components/auth/RegisterSuccessMessage.vue`
 
 **Props:**
+
 - `email`: `string`
 
 #### PasswordStrengthIndicator
@@ -898,6 +980,7 @@ Indicador visual de la fortaleza de la contraseña.
 **Ubicación**: `app/components/auth/PasswordStrengthIndicator.vue`
 
 **Props:**
+
 - `strength`: `number` (0-4)
 - `label`: `string`
 - `color`: `string`
@@ -909,9 +992,11 @@ Botón para iniciar sesión con Google.
 **Ubicación**: `app/components/auth/GoogleSignInButton.vue`
 
 **Props:**
+
 - `loading`: `boolean`
 
 **Events:**
+
 - `click`: Inicia sesión con Google
 
 ---
@@ -925,6 +1010,7 @@ Captura errores en componentes hijos.
 **Ubicación**: `app/components/error/ErrorBoundary.vue`
 
 **Slots:**
+
 - `default`: Contenido a proteger
 - `fallback`: Contenido a mostrar en caso de error
 
@@ -935,6 +1021,7 @@ Muestra un error de forma visual.
 **Ubicación**: `app/components/error/ErrorDisplay.vue`
 
 **Props:**
+
 - `error`: `Error | string`
 - `type`: `'error' | 'warning' | 'info'`
 
@@ -945,6 +1032,7 @@ Estado de error inline.
 **Ubicación**: `app/components/error/ErrorState.vue`
 
 **Props:**
+
 - `error`: `Error | string`
 - `compact`: `boolean` (opcional)
 
@@ -959,6 +1047,7 @@ Tarjeta de perfil del usuario.
 **Ubicación**: `app/components/index/ProfileCard.vue`
 
 **Props:**
+
 - `profile`: `UserProfile | null`
 - `expProgress`: `{ current: number, needed: number, progress: number }`
 
@@ -969,6 +1058,7 @@ Grid de módulos disponibles.
 **Ubicación**: `app/components/index/ModuleGrid.vue`
 
 **Props:**
+
 - `modules`: `AppModule[]`
 - `isActive`: `(to: string) => boolean`
 
@@ -985,9 +1075,11 @@ Prompt para completar configuración.
 **Ubicación**: `app/components/index/SettingsPrompt.vue`
 
 **Props:**
+
 - `show`: `boolean`
 
 **Events:**
+
 - `dismiss`: Cierra el prompt
 
 ### LoadingSpinner
@@ -1019,10 +1111,12 @@ Tarjeta de módulo en configuración.
 **Ubicación**: `app/components/settings/ModuleCard.vue`
 
 **Props:**
+
 - `module`: `AppModule`
 - `enabled`: `boolean`
 
 **Events:**
+
 - `toggle`: Cambia el estado del módulo
 
 ### ModuleList
@@ -1032,9 +1126,11 @@ Lista de módulos configurables.
 **Ubicación**: `app/components/settings/ModuleList.vue`
 
 **Props:**
+
 - `modules`: `AppModule[]`
 
 **Events:**
+
 - `toggle`
 
 ### SettingsHeader
@@ -1056,6 +1152,7 @@ Sección informativa.
 **Ubicación**: `app/components/settings/InfoSection.vue`
 
 **Props:**
+
 - `title`: `string`
 - `description`: `string`
 
@@ -1066,10 +1163,12 @@ Diálogo de confirmación para deshabilitar módulos.
 **Ubicación**: `app/components/settings/ConfirmDisableDialog.vue`
 
 **Props:**
+
 - `open`: `boolean`
 - `moduleName`: `string`
 
 **Events:**
+
 - `update:open`
 - `confirm`: Confirma la deshabilitación
 
@@ -1115,5 +1214,3 @@ Se renderiza automáticamente en `app.vue`.
 ---
 
 **Última actualización**: Enero 2025
-
-

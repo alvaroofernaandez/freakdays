@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ChevronLeft, Settings as SettingsIcon, Check } from 'lucide-vue-next'
+import { ChevronLeft, Settings as SettingsIcon, Check } from 'lucide-vue-next';
 
 interface Props {
-  saving: boolean
-  saved: boolean
+  saving: boolean;
+  saved: boolean;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 </script>
 
 <template>
@@ -21,12 +21,13 @@ defineProps<Props>()
         <SettingsIcon class="h-6 w-6 text-primary" />
         Configuración
       </h1>
-      <p class="text-muted-foreground text-sm">
-        Gestiona tus módulos activos
-      </p>
+      <p class="text-muted-foreground text-sm">Gestiona tus módulos activos</p>
     </div>
     <div v-if="saving || saved" class="flex items-center gap-2 text-sm">
-      <div v-if="saving" class="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
+      <div
+        v-if="saving"
+        class="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full"
+      />
       <div v-else-if="saved" class="flex items-center gap-1 text-exp-easy">
         <Check class="h-4 w-4" />
         <span>Guardado</span>
@@ -34,4 +35,3 @@ defineProps<Props>()
     </div>
   </header>
 </template>
-

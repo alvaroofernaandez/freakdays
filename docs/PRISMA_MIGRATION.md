@@ -3,6 +3,7 @@
 ## ✅ Cambios Realizados
 
 ### 1. Instalación y Configuración
+
 - ✅ Añadido `@prisma/client` y `prisma` a `package.json`
 - ✅ Creado `prisma/schema.prisma` con todos los modelos de la base de datos
 - ✅ Creado composable `usePrisma()` para acceso al cliente de Prisma
@@ -20,27 +21,32 @@ Todas las operaciones de base de datos ahora se ejecutan en el servidor a travé
 ### 3. Composables Migrados a API Routes
 
 #### ✅ `useAnime.ts`
+
 - Todas las operaciones CRUD ahora usan `$fetch` para llamar a API routes
 - Type safety mejorado con tipos generados de Prisma
 - Prisma nunca se expone al cliente
 
 #### ✅ `useManga.ts`
+
 - Migrado a API routes con soporte completo para Decimal (precios)
 - Manejo mejorado de arrays (ownedVolumes)
 - Operaciones ejecutadas exclusivamente en el servidor
 
 #### ✅ `useQuests.ts`
+
 - Migrado a API routes
 - `completeQuest` usa transacciones de Prisma en el servidor
 - Funciones RPC (`check_overdue_quests`, `check_quests_due_soon`) mantienen Supabase
 
 #### ✅ `useProfile.ts`
+
 - Operaciones CRUD migradas a API routes
 - Funciones de upload (avatar/banner) mantienen Supabase Storage
 
 ### 3. Funcionalidades que Mantienen Supabase
 
 Las siguientes funcionalidades siguen usando Supabase directamente:
+
 - **Autenticación** (`useAuth.ts`): Supabase Auth
 - **Storage** (`useProfile.ts`): Supabase Storage para avatares y banners
 - **RPC Functions**: Funciones RPC específicas de Supabase
@@ -51,6 +57,7 @@ Las siguientes funcionalidades siguen usando Supabase directamente:
 ### Comandos a Ejecutar
 
 1. **Instalar dependencias:**
+
 ```bash
 pnpm install
 # o
@@ -58,16 +65,19 @@ npm install
 ```
 
 2. **Configurar DATABASE_URL en `.env`:**
+
 ```env
 DATABASE_URL=postgresql://user:password@host:port/database?schema=public&pgbouncer=true&connection_limit=1
 ```
 
 Para obtener la URL:
+
 - Ve a Supabase Dashboard → Settings → Database
 - Copia "Connection string" (modo Transaction)
 - Añade `&pgbouncer=true&connection_limit=1` al final
 
 3. **Generar cliente de Prisma:**
+
 ```bash
 pnpm prisma:generate
 # o
@@ -75,6 +85,7 @@ npm run prisma:generate
 ```
 
 4. **Sincronizar schema (opcional):**
+
 ```bash
 pnpm prisma:push
 # o
@@ -116,15 +127,18 @@ pnpm prisma migrate status
 ## 🐛 Troubleshooting
 
 ### Error: "Can't reach database server"
+
 - Verifica `DATABASE_URL` en `.env`
 - Asegúrate de usar connection pooling
 - Verifica whitelist de IPs en Supabase
 
 ### Error: "Schema validation failed"
+
 - Ejecuta `pnpm prisma:generate`
 - Verifica que el schema de Prisma coincida con la BD
 
 ### Error: "Connection limit exceeded"
+
 - Usa `pgbouncer=true` en `DATABASE_URL`
 - Verifica `connection_limit=1` en la URL
 
@@ -133,4 +147,3 @@ pnpm prisma migrate status
 - [Prisma Docs](https://www.prisma.io/docs)
 - [Supabase + Prisma](https://supabase.com/docs/guides/integrations/prisma)
 - Ver `docs/prisma-setup.md` para más detalles
-

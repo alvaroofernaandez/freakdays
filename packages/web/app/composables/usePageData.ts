@@ -1,5 +1,5 @@
-import type { Ref } from "vue";
-import { computed, onMounted, readonly, ref } from "vue";
+import type { Ref } from 'vue';
+import { computed, onMounted, readonly, ref } from 'vue';
 
 export interface UsePageDataOptions<T> {
   fetcher: () => Promise<T>;
@@ -23,10 +23,9 @@ export function usePageData<T>(options: UsePageDataOptions<T>) {
     try {
       data.value = await fetcher();
     } catch (err) {
-      const errorInstance =
-        err instanceof Error ? err : new Error("Unknown error");
+      const errorInstance = err instanceof Error ? err : new Error('Unknown error');
       error.value = errorInstance;
-      console.error("Error in usePageData:", errorInstance);
+      console.error('Error in usePageData:', errorInstance);
       onError?.(errorInstance);
     } finally {
       loading.value = false;

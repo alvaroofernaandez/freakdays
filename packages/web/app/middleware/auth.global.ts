@@ -1,5 +1,5 @@
-import { useAuthStore } from "../../stores/auth";
-import { useModulesStore } from "../../stores/modules";
+import { useAuthStore } from '../../stores/auth';
+import { useModulesStore } from '../../stores/modules';
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.server) {
@@ -11,9 +11,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const modulesStore = useModulesStore();
   const supabase = useSupabase();
 
-  const publicRoutes = ["/login", "/register"];
+  const publicRoutes = ['/login', '/register'];
   const isPublicRoute = publicRoutes.includes(to.path);
-  const isOnboardingRoute = to.path === "/onboarding";
+  const isOnboardingRoute = to.path === '/onboarding';
 
   // Sync Supabase user with Auth Store
   if (user.value) {
@@ -27,7 +27,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         const { data: sessionData } = await supabase.auth.getSession();
         authStore.setSession(sessionData.session);
       } catch (error) {
-        console.error("Error syncing auth:", error);
+        console.error('Error syncing auth:', error);
         authStore.reset();
       }
     }
@@ -40,15 +40,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Redirect if not authenticated and trying to access protected route
   if (!user.value && !isPublicRoute) {
-    return navigateTo("/login");
+    return navigateTo('/login');
   }
 
   // Check onboarding status for authenticated users (only if not already on onboarding)
   // Always load modules if not synced OR if synced but no enabled modules (page refresh scenario)
   if (user.value && !isOnboardingRoute) {
-    const needsLoad = !modulesStore.synced || 
-                      (modulesStore.synced && modulesStore.enabledModules.length === 0 && modulesStore.modules.length > 0);
-    
+    const needsLoad =
+      !modulesStore.synced ||
+      (modulesStore.synced &&
+        modulesStore.enabledModules.length === 0 &&
+        modulesStore.modules.length > 0);
+
     if (needsLoad) {
       try {
         if (!user.value.id) {
@@ -57,12 +60,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
         }
 
         const { data, error } = await supabase
-          .from("user_modules")
-          .select("module_id, enabled")
-          .eq("user_id", user.value.id);
+          .from('user_modules')
+          .select('module_id, enabled')
+          .eq('user_id', user.value.id);
 
         if (error) {
-          console.error("Error loading modules:", error);
+          console.error('Error loading modules:', error);
           modulesStore.synced = true;
           return;
         }
@@ -73,7 +76,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
           modulesStore.synced = true;
         }
       } catch (error) {
-        console.error("Error loading modules:", error);
+        console.error('Error loading modules:', error);
         modulesStore.synced = true;
       }
     }
@@ -82,10 +85,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Redirect if authenticated and trying to access public route
   if (user.value && isPublicRoute) {
     if (modulesStore.synced && !modulesStore.hasCompletedOnboarding) {
-      return navigateTo("/onboarding");
+      return navigateTo('/onboarding');
     }
     if (modulesStore.hasCompletedOnboarding) {
-      return navigateTo("/");
+      return navigateTo('/');
     }
     return;
   }
@@ -99,6 +102,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     modulesStore.synced &&
     !modulesStore.hasCompletedOnboarding
   ) {
-    return navigateTo("/onboarding");
+    return navigateTo('/onboarding');
   }
 });

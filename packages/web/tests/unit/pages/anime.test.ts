@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { setActivePinia, createPinia } from 'pinia'
-import AnimePage from '../../../app/pages/anime.vue'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mount } from '@vue/test-utils';
+import { setActivePinia, createPinia } from 'pinia';
+import AnimePage from '../../../app/pages/anime.vue';
 
 vi.mock('../../../app/composables/useAnimePage', () => ({
   useAnimePage: () => ({
@@ -33,12 +33,12 @@ vi.mock('../../../app/composables/useAnimePage', () => ({
     decrementEpisode: vi.fn(),
     deleteAnimeEntry: vi.fn(),
   }),
-}))
+}));
 
 describe('anime.vue', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
-  })
+    setActivePinia(createPinia());
+  });
 
   it('should render anime page', () => {
     const wrapper = mount(AnimePage, {
@@ -66,17 +66,17 @@ describe('anime.vue', () => {
           Label: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.text()).toContain('Anime')
-  })
+    expect(wrapper.text()).toContain('Anime');
+  });
 
   it('should show marketplace when activeView is marketplace', () => {
     vi.doMock('../../../app/composables/useAnimePage', () => ({
       useAnimePage: () => ({
         activeView: { value: 'marketplace' },
       }),
-    }))
+    }));
 
     const wrapper = mount(AnimePage, {
       global: {
@@ -103,10 +103,10 @@ describe('anime.vue', () => {
           Label: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
+    expect(wrapper.exists()).toBe(true);
+  });
 
   it('should show list when activeView is list', () => {
     const wrapper = mount(AnimePage, {
@@ -134,9 +134,8 @@ describe('anime.vue', () => {
           Label: true,
         },
       },
-    })
+    });
 
-    expect(wrapper.exists()).toBe(true)
-  })
-})
-
+    expect(wrapper.exists()).toBe(true);
+  });
+});

@@ -1,117 +1,117 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { Card } from '@/components/ui/card'
-import CalendarEventCard from './CalendarEventCard.vue'
-import type { Release } from '@/composables/useCalendar'
+import { computed, onMounted, ref } from 'vue';
+import { Card } from '@/components/ui/card';
+import CalendarEventCard from './CalendarEventCard.vue';
+import type { Release } from '@/composables/useCalendar';
 
 interface Props {
-  date: Date
-  events: Release[]
-  isToday: boolean
-  isCurrentMonth: boolean
-  isDragging: boolean
-  isHovered?: boolean
+  date: Date;
+  events: Release[];
+  isToday: boolean;
+  isCurrentMonth: boolean;
+  isDragging: boolean;
+  isHovered?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   isHovered: false,
-})
+});
 
 const emit = defineEmits<{
-  drop: [date: Date, eventId: string]
-  delete: [id: string]
-  deleteRequest: [release: Release]
-  editRequest: [release: Release]
-  dayClick: [date: Date]
-  dragstart: [eventId: string]
-  dragend: []
-  hover: [date: Date | null]
-}>()
+  drop: [date: Date, eventId: string];
+  delete: [id: string];
+  deleteRequest: [release: Release];
+  editRequest: [release: Release];
+  dayClick: [date: Date];
+  dragstart: [eventId: string];
+  dragend: [];
+  hover: [date: Date | null];
+}>();
 
-const dayNumber = computed(() => props.date.getDate())
+const dayNumber = computed(() => props.date.getDate());
 const isWeekend = computed(() => {
-  const day = props.date.getDay()
-  return day === 0 || day === 6
-})
+  const day = props.date.getDay();
+  return day === 0 || day === 6;
+});
 
-const isDragOver = ref(false)
-const isMobileOrTablet = ref(false)
+const isDragOver = ref(false);
+const isMobileOrTablet = ref(false);
 
 onMounted(() => {
-  isMobileOrTablet.value = window.innerWidth < 1024
-})
+  isMobileOrTablet.value = window.innerWidth < 1024;
+});
 
 function handleDrop(e: DragEvent) {
-  e.preventDefault()
-  e.stopPropagation()
-  isDragOver.value = false
-  
-  let eventId = e.dataTransfer?.getData('text/plain')
+  e.preventDefault();
+  e.stopPropagation();
+  isDragOver.value = false;
+
+  let eventId = e.dataTransfer?.getData('text/plain');
   if (!eventId || eventId.trim() === '') {
     try {
-      const jsonData = e.dataTransfer?.getData('application/json')
+      const jsonData = e.dataTransfer?.getData('application/json');
       if (jsonData) {
-        const parsed = JSON.parse(jsonData)
-        eventId = parsed.id
+        const parsed = JSON.parse(jsonData);
+        eventId = parsed.id;
       }
     } catch {
       // Ignore JSON parse errors
     }
   }
-  
+
   if (eventId && eventId.trim() !== '') {
-    emit('drop', props.date, eventId)
+    emit('drop', props.date, eventId);
   }
-  emit('hover', null)
+  emit('hover', null);
 }
 
 function handleDragOver(e: DragEvent) {
-  e.preventDefault()
-  e.stopPropagation()
+  e.preventDefault();
+  e.stopPropagation();
   if (e.dataTransfer) {
-    e.dataTransfer.dropEffect = 'move'
-    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.effectAllowed = 'move';
   }
   if (!isDragOver.value) {
-    isDragOver.value = true
-    emit('hover', props.date)
+    isDragOver.value = true;
+    emit('hover', props.date);
   }
 }
 
 function handleDragLeave(e: DragEvent) {
-  const relatedTarget = e.relatedTarget as HTMLElement | null
-  const currentTarget = e.currentTarget as HTMLElement
-  
+  const relatedTarget = e.relatedTarget as HTMLElement | null;
+  const currentTarget = e.currentTarget as HTMLElement;
+
   if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
-    isDragOver.value = false
-    emit('hover', null)
+    isDragOver.value = false;
+    emit('hover', null);
   }
 }
 
 function handleDragEnter(e: DragEvent) {
-  e.preventDefault()
-  e.stopPropagation()
+  e.preventDefault();
+  e.stopPropagation();
   if (props.isDragging || e.dataTransfer?.types.includes('text/plain')) {
-    isDragOver.value = true
-    emit('hover', props.date)
+    isDragOver.value = true;
+    emit('hover', props.date);
   }
 }
 
 function handleMouseEnter() {
   if (props.isDragging) {
-    emit('hover', props.date)
+    emit('hover', props.date);
   }
 }
 
 function handleMouseLeave() {
   if (!isDragOver.value) {
-    emit('hover', null)
+    emit('hover', null);
   }
 }
 
 function handleDayClick() {
   if (isMobileOrTablet.value) {
-    emit('dayClick', props.date)
+    emit('dayClick', props.date);
   }
 }
 </script>
@@ -139,7 +139,14 @@ function handleDayClick() {
     @mouseleave="handleMouseLeave"
     @click="handleDayClick"
   >
-    <div class="p-1 sm:p-1.5 md:p-1.5 lg:p-2 h-full flex flex-col relative" :class="events.length > 0 ? 'overflow-hidden sm:overflow-hidden md:overflow-hidden lg:overflow-visible' : 'overflow-hidden'">
+    <div
+      class="p-1 sm:p-1.5 md:p-1.5 lg:p-2 h-full flex flex-col relative"
+      :class="
+        events.length > 0
+          ? 'overflow-hidden sm:overflow-hidden md:overflow-hidden lg:overflow-visible'
+          : 'overflow-hidden'
+      "
+    >
       <div class="flex items-start gap-1 sm:gap-2 mb-0.5 sm:mb-1.5 shrink-0 relative z-10">
         <span
           :class="[
@@ -163,23 +170,27 @@ function handleDayClick() {
         v-if="events.length > 0"
         class="hidden lg:flex flex-1 space-y-0.5 sm:space-y-0.5 md:space-y-0.5 lg:space-y-1 min-w-0 relative z-20 overflow-hidden lg:overflow-visible lg:relative"
       >
-        <TransitionGroup name="event" tag="div" class="space-y-0.5 sm:space-y-0.5 md:space-y-0.5 lg:space-y-1 w-full">
-            <CalendarEventCard
-              v-for="(event, index) in events.slice(0, 3)"
-              :key="event.id"
-              :release="event"
-              :is-dragging="isDragging"
-              :class="[
-                index === 0 ? 'sm:top-0 md:top-0 lg:top-0' : '',
-                index === 1 ? 'sm:top-[1.5rem] md:top-[1.25rem] lg:top-[2rem]' : '',
-                index === 2 ? 'sm:top-[3rem] md:top-[2.5rem] lg:top-[4rem]' : ''
-              ]"
-              @delete.stop="emit('delete', $event)"
-              @deleteRequest="emit('deleteRequest', $event)"
-              @editRequest="emit('editRequest', $event)"
-              @dragstart="emit('dragstart', $event)"
-              @dragend="emit('dragend')"
-            />
+        <TransitionGroup
+          name="event"
+          tag="div"
+          class="space-y-0.5 sm:space-y-0.5 md:space-y-0.5 lg:space-y-1 w-full"
+        >
+          <CalendarEventCard
+            v-for="(event, index) in events.slice(0, 3)"
+            :key="event.id"
+            :release="event"
+            :is-dragging="isDragging"
+            :class="[
+              index === 0 ? 'sm:top-0 md:top-0 lg:top-0' : '',
+              index === 1 ? 'sm:top-[1.5rem] md:top-[1.25rem] lg:top-[2rem]' : '',
+              index === 2 ? 'sm:top-[3rem] md:top-[2.5rem] lg:top-[4rem]' : '',
+            ]"
+            @delete.stop="emit('delete', $event)"
+            @deleteRequest="emit('deleteRequest', $event)"
+            @editRequest="emit('editRequest', $event)"
+            @dragstart="emit('dragstart', $event)"
+            @dragend="emit('dragend')"
+          />
         </TransitionGroup>
         <div
           v-if="events.length > 3"
@@ -188,10 +199,7 @@ function handleDayClick() {
           +{{ events.length - 3 }} más
         </div>
       </div>
-      <div
-        v-if="events.length === 0"
-        class="flex-1"
-      />
+      <div v-if="events.length === 0" class="flex-1" />
     </div>
   </Card>
 </template>
@@ -219,4 +227,3 @@ function handleDayClick() {
   transition: transform 0.3s ease;
 }
 </style>
-

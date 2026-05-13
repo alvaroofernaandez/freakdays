@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import RemoveMemberConfirmModal from "../../../../app/components/party/RemoveMemberConfirmModal";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import RemoveMemberConfirmModal from '../../../../app/components/party/RemoveMemberConfirmModal';
 
-describe("RemoveMemberConfirmModal.vue", () => {
-  it("should render component", () => {
+describe('RemoveMemberConfirmModal.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(RemoveMemberConfirmModal, {
       global: {
         stubs: {

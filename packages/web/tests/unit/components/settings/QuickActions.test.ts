@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import QuickActions from "../../../../app/components/settings/QuickActions";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import QuickActions from '../../../../app/components/settings/QuickActions';
 
-describe("QuickActions.vue", () => {
-  it("should render component", () => {
+describe('QuickActions.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(QuickActions, {
       global: {
         stubs: {

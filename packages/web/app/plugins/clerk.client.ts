@@ -1,4 +1,4 @@
-import { Clerk } from "@clerk/clerk-js";
+import { Clerk } from '@clerk/clerk-js';
 
 export default defineNuxtPlugin(async () => {
   const runtimeConfig = useRuntimeConfig();
@@ -7,7 +7,7 @@ export default defineNuxtPlugin(async () => {
   if (!publishableKey) {
     if (import.meta.dev) {
       console.warn(
-        "[clerk] NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY no está definido. OAuth no estará disponible."
+        '[clerk] NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY no está definido. OAuth no estará disponible.',
       );
     }
 
@@ -21,8 +21,8 @@ export default defineNuxtPlugin(async () => {
   } catch (error) {
     if (import.meta.dev) {
       console.warn(
-        "[clerk] Error inicializando Clerk en cliente. Verificá NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY y reiniciá el dev server.",
-        error
+        '[clerk] Error inicializando Clerk en cliente. Verificá NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY y reiniciá el dev server.',
+        error,
       );
     }
   }

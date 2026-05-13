@@ -1,71 +1,90 @@
 <script setup lang="ts">
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { DatePicker } from '@/components/ui/date-picker'
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-vue-next'
-import type { Release } from '@/composables/useCalendar'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Trash2,
+} from 'lucide-vue-next';
+import type { Release } from '@/composables/useCalendar';
 
 interface Props {
-  open: boolean
-  date: Date | null
-  events: readonly Release[]
-  isSubmitting: boolean
+  open: boolean;
+  date: Date | null;
+  events: readonly Release[];
+  isSubmitting: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-  'update:event': [eventId: string, date: Date]
-  'edit': [release: Release]
-  'delete': [release: Release]
-  'add': [date: Date]
-}>()
+  'update:open': [value: boolean];
+  'update:event': [eventId: string, date: Date];
+  edit: [release: Release];
+  delete: [release: Release];
+  add: [date: Date];
+}>();
 
-const selectedEvent = ref<Release | null>(null)
-const newDate = ref<Date | null>(null)
+const selectedEvent = ref<Release | null>(null);
+const newDate = ref<Date | null>(null);
 
-watch(() => props.date, (date) => {
-  if (date) {
-    newDate.value = new Date(date)
-  }
-}, { immediate: true })
+watch(
+  () => props.date,
+  (date) => {
+    if (date) {
+      newDate.value = new Date(date);
+    }
+  },
+  { immediate: true },
+);
 
-watch(() => props.open, (open) => {
-  if (open && props.date) {
-    newDate.value = new Date(props.date)
-    selectedEvent.value = null
-  }
-})
+watch(
+  () => props.open,
+  (open) => {
+    if (open && props.date) {
+      newDate.value = new Date(props.date);
+      selectedEvent.value = null;
+    }
+  },
+);
 
 const formattedDate = computed(() => {
-  if (!props.date) return ''
-  return props.date.toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
-  })
-})
+  if (!props.date) return '';
+  return props.date.toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+});
 
 function handleChangeDate(event: Release) {
-  if (!newDate.value) return
-  emit('update:event', event.id, newDate.value)
-  selectedEvent.value = null
+  if (!newDate.value) return;
+  emit('update:event', event.id, newDate.value);
+  selectedEvent.value = null;
 }
 
 function handleEdit(event: Release) {
-  emit('edit', event)
-  emit('update:open', false)
+  emit('edit', event);
+  emit('update:open', false);
 }
 
 function handleDelete(event: Release) {
-  emit('delete', event)
+  emit('delete', event);
 }
 
 function handleClose() {
-  emit('update:open', false)
-  selectedEvent.value = null
+  emit('update:open', false);
+  selectedEvent.value = null;
 }
 </script>
 
@@ -78,7 +97,10 @@ function handleClose() {
           Eventos del {{ formattedDate }}
         </SheetTitle>
         <SheetDescription class="text-sm">
-          {{ events.length }} {{ events.length === 1 ? 'evento' : 'eventos' }} programado{{ events.length === 1 ? '' : 's' }} para este día
+          {{ events.length }} {{ events.length === 1 ? 'evento' : 'eventos' }} programado{{
+            events.length === 1 ? '' : 's'
+          }}
+          para este día
         </SheetDescription>
       </SheetHeader>
 
@@ -93,7 +115,13 @@ function handleClose() {
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-base mb-1">{{ event.title }}</h3>
                 <p class="text-sm text-muted-foreground">
-                  {{ event.type === 'anime_episode' ? 'Episodio Anime' : event.type === 'manga_volume' ? 'Tomo Manga' : 'Evento' }}
+                  {{
+                    event.type === 'anime_episode'
+                      ? 'Episodio Anime'
+                      : event.type === 'manga_volume'
+                        ? 'Tomo Manga'
+                        : 'Evento'
+                  }}
                 </p>
               </div>
               <div class="flex items-center gap-1 shrink-0">
@@ -134,11 +162,7 @@ function handleClose() {
                 Selecciona la nueva fecha para este evento
               </p>
             </div>
-            <DatePicker
-              v-model="newDate"
-              placeholder="Selecciona una fecha"
-              class="w-full h-11"
-            />
+            <DatePicker v-model="newDate" placeholder="Selecciona una fecha" class="w-full h-11" />
             <div class="flex gap-2">
               <Button
                 variant="outline"
@@ -176,4 +200,3 @@ function handleClose() {
     </SheetContent>
   </Sheet>
 </template>
-

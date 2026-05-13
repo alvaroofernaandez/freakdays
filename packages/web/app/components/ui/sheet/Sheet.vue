@@ -2,17 +2,17 @@
 import { DialogRoot } from 'radix-vue';
 
 interface Props {
-  open?: boolean
-  defaultOpen?: boolean
+  open?: boolean;
+  defaultOpen?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   defaultOpen: false,
-})
+});
 
 const emit = defineEmits<{
-  'update:open': [value: boolean]
-}>()
+  'update:open': [value: boolean];
+}>();
 </script>
 
 <template>

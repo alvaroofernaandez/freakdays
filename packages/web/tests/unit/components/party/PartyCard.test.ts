@@ -1,24 +1,24 @@
-import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
-import PartyCard from "../../../../app/components/party/PartyCard.vue";
+import { mount } from '@vue/test-utils';
+import { describe, expect, it } from 'vitest';
+import PartyCard from '../../../../app/components/party/PartyCard.vue';
 
-describe("PartyCard.vue", () => {
+describe('PartyCard.vue', () => {
   const mockParty = {
-    id: "party-1",
-    name: "Test Party",
-    description: "A test party description",
+    id: 'party-1',
+    name: 'Test Party',
+    description: 'A test party description',
     maxMembers: 10,
-    inviteCode: "ABC123",
-    ownerId: "owner-1",
+    inviteCode: 'ABC123',
+    ownerId: 'owner-1',
     members: [
       {
-        id: "member-1",
-        partyId: "party-1",
-        userId: "user-1",
+        id: 'member-1',
+        partyId: 'party-1',
+        userId: 'user-1',
         joinedAt: new Date(),
         profile: {
-          username: "testuser",
-          displayName: "Test User",
+          username: 'testuser',
+          displayName: 'Test User',
           avatarUrl: null,
         },
       },
@@ -27,7 +27,7 @@ describe("PartyCard.vue", () => {
     updatedAt: new Date(),
   };
 
-  it("should render component", () => {
+  it('should render component', () => {
     const wrapper = mount(PartyCard, {
       props: {
         party: mockParty,

@@ -25,10 +25,7 @@ export class QuestsController {
   constructor(private readonly questsService: QuestsService) {}
 
   @Get()
-  listQuests(
-    @Req() request: Request,
-    @CurrentOrg() orgId: string | null,
-  ): Promise<QuestView[]> {
+  listQuests(@Req() request: Request, @CurrentOrg() orgId: string | null): Promise<QuestView[]> {
     const user = this.getRequestUser(request);
     return this.questsService.list(user.sub, orgId);
   }

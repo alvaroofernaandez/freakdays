@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { ANIME_STATUS_LABELS, type AnimeStatus } from '../../../domain/types/anime'
+import { describe, it, expect } from 'vitest';
+import { ANIME_STATUS_LABELS, type AnimeStatus } from '../../../domain/types/anime';
 
 describe('anime types', () => {
   describe('ANIME_STATUS_LABELS', () => {
@@ -11,23 +11,23 @@ describe('anime types', () => {
         'dropped',
         'plan_to_watch',
         'rewatching',
-      ]
+      ];
 
       statuses.forEach((status) => {
-        expect(ANIME_STATUS_LABELS[status]).toBeDefined()
-        expect(typeof ANIME_STATUS_LABELS[status]).toBe('string')
-        expect(ANIME_STATUS_LABELS[status].length).toBeGreaterThan(0)
-      })
-    })
+        expect(ANIME_STATUS_LABELS[status]).toBeDefined();
+        expect(typeof ANIME_STATUS_LABELS[status]).toBe('string');
+        expect(ANIME_STATUS_LABELS[status].length).toBeGreaterThan(0);
+      });
+    });
 
     it('should have correct Spanish labels', () => {
-      expect(ANIME_STATUS_LABELS.watching).toBe('En curso')
-      expect(ANIME_STATUS_LABELS.completed).toBe('Visto')
-      expect(ANIME_STATUS_LABELS.on_hold).toBe('En pausa')
-      expect(ANIME_STATUS_LABELS.dropped).toBe('Droppeado')
-      expect(ANIME_STATUS_LABELS.plan_to_watch).toBe('Pendiente')
-      expect(ANIME_STATUS_LABELS.rewatching).toBe('Rewatch')
-    })
+      expect(ANIME_STATUS_LABELS.watching).toBe('En curso');
+      expect(ANIME_STATUS_LABELS.completed).toBe('Visto');
+      expect(ANIME_STATUS_LABELS.on_hold).toBe('En pausa');
+      expect(ANIME_STATUS_LABELS.dropped).toBe('Droppeado');
+      expect(ANIME_STATUS_LABELS.plan_to_watch).toBe('Pendiente');
+      expect(ANIME_STATUS_LABELS.rewatching).toBe('Rewatch');
+    });
 
     it('should have all expected status keys', () => {
       const expectedKeys: AnimeStatus[] = [
@@ -37,14 +37,13 @@ describe('anime types', () => {
         'dropped',
         'plan_to_watch',
         'rewatching',
-      ]
+      ];
 
-      const actualKeys = Object.keys(ANIME_STATUS_LABELS) as AnimeStatus[]
-      expect(actualKeys.length).toBe(expectedKeys.length)
+      const actualKeys = Object.keys(ANIME_STATUS_LABELS) as AnimeStatus[];
+      expect(actualKeys.length).toBe(expectedKeys.length);
       expectedKeys.forEach((key) => {
-        expect(actualKeys).toContain(key)
-      })
-    })
-  })
-})
-
+        expect(actualKeys).toContain(key);
+      });
+    });
+  });
+});

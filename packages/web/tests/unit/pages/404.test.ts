@@ -1,21 +1,21 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
-import { setActivePinia, createPinia } from "pinia";
-import Page404 from "../../../app/pages/404.vue";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mount } from '@vue/test-utils';
+import { setActivePinia, createPinia } from 'pinia';
+import Page404 from '../../../app/pages/404.vue';
 
-vi.mock("vue-router", () => ({
+vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
     back: vi.fn(),
   }),
 }));
 
-describe("404.vue", () => {
+describe('404.vue', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
   });
 
-  it("should render 404 page", () => {
+  it('should render 404 page', () => {
     const wrapper = mount(Page404, {
       global: {
         stubs: {
@@ -24,11 +24,11 @@ describe("404.vue", () => {
       },
     });
 
-    expect(wrapper.text()).toContain("404");
-    expect(wrapper.text()).toContain("Página no encontrada");
+    expect(wrapper.text()).toContain('404');
+    expect(wrapper.text()).toContain('Página no encontrada');
   });
 
-  it("should have navigation buttons", () => {
+  it('should have navigation buttons', () => {
     const wrapper = mount(Page404, {
       global: {
         stubs: {
@@ -37,17 +37,17 @@ describe("404.vue", () => {
       },
     });
 
-    const buttons = wrapper.findAll("button");
+    const buttons = wrapper.findAll('button');
     expect(buttons.length).toBeGreaterThan(0);
   });
 
-  it("should call router.back when back button is clicked", async () => {
+  it('should call router.back when back button is clicked', async () => {
     const router = {
       push: vi.fn(),
       back: vi.fn(),
     };
 
-    vi.doMock("vue-router", () => ({
+    vi.doMock('vue-router', () => ({
       useRouter: () => router,
     }));
 
@@ -62,9 +62,9 @@ describe("404.vue", () => {
       },
     });
 
-    const backButton = wrapper.find("button");
+    const backButton = wrapper.find('button');
     if (backButton.exists()) {
-      await backButton.trigger("click");
+      await backButton.trigger('click');
     }
 
     expect(wrapper.vm).toBeDefined();

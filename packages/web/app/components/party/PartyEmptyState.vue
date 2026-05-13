@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next'
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next';
 </script>
 
 <template>
@@ -23,13 +23,17 @@ import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next'
       <div
         class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"
       />
-      <div class="absolute bottom-0 left-0 w-24 h-24 bg-accent/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+      <div
+        class="absolute bottom-0 left-0 w-24 h-24 bg-accent/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"
+      />
 
       <CardContent class="relative py-8 sm:py-12 md:py-16 px-4 sm:px-6">
         <div class="flex flex-col items-center text-center space-y-4 sm:space-y-6 max-w-md mx-auto">
           <div class="relative">
             <div class="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
-            <div class="relative bg-linear-to-br from-primary/20 to-accent/20 p-4 sm:p-6 rounded-full">
+            <div
+              class="relative bg-linear-to-br from-primary/20 to-accent/20 p-4 sm:p-6 rounded-full"
+            >
               <Users class="h-12 w-12 sm:h-16 sm:w-16 text-primary" />
             </div>
           </div>
@@ -41,12 +45,16 @@ import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next'
               ¡Comienza tu aventura en grupo!
             </h3>
             <p class="text-muted-foreground text-sm sm:text-base leading-relaxed px-2">
-              Crea tu primera party para compartir tus progresos con amigos o únete a una existente usando un código
-              de invitación
+              Crea tu primera party para compartir tus progresos con amigos o únete a una existente
+              usando un código de invitación
             </p>
           </div>
 
-          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto" role="group" aria-label="Acciones para empezar">
+          <div
+            class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto"
+            role="group"
+            aria-label="Acciones para empezar"
+          >
             <Button
               size="lg"
               class="flex-1 sm:flex-none glow-primary group relative overflow-hidden min-h-[44px]"
@@ -54,7 +62,10 @@ import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next'
               aria-label="Crear tu primera party"
             >
               <span class="relative z-10 flex items-center justify-center">
-                <Plus class="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
+                <Plus
+                  class="h-5 w-5 mr-2 group-hover:rotate-90 transition-transform duration-300"
+                  aria-hidden="true"
+                />
                 <span>Crear Party</span>
               </span>
               <div
@@ -74,9 +85,13 @@ import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next'
           </div>
 
           <div class="pt-3 sm:pt-4 border-t border-border/50 w-full px-2">
-            <p class="text-xs text-muted-foreground flex items-center justify-center gap-2 flex-wrap">
+            <p
+              class="text-xs text-muted-foreground flex items-center justify-center gap-2 flex-wrap"
+            >
               <Shield class="h-3 w-3 shrink-0" />
-              <span class="text-center">Las parties son privadas y solo los miembros pueden ver el contenido</span>
+              <span class="text-center"
+                >Las parties son privadas y solo los miembros pueden ver el contenido</span
+              >
             </p>
           </div>
         </div>
@@ -84,4 +99,3 @@ import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next'
     </Card>
   </div>
 </template>
-

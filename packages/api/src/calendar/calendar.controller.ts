@@ -42,11 +42,7 @@ export class CalendarController {
     const user = this.getRequestUser(request);
     const parsedDaysAhead = this.parseDaysAhead(daysAhead);
 
-    return this.calendarService.listUpcomingReleases(
-      user.sub,
-      orgId,
-      parsedDaysAhead,
-    );
+    return this.calendarService.listUpcomingReleases(user.sub, orgId, parsedDaysAhead);
   }
 
   @Post('releases')

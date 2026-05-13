@@ -21,9 +21,7 @@ export interface ActiveIdentityOrganization {
 export class IdentityContextService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getActiveUserByClerkIdOrThrow(
-    clerkUserId: string,
-  ): Promise<ActiveIdentityUser> {
+  async getActiveUserByClerkIdOrThrow(clerkUserId: string): Promise<ActiveIdentityUser> {
     const user = await this.prisma.user.findFirst({
       where: {
         clerkUserId,
@@ -67,10 +65,7 @@ export class IdentityContextService {
     return organization;
   }
 
-  async assertMembershipOrThrow(
-    userId: string,
-    organizationId: string,
-  ): Promise<void> {
+  async assertMembershipOrThrow(userId: string, organizationId: string): Promise<void> {
     const membership = await this.prisma.membership.findFirst({
       where: {
         userId,

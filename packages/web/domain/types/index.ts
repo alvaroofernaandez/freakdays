@@ -1,3 +1,3 @@
-export * from "./modules";
-export * from "./quests";
-export * from "./anime";
+export * from './modules';
+export * from './quests';
+export * from './anime';

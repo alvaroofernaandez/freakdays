@@ -1,5 +1,5 @@
-import type { CreateReleaseDTO } from "@/composables/useCalendar";
-import { useToast } from "./useToast";
+import type { CreateReleaseDTO } from '@/composables/useCalendar';
+import { useToast } from './useToast';
 
 export function useCalendarPage() {
   const calendarApi = useCalendar();
@@ -24,30 +24,28 @@ export function useCalendarPage() {
     onError: (error) =>
       showFriendlyError(
         error,
-        "No pudimos cargar el calendario en este momento. Probá de nuevo en unos minutos."
+        'No pudimos cargar el calendario en este momento. Probá de nuevo en unos minutos.',
       ),
   });
 
   const currentMonth = ref(new Date());
   const newRelease = ref<CreateReleaseDTO>({
-    title: "",
-    type: "anime_episode",
-    release_date:
-      new Date().toISOString().split("T")[0] ||
-      new Date().toISOString().slice(0, 10),
+    title: '',
+    type: 'anime_episode',
+    release_date: new Date().toISOString().split('T')[0] || new Date().toISOString().slice(0, 10),
     description: undefined,
     url: undefined,
   });
 
   const monthName = computed(() =>
-    currentMonth.value.toLocaleDateString("es-ES", {
-      month: "long",
-      year: "numeric",
-    })
+    currentMonth.value.toLocaleDateString('es-ES', {
+      month: 'long',
+      year: 'numeric',
+    }),
   );
 
   function formatDate(date: Date) {
-    return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   }
 
   async function addRelease() {
@@ -58,27 +56,26 @@ export function useCalendarPage() {
       if (created) {
         await reloadReleases();
         newRelease.value = {
-          title: "",
-          type: "anime_episode",
+          title: '',
+          type: 'anime_episode',
           release_date:
-            new Date().toISOString().split("T")[0] ||
-            new Date().toISOString().slice(0, 10),
+            new Date().toISOString().split('T')[0] || new Date().toISOString().slice(0, 10),
           description: undefined,
           url: undefined,
         };
         modal.close();
-        toast.success("Evento añadido al calendario");
+        toast.success('Evento añadido al calendario');
       }
     } catch (error) {
-      showFriendlyError(error, "Error al añadir evento");
+      showFriendlyError(error, 'Error al añadir evento');
     }
   }
 
   async function updateEventDate(eventId: string, newDate: Date) {
     try {
       const year = newDate.getFullYear();
-      const month = String(newDate.getMonth() + 1).padStart(2, "0");
-      const day = String(newDate.getDate()).padStart(2, "0");
+      const month = String(newDate.getMonth() + 1).padStart(2, '0');
+      const day = String(newDate.getDate()).padStart(2, '0');
       const dateString = `${year}-${month}-${day}`;
 
       const updated = await calendarApi.updateRelease(eventId, {
@@ -86,10 +83,10 @@ export function useCalendarPage() {
       });
       if (updated) {
         await reloadReleases();
-        toast.success("Evento movido");
+        toast.success('Evento movido');
       }
     } catch (error) {
-      showFriendlyError(error, "Error al mover evento");
+      showFriendlyError(error, 'Error al mover evento');
     }
   }
 
@@ -98,27 +95,24 @@ export function useCalendarPage() {
       const success = await calendarApi.deleteRelease(id);
       if (success) {
         await reloadReleases();
-        toast.success("Evento eliminado");
+        toast.success('Evento eliminado');
       }
     } catch (error) {
-      showFriendlyError(error, "Error al eliminar evento");
+      showFriendlyError(error, 'Error al eliminar evento');
     }
   }
 
-  async function updateReleaseEntry(
-    id: string,
-    dto: Partial<CreateReleaseDTO>
-  ) {
+  async function updateReleaseEntry(id: string, dto: Partial<CreateReleaseDTO>) {
     try {
       const updated = await calendarApi.updateRelease(id, dto);
       if (updated) {
         await reloadReleases();
-        toast.success("Evento actualizado");
+        toast.success('Evento actualizado');
         return true;
       }
       return false;
     } catch (error) {
-      showFriendlyError(error, "Error al actualizar evento");
+      showFriendlyError(error, 'Error al actualizar evento');
       return false;
     }
   }

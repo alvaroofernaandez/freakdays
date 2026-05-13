@@ -1,39 +1,50 @@
 <script setup lang="ts">
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar, Check, Copy, Crown, RefreshCw, Shield, Trash2, UserMinus, Users, X } from 'lucide-vue-next'
-import type { Party, PartyMember } from '@/composables/useParties'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Calendar,
+  Check,
+  Copy,
+  Crown,
+  RefreshCw,
+  Shield,
+  Trash2,
+  UserMinus,
+  Users,
+  X,
+} from 'lucide-vue-next';
+import type { Party, PartyMember } from '@/composables/useParties';
 
 type ReadonlyParty = Readonly<Omit<Party, 'members'>> & {
-  readonly members: readonly Readonly<PartyMember>[]
-}
+  readonly members: readonly Readonly<PartyMember>[];
+};
 
-type ReadonlyPartyMember = Readonly<PartyMember>
+type ReadonlyPartyMember = Readonly<PartyMember>;
 
 interface Props {
-  open: boolean
-  party: ReadonlyParty | Party | null
-  memberToRemove: ReadonlyPartyMember | PartyMember | null
-  copiedCode: string | null
-  isOwner: boolean
-  canManageMembers: boolean
-  isSubmitting: boolean
-  isRegeneratingCode: boolean
-  currentUserId: string | null
-  getMemberRoleLabel: (role: string) => string
-  formatDate: (date: Date) => string
+  open: boolean;
+  party: ReadonlyParty | Party | null;
+  memberToRemove: ReadonlyPartyMember | PartyMember | null;
+  copiedCode: string | null;
+  isOwner: boolean;
+  canManageMembers: boolean;
+  isSubmitting: boolean;
+  isRegeneratingCode: boolean;
+  currentUserId: string | null;
+  getMemberRoleLabel: (role: string) => string;
+  formatDate: (date: Date) => string;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  close: []
-  copyCode: [code: string]
-  regenerateCode: [partyId: string]
-  removeMember: [party: ReadonlyParty | Party, member: ReadonlyPartyMember | PartyMember]
-  deleteParty: [party: ReadonlyParty | Party]
-}>()
+  close: [];
+  copyCode: [code: string];
+  regenerateCode: [partyId: string];
+  removeMember: [party: ReadonlyParty | Party, member: ReadonlyPartyMember | PartyMember];
+  deleteParty: [party: ReadonlyParty | Party];
+}>();
 </script>
 
 <template>
@@ -43,7 +54,7 @@ const emit = defineEmits<{
         <div
           v-if="open && party"
           class="fixed inset-0 z-100 flex items-start sm:items-center justify-center p-0 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
-          style="pointer-events: auto;"
+          style="pointer-events: auto"
           @click.self="emit('close')"
           @keydown.esc="emit('close')"
           role="dialog"
@@ -64,9 +75,15 @@ const emit = defineEmits<{
                   </AvatarFallback>
                 </Avatar>
                 <div class="flex-1 min-w-0">
-                  <CardTitle id="party-details-title" class="flex items-center gap-1.5 sm:gap-2 text-base sm:text-lg">
+                  <CardTitle
+                    id="party-details-title"
+                    class="flex items-center gap-1.5 sm:gap-2 text-base sm:text-lg"
+                  >
                     <span class="truncate">{{ party.name }}</span>
-                    <Crown v-if="isOwner" class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-exp-medium shrink-0" />
+                    <Crown
+                      v-if="isOwner"
+                      class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-exp-medium shrink-0"
+                    />
                   </CardTitle>
                   <CardDescription class="text-xs sm:text-sm">
                     Creada el {{ formatDate(party.createdAt) }}
@@ -106,10 +123,17 @@ const emit = defineEmits<{
                       size="icon"
                       class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
                       @click="emit('copyCode', party.inviteCode!)"
-                      :aria-label="copiedCode === party.inviteCode ? 'Código copiado al portapapeles' : 'Copiar código de invitación'"
+                      :aria-label="
+                        copiedCode === party.inviteCode
+                          ? 'Código copiado al portapapeles'
+                          : 'Copiar código de invitación'
+                      "
                       :aria-pressed="copiedCode === party.inviteCode"
                     >
-                      <Check v-if="copiedCode === party.inviteCode" class="h-4 w-4 text-exp-easy animate-in zoom-in duration-200" />
+                      <Check
+                        v-if="copiedCode === party.inviteCode"
+                        class="h-4 w-4 text-exp-easy animate-in zoom-in duration-200"
+                      />
                       <Copy v-else class="h-4 w-4" />
                     </Button>
                     <Button
@@ -135,10 +159,16 @@ const emit = defineEmits<{
                     role="listitem"
                   >
                     <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                      <Avatar class="h-9 w-9 sm:h-10 sm:w-10 shrink-0" role="img"
-                        :aria-label="`Avatar de ${member.profile?.displayName || member.profile?.username || 'Usuario'}`">
-                        <AvatarImage v-if="member.profile?.avatarUrl" :src="member.profile.avatarUrl"
-                          :alt="member.profile?.displayName || member.profile?.username" />
+                      <Avatar
+                        class="h-9 w-9 sm:h-10 sm:w-10 shrink-0"
+                        role="img"
+                        :aria-label="`Avatar de ${member.profile?.displayName || member.profile?.username || 'Usuario'}`"
+                      >
+                        <AvatarImage
+                          v-if="member.profile?.avatarUrl"
+                          :src="member.profile.avatarUrl"
+                          :alt="member.profile?.displayName || member.profile?.username"
+                        />
                         <AvatarFallback class="text-xs sm:text-sm">
                           {{
                             (member.profile?.username || member.profile?.displayName || '?')
@@ -151,8 +181,11 @@ const emit = defineEmits<{
                         <p class="font-medium truncate text-sm sm:text-base">
                           {{ member.profile?.displayName || member.profile?.username || 'Usuario' }}
                         </p>
-                        <div class="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground flex-wrap" role="group"
-                          aria-label="Información del miembro">
+                        <div
+                          class="flex items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground flex-wrap"
+                          role="group"
+                          aria-label="Información del miembro"
+                        >
                           <Shield class="h-3 w-3 shrink-0" aria-hidden="true" />
                           <span>{{ getMemberRoleLabel(member.role) }}</span>
                           <span class="mx-0.5 sm:mx-1" aria-hidden="true">•</span>
@@ -162,7 +195,11 @@ const emit = defineEmits<{
                       </div>
                     </div>
                     <Button
-                      v-if="canManageMembers && member.role !== 'owner' && member.userId !== currentUserId"
+                      v-if="
+                        canManageMembers &&
+                        member.role !== 'owner' &&
+                        member.userId !== currentUserId
+                      "
                       variant="ghost"
                       size="icon"
                       class="h-9 w-9 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 transition-colors"
@@ -176,8 +213,12 @@ const emit = defineEmits<{
               </div>
 
               <div v-if="isOwner" class="flex gap-2 pt-3 sm:pt-4 border-t">
-                <Button variant="destructive" class="flex-1 min-h-[44px]" @click="emit('deleteParty', party)"
-                  aria-label="Eliminar party">
+                <Button
+                  variant="destructive"
+                  class="flex-1 min-h-[44px]"
+                  @click="emit('deleteParty', party)"
+                  aria-label="Eliminar party"
+                >
                   <Trash2 class="h-4 w-4 mr-2" />
                   Eliminar Party
                 </Button>
@@ -201,4 +242,3 @@ const emit = defineEmits<{
   opacity: 0;
 }
 </style>
-

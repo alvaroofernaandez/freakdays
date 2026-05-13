@@ -1,17 +1,17 @@
-import { PrismaClient } from "@prisma/client";
-import { defineEventHandler, getRouterParam, readBody } from "h3";
+import { PrismaClient } from '@prisma/client';
+import { defineEventHandler, getRouterParam, readBody } from 'h3';
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
   const user = await serverSupabaseUser(event);
   if (!user) {
-    throw createError({ statusCode: 401, message: "Unauthorized" });
+    throw createError({ statusCode: 401, message: 'Unauthorized' });
   }
 
-  const listId = getRouterParam(event, "listId");
+  const listId = getRouterParam(event, 'listId');
   if (!listId) {
-    throw createError({ statusCode: 400, message: "List ID required" });
+    throw createError({ statusCode: 400, message: 'List ID required' });
   }
 
   const body = await readBody(event);
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
   });
 
   if (!list) {
-    throw createError({ statusCode: 404, message: "List not found" });
+    throw createError({ statusCode: 404, message: 'List not found' });
   }
 
   const membership = await prisma.partyMember.findUnique({
@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
   });
 
   if (!membership) {
-    throw createError({ statusCode: 403, message: "Access denied" });
+    throw createError({ statusCode: 403, message: 'Access denied' });
   }
 
   // Create item
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
     data: {
       listId,
       title: body.title,
-      status: body.status || "plan_to_watch",
+      status: body.status || 'plan_to_watch',
       currentEpisode: body.current_episode || 0,
       totalEpisodes: body.episodes || null,
       score: body.score || null,

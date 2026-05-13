@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import ProfileStats from "../../../../app/components/profile/ProfileStats";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import ProfileStats from '../../../../app/components/profile/ProfileStats';
 
-describe("ProfileStats.vue", () => {
-  it("should render component", () => {
+describe('ProfileStats.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(ProfileStats, {
       global: {
         stubs: {

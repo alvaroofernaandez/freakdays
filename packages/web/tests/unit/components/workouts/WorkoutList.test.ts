@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import WorkoutList from "../../../../app/components/workouts/WorkoutList.vue";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import WorkoutList from '../../../../app/components/workouts/WorkoutList.vue';
 
-describe("WorkoutList.vue", () => {
-  it("should render component", () => {
+describe('WorkoutList.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(WorkoutList, {
       props: {
         workouts: [],

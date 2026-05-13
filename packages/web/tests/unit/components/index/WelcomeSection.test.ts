@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import WelcomeSection from "../../../../app/components/index/WelcomeSection.vue";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import WelcomeSection from '../../../../app/components/index/WelcomeSection.vue';
 
-describe("WelcomeSection.vue", () => {
-  it("should render welcome section", () => {
+describe('WelcomeSection.vue', () => {
+  it('should render welcome section', () => {
     const wrapper = mount(WelcomeSection, {
       global: {
         stubs: {
@@ -16,4 +16,3 @@ describe("WelcomeSection.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
 });
-

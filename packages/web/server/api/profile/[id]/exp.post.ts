@@ -1,24 +1,24 @@
-import { getPrisma } from "../../../utils/prisma";
+import { getPrisma } from '../../../utils/prisma';
 
 function calculateLevel(exp: number): number {
   return Math.floor(exp / 100) + 1;
 }
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
+  const id = getRouterParam(event, 'id');
   const body = await readBody(event);
 
   if (!id) {
     throw createError({
       statusCode: 400,
-      message: "User ID is required",
+      message: 'User ID is required',
     });
   }
 
-  if (typeof body.amount !== "number") {
+  if (typeof body.amount !== 'number') {
     throw createError({
       statusCode: 400,
-      message: "Amount is required and must be a number",
+      message: 'Amount is required and must be a number',
     });
   }
 
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
     if (!profile) {
       throw createError({
         statusCode: 404,
-        message: "Profile not found",
+        message: 'Profile not found',
       });
     }
 
@@ -48,8 +48,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     throw createError({
       statusCode: 500,
-      message: "Error adding exp",
+      message: 'Error adding exp',
     });
   }
 });
-

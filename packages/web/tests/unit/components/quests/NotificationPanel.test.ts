@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import NotificationPanel from "../../../../app/components/quests/NotificationPanel";
+import { describe, it, expect } from 'vitest';
+import { mount } from '@vue/test-utils';
+import NotificationPanel from '../../../../app/components/quests/NotificationPanel';
 
-describe("NotificationPanel.vue", () => {
-  it("should render component", () => {
+describe('NotificationPanel.vue', () => {
+  it('should render component', () => {
     const wrapper = mount(NotificationPanel, {
       global: {
         stubs: {
