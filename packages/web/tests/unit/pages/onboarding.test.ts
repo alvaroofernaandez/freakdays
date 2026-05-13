@@ -3,19 +3,13 @@ import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import OnboardingPage from '../../../app/pages/onboarding.vue';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
-}));
-
-vi.mock('../../../app/composables/useSupabase', () => ({
-  useSupabase: () => ({
-    from: vi.fn(() => ({
-      upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
-    })),
-  }),
-}));
+vi.mock('vue-router', async () => {
+  const actual = await vi.importActual<typeof import('vue-router')>('vue-router');
+  return {
+    ...actual,
+    useRouter: () => ({ push: vi.fn() }),
+  };
+});
 
 describe('onboarding.vue', () => {
   beforeEach(() => {
