@@ -24,7 +24,7 @@ const props = defineProps<{
 }>();
 
 const toast = useToast();
-const authStore = useAuthStore();
+const _authStore = useAuthStore();
 const authContext = useAuthContext();
 const isSaving = ref(false);
 const isDragging = ref(false);

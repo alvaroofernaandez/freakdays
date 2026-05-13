@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { AlertTriangle, X, Power } from 'lucide-vue-next';
-import type { ModuleId } from '~~/domain/types';
 
 interface Props {
   open: boolean;
@@ -8,7 +7,7 @@ interface Props {
   saving: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   confirm: [];

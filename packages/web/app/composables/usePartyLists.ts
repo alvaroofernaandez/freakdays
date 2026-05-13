@@ -171,16 +171,10 @@ export function usePartyLists(partyId: string) {
 
   async function fetchListById(listId: string): Promise<PartySharedList> {
     await refreshAuthContext();
-
-    try {
-      const list = await apiClient.get<ApiPartyList>(`/v1/party/lists/${listId}`, {
-        requireOrg: true,
-      });
-
-      return mapApiList(list);
-    } catch (e) {
-      throw e;
-    }
+    const list = await apiClient.get<ApiPartyList>(`/v1/party/lists/${listId}`, {
+      requireOrg: true,
+    });
+    return mapApiList(list);
   }
 
   async function updateList(
@@ -188,46 +182,27 @@ export function usePartyLists(partyId: string) {
     payload: PartyListUpdatePayload,
   ): Promise<PartySharedList> {
     await refreshAuthContext();
-
-    try {
-      const updated = await apiClient.put<ApiPartyList>(`/v1/party/lists/${listId}`, payload, {
-        requireOrg: true,
-      });
-
-      return mapApiList(updated);
-    } catch (e) {
-      throw e;
-    }
+    const updated = await apiClient.put<ApiPartyList>(`/v1/party/lists/${listId}`, payload, {
+      requireOrg: true,
+    });
+    return mapApiList(updated);
   }
 
   async function addListItem(listId: string, payload: PartyListItemPayload) {
     await refreshAuthContext();
-
-    try {
-      const created = await apiClient.post<ApiPartyListItem>(
-        `/v1/party/lists/${listId}/items`,
-        payload,
-        {
-          requireOrg: true,
-        },
-      );
-
-      return mapApiItem(created);
-    } catch (e) {
-      throw e;
-    }
+    const created = await apiClient.post<ApiPartyListItem>(
+      `/v1/party/lists/${listId}/items`,
+      payload,
+      { requireOrg: true },
+    );
+    return mapApiItem(created);
   }
 
   async function deleteListItem(listId: string, itemId: string): Promise<void> {
     await refreshAuthContext();
-
-    try {
-      await apiClient.del<{ success: true }>(`/v1/party/lists/${listId}/items/${itemId}`, {
-        requireOrg: true,
-      });
-    } catch (e) {
-      throw e;
-    }
+    await apiClient.del<{ success: true }>(`/v1/party/lists/${listId}/items/${itemId}`, {
+      requireOrg: true,
+    });
   }
 
   return {

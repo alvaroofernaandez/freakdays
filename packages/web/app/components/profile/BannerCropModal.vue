@@ -84,7 +84,7 @@ function loadImage() {
 
   const img = new Image();
   img.onload = () => {
-    const containerAspect = containerWidth.value / containerHeight.value;
+    const _containerAspect = containerWidth.value / containerHeight.value;
     const imageAspect = img.width / img.height;
     const targetAspect = props.aspectRatio;
 

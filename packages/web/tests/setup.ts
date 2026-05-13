@@ -4,7 +4,37 @@ import { vi } from 'vitest';
 
 // Mock Pinia store
 import { createTestingPinia } from '@pinia/testing';
-import { ref } from 'vue';
+
+// happy-dom ships an incomplete Storage proxy in the 'nuxt' vitest
+// environment — getItem/setItem/clear can be properties rather than
+// callable methods. Pin a real in-memory implementation so any code that
+// touches localStorage at module-init time loads cleanly.
+const storageBackend = new Map<string, string>();
+const localStorageMock: Storage = {
+  get length() {
+    return storageBackend.size;
+  },
+  clear: () => storageBackend.clear(),
+  getItem: (key) => storageBackend.get(key) ?? null,
+  key: (index) => [...storageBackend.keys()][index] ?? null,
+  removeItem: (key) => {
+    storageBackend.delete(key);
+  },
+  setItem: (key, value) => {
+    storageBackend.set(key, String(value));
+  },
+};
+
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock,
+    writable: true,
+  });
+  Object.defineProperty(window, 'sessionStorage', {
+    value: localStorageMock,
+    writable: true,
+  });
+}
 
 // Mock Nuxt runtime config
 vi.stubGlobal('useRuntimeConfig', () => ({

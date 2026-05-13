@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Workout } from '@/composables/useWorkouts';
-import { Trash2, Dumbbell } from 'lucide-vue-next';
+import { Trash2 } from 'lucide-vue-next';
 
 interface Props {
   open: boolean;
@@ -10,7 +10,7 @@ interface Props {
   isSubmitting: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   close: [];

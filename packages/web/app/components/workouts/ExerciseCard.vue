@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, computed } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 import { Plus, Minus, Loader2, Check, Save } from 'lucide-vue-next';
-import type { WorkoutExercise, WorkoutSet } from '@/composables/useWorkouts';
+import type { WorkoutExercise } from '@/composables/useWorkouts';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ const emit = defineEmits<{
 const localSetValues = ref<Record<string, { reps?: number; weight_kg?: number }>>({});
 const pendingSets = ref<Set<string>>(new Set());
 
-function initializeLocalValues() {
+function _initializeLocalValues() {
   if (props.exercise.sets) {
     props.exercise.sets.forEach((set) => {
       if (!localSetValues.value[set.id] || !pendingSets.value.has(set.id)) {
@@ -63,7 +63,9 @@ watch(
 
     oldIds.forEach((setId) => {
       if (!newIds.has(setId)) {
-        delete localSetValues.value[setId];
+        localSetValues.value = Object.fromEntries(
+          Object.entries(localSetValues.value).filter(([k]) => k !== setId),
+        );
         pendingSets.value.delete(setId);
       }
     });

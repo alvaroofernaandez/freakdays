@@ -7,7 +7,7 @@ export function useWorkoutsPage() {
   const modal = useModal();
   const workoutModal = useModal();
   const route = useRoute();
-  const router = useRouter();
+  const _router = useRouter();
 
   const currentWorkout = ref<Workout | null>(null);
   const newExerciseName = ref('');

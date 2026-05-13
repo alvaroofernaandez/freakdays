@@ -39,7 +39,7 @@ export function useAuth() {
     try {
       await authContext.refresh();
       authStore.setSession(null);
-    } catch (err) {
+    } catch (_err) {
       authStore.setError('Error initializing auth');
     } finally {
       authStore.setLoading(false);
@@ -96,14 +96,14 @@ export function useAuth() {
       authContext.clear();
       organizationContext.clearActiveOrgId();
       router.push('/login');
-    } catch (err) {
+    } catch (_err) {
       authStore.setError('Error signing out');
     } finally {
       authStore.setLoading(false);
     }
   }
 
-  async function createProfile(userId: string, email: string) {
+  async function _createProfile(userId: string, email: string) {
     void userId;
     void email;
     throw new Error('createProfile legacy no soportado en runtime Clerk-only.');

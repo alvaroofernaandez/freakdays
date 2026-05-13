@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Globe, Instagram, Link2, MapPin, MessageSquare, Twitter } from 'lucide-vue-next';
+import { Globe, Instagram, MapPin, MessageSquare, Twitter } from 'lucide-vue-next';
 import type { AnimeEntry } from '@/composables/useAnime';
 import type { MangaEntry } from '@/composables/useManga';
 

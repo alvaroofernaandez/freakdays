@@ -5,13 +5,11 @@ import {
   Minus,
   Trash2,
   Star,
-  Edit2,
   CheckCircle2,
   Heart,
   TrendingUp,
   Euro,
   X,
-  MoreVertical,
 } from 'lucide-vue-next';
 import type { MangaEntry } from '@/composables/useManga';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +38,7 @@ const progress = computed(() => {
   return Math.round((props.manga.ownedVolumes.length / props.manga.totalVolumes) * 100);
 });
 
-const isCompleted = computed(() => props.manga.status === 'completed');
+const _isCompleted = computed(() => props.manga.status === 'completed');
 const isWishlist = computed(() => props.manga.status === 'wishlist');
 
 const statusConfig = computed(() => {

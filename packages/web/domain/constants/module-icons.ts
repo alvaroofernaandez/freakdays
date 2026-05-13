@@ -1,6 +1,5 @@
 import type { Component } from 'vue';
 import { Dumbbell, BookOpen, Tv, Swords, Users, Calendar } from 'lucide-vue-next';
-import type { ModuleId } from '../types';
 
 export type ModuleIconName = 'dumbbell' | 'book-open' | 'tv' | 'sword' | 'users' | 'calendar';
 

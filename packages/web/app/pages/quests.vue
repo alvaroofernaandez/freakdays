@@ -13,7 +13,7 @@ definePageMeta({
 });
 
 const {
-  quests,
+  quests: _quests,
   notifications,
   loading,
   isSubmitting,

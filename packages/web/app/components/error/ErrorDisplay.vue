@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, Info, XCircle, AlertCircle } from 'lucide-vue-next';
+import { AlertTriangle, Info, XCircle } from 'lucide-vue-next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 

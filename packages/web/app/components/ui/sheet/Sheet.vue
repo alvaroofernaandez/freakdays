@@ -6,7 +6,7 @@ interface Props {
   defaultOpen?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   defaultOpen: false,
 });
 

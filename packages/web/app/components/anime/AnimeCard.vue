@@ -11,11 +11,6 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle2,
-  BookOpen,
-  Globe,
-  Tag,
-  BarChart3,
-  Link,
 } from 'lucide-vue-next';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import type { AnimeEntry, AnimeStatus } from '@/composables/useAnime';

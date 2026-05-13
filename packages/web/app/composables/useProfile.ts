@@ -253,7 +253,7 @@ export function useProfile() {
   } {
     const currentLevel = calculateLevel(currentExp);
     const expAtCurrentLevel = (currentLevel - 1) * 100;
-    const expAtNextLevel = currentLevel * 100;
+    const _expAtNextLevel = currentLevel * 100;
     const current = currentExp - expAtCurrentLevel;
     const needed = 100;
     const progress = (current / needed) * 100;

@@ -93,7 +93,7 @@ function handleDragStart(e: DragEvent) {
 
   const target = e.currentTarget as HTMLElement;
   const rect = target.getBoundingClientRect();
-  const computedStyle = getComputedStyle(target);
+  const _computedStyle = getComputedStyle(target);
 
   const dragImage = target.cloneNode(true) as HTMLElement;
   dragImage.style.position = 'fixed';

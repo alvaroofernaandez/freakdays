@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CheckCircle2, Trash2, Clock, Calendar } from 'lucide-vue-next';
+import { CheckCircle2, Trash2, Calendar } from 'lucide-vue-next';
 import type { Quest } from '~~/domain/types';
 import { formatDueDate, formatDueTime, getTimeRemaining } from '@/utils/quest-formatters';
 import { DIFFICULTY_COLORS, DIFFICULTY_LABELS } from '@/utils/quest-constants';
@@ -9,7 +9,7 @@ interface Props {
   isCompleted?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   isCompleted: false,
 });
 

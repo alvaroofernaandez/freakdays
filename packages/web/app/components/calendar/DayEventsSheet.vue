@@ -8,13 +8,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
-import {
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-  Edit2,
-  Trash2,
-} from 'lucide-vue-next';
+import { Calendar as CalendarIcon, Edit2, Trash2 } from 'lucide-vue-next';
 import type { Release } from '@/composables/useCalendar';
 
 interface Props {
@@ -82,7 +76,7 @@ function handleDelete(event: Release) {
   emit('delete', event);
 }
 
-function handleClose() {
+function _handleClose() {
   emit('update:open', false);
   selectedEvent.value = null;
 }

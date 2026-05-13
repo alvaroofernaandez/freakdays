@@ -94,9 +94,9 @@ describe('useAnimeSearch', () => {
       );
 
       const { searchAnime } = useAnimeSearch();
-      const promise1 = searchAnime('test1');
+      const _promise1 = searchAnime('test1');
       await new Promise((resolve) => setTimeout(resolve, 10));
-      const promise2 = searchAnime('test2');
+      const _promise2 = searchAnime('test2');
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(abortSpy).toHaveBeenCalled();
