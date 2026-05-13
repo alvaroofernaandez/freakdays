@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ALL_MODULES, type ModuleId, type AppModule } from '../../../domain/types/modules';
+import { ALL_MODULES, type ModuleId } from '../../../domain/types/modules';
 
 describe('modules types', () => {
   describe('ALL_MODULES', () => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Plus, Trophy, Clock, Loader2 } from 'lucide-vue-next';
+import { Plus, Trophy, Clock } from 'lucide-vue-next';
 import type { Quest } from '~~/domain/types';
 import { Empty } from '@/components/ui/empty';
 import QuestCard from './QuestCard.vue';
@@ -11,7 +11,7 @@ interface Props {
   isCompleted?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   isCompleted: false,
 });
 

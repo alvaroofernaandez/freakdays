@@ -2,6 +2,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Shield, UserPlus, Users } from 'lucide-vue-next';
+
+defineEmits<{
+  create: [];
+  join: [];
+}>();
 </script>
 
 <template>

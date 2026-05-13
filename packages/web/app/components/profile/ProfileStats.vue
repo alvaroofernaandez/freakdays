@@ -11,7 +11,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const progress = computed(() => {
+const _progress = computed(() => {
   if (props.neededExp === 0) return 100;
   return Math.min(100, (props.currentExp / props.neededExp) * 100);
 });

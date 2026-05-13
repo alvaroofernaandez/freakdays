@@ -28,7 +28,7 @@ import {
 } from 'lucide-vue-next';
 
 const {
-  animeList,
+  animeList: _animeList,
   loading,
   modal,
   statusModal,

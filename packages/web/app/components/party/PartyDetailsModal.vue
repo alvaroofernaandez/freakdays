@@ -36,7 +36,7 @@ interface Props {
   formatDate: (date: Date) => string;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   close: [];

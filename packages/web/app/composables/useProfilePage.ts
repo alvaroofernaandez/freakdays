@@ -1,6 +1,5 @@
 import type { AnimeEntry } from '@/composables/useAnime';
 import type { MangaEntry } from '@/composables/useManga';
-import type { UserProfile } from '@/composables/useProfile';
 import type { ModuleId } from '~~/domain/types';
 import { nextTick } from 'vue';
 import { useAuthStore } from '~~/stores/auth';
@@ -262,7 +261,7 @@ export function useProfilePage() {
     avatarFileInput.value?.click();
   }
 
-  function triggerBannerUpload() {
+  function _triggerBannerUpload() {
     if (bannerFileInput.value) {
       bannerFileInput.value.click();
     } else {
@@ -270,7 +269,7 @@ export function useProfilePage() {
     }
   }
 
-  async function handleBannerUpload(event: Event) {
+  async function _handleBannerUpload(event: Event) {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
     if (!file) return;
@@ -387,7 +386,7 @@ export function useProfilePage() {
         modulesSaved.value = false;
       }, 2000);
       toast.success('Módulos actualizados');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Error al guardar módulos');
     } finally {
       savingModules.value = false;

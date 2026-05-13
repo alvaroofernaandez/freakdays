@@ -19,7 +19,7 @@ interface Props {
   favoriteManga: MangaEntry | null;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 </script>
 
 <template>

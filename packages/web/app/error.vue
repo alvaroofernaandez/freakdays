@@ -27,7 +27,7 @@ interface ErrorProps {
 const props = defineProps<ErrorProps>();
 
 const error = computed(() => props.error || {});
-const route = useRoute();
+const _route = useRoute();
 const router = useRouter();
 
 const errorInfo = computed(() => {

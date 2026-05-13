@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { PopoverRoot, PopoverAnchor } from 'radix-vue';
+import { PopoverRoot } from 'radix-vue';
 
 interface Props {
   open?: boolean;
   defaultOpen?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   defaultOpen: false,
 });
 

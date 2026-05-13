@@ -60,24 +60,20 @@ export function useUserModules() {
       return [];
     }
 
-    try {
-      const response = await apiClient.put<ApiSaveUserModulesResponse>(
-        '/v1/modules/me',
-        {
-          modules: modules.map((module) => ({
-            moduleId: module.module_id,
-            enabled: Boolean(module.enabled),
-          })),
-        },
-        {
-          requireOrg: true,
-        },
-      );
+    const response = await apiClient.put<ApiSaveUserModulesResponse>(
+      '/v1/modules/me',
+      {
+        modules: modules.map((module) => ({
+          moduleId: module.module_id,
+          enabled: Boolean(module.enabled),
+        })),
+      },
+      {
+        requireOrg: true,
+      },
+    );
 
-      return mapApiToLegacyShape(response.modules);
-    } catch (error) {
-      throw error;
-    }
+    return mapApiToLegacyShape(response.modules);
   }
 
   return {

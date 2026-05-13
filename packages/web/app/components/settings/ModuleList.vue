@@ -6,7 +6,7 @@ interface Props {
   modules: AppModule[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   toggle: [id: ModuleId];

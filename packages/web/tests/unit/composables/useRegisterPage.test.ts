@@ -3,7 +3,6 @@ import { setActivePinia, createPinia } from 'pinia';
 import { mount } from '@vue/test-utils';
 import { defineComponent } from 'vue';
 import { useRegisterPage } from '../../../app/composables/useRegisterPage';
-import { useAuthStore } from '../../../stores/auth';
 
 vi.mock('../../../app/composables/useAuth', () => ({
   useAuth: () => ({

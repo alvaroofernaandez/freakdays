@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { User, Settings, LogOut, X, Trophy } from 'lucide-vue-next';
+import { User, LogOut, X, Trophy } from 'lucide-vue-next';
 import type { Component } from 'vue';
 
 interface NavItem {
@@ -14,7 +14,7 @@ interface Props {
   isActive: (to: string) => boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   close: [];

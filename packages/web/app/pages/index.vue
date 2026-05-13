@@ -14,7 +14,7 @@ import { useAuthStore } from '~~/stores/auth';
 import { useProfile } from '@/composables/useProfile';
 
 const authStore = useAuthStore();
-const profileApi = useProfile();
+const _profileApi = useProfile();
 
 const { profile, isLoading, greeting, expProgress, quickStats, loadingStats, modulesStore } =
   useIndexPage();

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PopoverTrigger as RadixPopoverTrigger } from 'radix-vue';
 
-const props = defineProps<{
+defineProps<{
   asChild?: boolean;
 }>();
 </script>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { X, Clock, Plus, Check, Dumbbell, Loader2 } from 'lucide-vue-next';
 import type { Workout, WorkoutExercise } from '@/composables/useWorkouts';
-import { getElapsedTime } from '@/utils/workout-formatters';
 import { calculateWorkoutStats } from '@/utils/workout-calculations';
 import { CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

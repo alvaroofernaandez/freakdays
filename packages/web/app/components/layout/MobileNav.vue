@@ -14,7 +14,7 @@ interface Props {
   menuOpen: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   'update:menuOpen': [value: boolean];

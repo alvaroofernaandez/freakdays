@@ -10,7 +10,7 @@ interface Props {
   show: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   close: [];

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Zap, Target, Trophy } from 'lucide-vue-next';
 import type { UserProfile } from '@/composables/useProfile';
-import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface Props {

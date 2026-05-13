@@ -2,7 +2,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit2, Save, Trash2, Upload, User, X } from 'lucide-vue-next';
+import { Edit2, Save, Trash2, Upload, X } from 'lucide-vue-next';
 import type { UserProfile } from '@/composables/useProfile';
 
 interface Props {
@@ -26,7 +26,7 @@ const emit = defineEmits<{
 
 const avatarFileInput = ref<HTMLInputElement | null>(null);
 
-function triggerUpload() {
+function _triggerUpload() {
   avatarFileInput.value?.click();
 }
 

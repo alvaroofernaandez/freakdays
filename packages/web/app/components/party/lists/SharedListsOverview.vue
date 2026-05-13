@@ -10,7 +10,7 @@ import {
 import { Clock, LayoutGrid, List, User } from 'lucide-vue-next';
 import type { PartySharedList } from '~~/domain/types/party';
 
-const props = defineProps<{
+defineProps<{
   lists: PartySharedList[];
 }>();
 

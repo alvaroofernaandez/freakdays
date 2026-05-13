@@ -16,7 +16,7 @@ interface Props {
   partyId: string;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   'update:open': [value: boolean];
