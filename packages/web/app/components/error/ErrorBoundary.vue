@@ -59,10 +59,10 @@ function handleReset() {
             <CardDescription class="mt-1">Se ha producido un error inesperado</CardDescription>
           </div>
           <Button
-            @click="handleReset"
             variant="ghost"
             size="icon"
             class="hover:bg-muted/50 transition-colors"
+            @click="handleReset"
           >
             <X class="h-4 w-4" />
           </Button>
@@ -100,9 +100,9 @@ function handleReset() {
         </div>
 
         <Button
-          @click="handleReset"
           variant="outline"
           class="w-full hover:bg-muted/50 hover:scale-[1.02] transition-all duration-300"
+          @click="handleReset"
         >
           <RefreshCw class="h-4 w-4 mr-2" />
           Reintentar

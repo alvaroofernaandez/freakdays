@@ -45,9 +45,9 @@ const props = withDefaults(defineProps<Props>(), {
     </CardHeader>
     <CardContent v-if="onAction" class="relative z-10">
       <Button
-        @click="onAction"
         variant="outline"
         class="w-full hover:bg-muted/50 hover:scale-[1.02] transition-all duration-300"
+        @click="onAction"
       >
         <RefreshCw class="h-4 w-4 mr-2" />
         {{ actionLabel || 'Reintentar' }}
@@ -75,10 +75,10 @@ const props = withDefaults(defineProps<Props>(), {
       <p class="text-sm text-muted-foreground mb-4">{{ props.message }}</p>
       <Button
         v-if="onAction"
-        @click="onAction"
         variant="outline"
         size="sm"
         class="hover:bg-muted/50 hover:scale-105 transition-all duration-300"
+        @click="onAction"
       >
         <RefreshCw class="h-4 w-4 mr-2" />
         {{ actionLabel || 'Reintentar' }}

@@ -153,16 +153,16 @@ onMounted(() => {
           size="sm"
           class="flex-1 sm:flex-none min-h-[44px] sm:min-h-0"
           :disabled="loading"
-          @click="fetchItems"
           aria-label="Actualizar lista de animes"
+          @click="fetchItems"
         >
           <RefreshCw :class="['h-4 w-4 mr-2', { 'animate-spin': loading }]" aria-hidden="true" />
           <span class="hidden sm:inline">Actualizar</span>
         </Button>
         <Button
-          @click="showMarketplace = true"
           class="flex-1 sm:flex-none min-h-[44px] sm:min-h-0 glow-primary"
           aria-label="Añadir anime a la lista compartida"
+          @click="showMarketplace = true"
         >
           <Plus class="h-4 w-4 mr-2" aria-hidden="true" />
           <span>Añadir Anime</span>
@@ -227,8 +227,8 @@ onMounted(() => {
               variant="ghost"
               size="icon"
               class="h-9 w-9 shrink-0 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
-              @click="handleCloseMarketplace"
               aria-label="Cerrar buscador de anime"
+              @click="handleCloseMarketplace"
             >
               <X class="h-4 w-4" aria-hidden="true" />
             </Button>
@@ -274,8 +274,8 @@ onMounted(() => {
               <Button
                 variant="outline"
                 size="sm"
-                @click="fetchItems"
                 class="min-h-[44px] sm:min-h-0"
+                @click="fetchItems"
               >
                 <RefreshCw class="h-4 w-4 mr-2" aria-hidden="true" />
                 Intentar de nuevo
@@ -301,7 +301,7 @@ onMounted(() => {
           </div>
         </template>
         <template #action>
-          <Button @click="showMarketplace = true" size="lg" class="min-h-[44px] glow-primary">
+          <Button size="lg" class="min-h-[44px] glow-primary" @click="showMarketplace = true">
             <Plus class="h-5 w-5 mr-2" aria-hidden="true" />
             Añadir Primer Anime
           </Button>
@@ -322,9 +322,9 @@ onMounted(() => {
           :key="item.id"
           :anime="item"
           :is-deleting="deletingItemId === item.id"
-          @delete="handleDelete"
           role="listitem"
           :aria-label="`${item.title}, ${item.status}, episodio ${item.currentEpisode}`"
+          @delete="handleDelete"
         />
       </TransitionGroup>
     </div>

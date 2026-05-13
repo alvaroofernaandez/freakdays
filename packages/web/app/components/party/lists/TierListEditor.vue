@@ -213,10 +213,10 @@ function handleDragEnd() {
         </div>
       </div>
       <Button
-        @click="save"
         :disabled="isSaving"
         class="min-h-[44px] sm:min-h-0 w-full sm:w-auto"
         aria-label="Guardar cambios en la tier list"
+        @click="save"
       >
         <Save v-if="!isSaving" class="h-4 w-4 mr-2" aria-hidden="true" />
         <span v-else class="animate-spin mr-2 inline-block" role="status" aria-label="Guardando"
@@ -257,24 +257,24 @@ function handleDragEnd() {
           <div class="flex flex-row sm:flex-col gap-1 ml-2 bg-black/20 rounded-lg p-1">
             <button
               v-if="tierIndex > 0"
-              @click="moveTierUp(tierIndex)"
               class="p-1.5 bg-white/30 hover:bg-white/50 rounded-md transition-colors min-w-[28px] min-h-[28px] flex items-center justify-center"
               :aria-label="`Mover tier ${tier.name} arriba`"
+              @click="moveTierUp(tierIndex)"
             >
               <ChevronUp class="h-4 w-4 text-black" aria-hidden="true" />
             </button>
             <button
               v-if="tierIndex < tiers.length - 1"
-              @click="moveTierDown(tierIndex)"
               class="p-1.5 bg-white/30 hover:bg-white/50 rounded-md transition-colors min-w-[28px] min-h-[28px] flex items-center justify-center"
               :aria-label="`Mover tier ${tier.name} abajo`"
+              @click="moveTierDown(tierIndex)"
             >
               <ChevronDown class="h-4 w-4 text-black" aria-hidden="true" />
             </button>
             <button
-              @click="removeTier(tier.id)"
               class="p-1.5 bg-red-500/40 hover:bg-red-500/70 rounded-md transition-colors min-w-[28px] min-h-[28px] flex items-center justify-center"
               :aria-label="`Eliminar tier ${tier.name}`"
+              @click="removeTier(tier.id)"
             >
               <Trash2 class="h-4 w-4 text-white" aria-hidden="true" />
             </button>
@@ -292,10 +292,10 @@ function handleDragEnd() {
             group="tierlist"
             item-key="id"
             :disabled="isMobile"
-            @start="handleDragStart"
-            @end="handleDragEnd"
             class="flex flex-wrap gap-2 h-full min-h-[60px]"
             :class="{ 'pointer-events-none': isMobile }"
+            @start="handleDragStart"
+            @end="handleDragEnd"
           >
             <template #item="{ element }">
               <div
@@ -312,8 +312,8 @@ function handleDragEnd() {
                 }}</span>
                 <button
                   class="absolute top-1.5 right-1.5 sm:top-1 sm:right-1 opacity-0 group-hover/item:opacity-100 group-focus/item:opacity-100 p-1.5 sm:p-1 hover:bg-destructive hover:text-destructive-foreground rounded transition-opacity min-h-[32px] min-w-[32px] sm:min-h-0 sm:min-w-0 flex items-center justify-center touch-manipulation"
-                  @click.stop="removeItem(element.id)"
                   :aria-label="`Eliminar item: ${element.content}`"
+                  @click.stop="removeItem(element.id)"
                 >
                   <Trash2 class="h-3.5 w-3.5 sm:h-3 sm:w-3" aria-hidden="true" />
                 </button>
@@ -334,10 +334,10 @@ function handleDragEnd() {
       <!-- Add Tier Button -->
       <div class="p-3 border-t bg-muted/10">
         <Button
-          @click="addTier"
           variant="outline"
           class="w-full min-h-[44px] border-dashed"
           aria-label="Añadir nuevo tier"
+          @click="addTier"
         >
           <Plus class="h-4 w-4 mr-2" aria-hidden="true" />
           Añadir Tier
@@ -384,11 +384,11 @@ function handleDragEnd() {
           </p>
         </div>
         <Button
-          @click="addItem"
           variant="secondary"
           class="min-h-[44px] sm:min-h-0 shrink-0"
           :disabled="!newItemText.trim()"
           aria-label="Añadir item a la lista"
+          @click="addItem"
         >
           <Plus class="h-4 w-4 sm:mr-2" aria-hidden="true" />
           <span class="hidden sm:inline">Añadir</span>
@@ -416,10 +416,10 @@ function handleDragEnd() {
           group="tierlist"
           item-key="id"
           :disabled="isMobile"
-          @start="handleDragStart"
-          @end="handleDragEnd"
           class="flex flex-wrap gap-2"
           :class="{ 'pointer-events-none': isMobile }"
+          @start="handleDragStart"
+          @end="handleDragEnd"
         >
           <template #item="{ element }">
             <div
@@ -436,8 +436,8 @@ function handleDragEnd() {
               }}</span>
               <button
                 class="absolute top-1.5 right-1.5 sm:top-1 sm:right-1 opacity-0 group-hover/item:opacity-100 group-focus/item:opacity-100 p-1.5 sm:p-1 hover:bg-destructive hover:text-destructive-foreground rounded transition-opacity min-h-[32px] min-w-[32px] sm:min-h-0 sm:min-w-0 flex items-center justify-center touch-manipulation"
-                @click.stop="removeItem(element.id)"
                 :aria-label="`Eliminar item: ${element.content}`"
+                @click.stop="removeItem(element.id)"
               >
                 <Trash2 class="h-3.5 w-3.5 sm:h-3 sm:w-3" aria-hidden="true" />
               </button>

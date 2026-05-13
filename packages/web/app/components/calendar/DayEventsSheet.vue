@@ -129,8 +129,8 @@ function handleClose() {
                   variant="ghost"
                   size="icon"
                   class="h-9 w-9 touch-manipulation"
-                  @click="handleEdit(event)"
                   aria-label="Editar evento"
+                  @click="handleEdit(event)"
                 >
                   <Edit2 class="h-4 w-4" />
                 </Button>
@@ -138,8 +138,8 @@ function handleClose() {
                   variant="ghost"
                   size="icon"
                   class="h-9 w-9 touch-manipulation text-destructive hover:text-destructive"
-                  @click="handleDelete(event)"
                   aria-label="Eliminar evento"
+                  @click="handleDelete(event)"
                 >
                   <Trash2 class="h-4 w-4" />
                 </Button>
@@ -167,15 +167,15 @@ function handleClose() {
               <Button
                 variant="outline"
                 class="flex-1 min-h-[44px] touch-manipulation"
-                @click="selectedEvent = null"
                 :disabled="isSubmitting"
+                @click="selectedEvent = null"
               >
                 Cancelar
               </Button>
               <Button
                 class="flex-1 min-h-[44px] touch-manipulation"
-                @click="handleChangeDate(event)"
                 :disabled="!newDate || isSubmitting"
+                @click="handleChangeDate(event)"
               >
                 {{ isSubmitting ? 'Guardando...' : 'Guardar' }}
               </Button>

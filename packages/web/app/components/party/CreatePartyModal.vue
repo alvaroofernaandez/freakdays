@@ -30,11 +30,11 @@ const emit = defineEmits<{
           v-if="open"
           class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-background/95 backdrop-blur-sm overflow-y-auto"
           style="pointer-events: auto"
-          @click.self="emit('close')"
-          @keydown.esc="emit('close')"
           role="dialog"
           aria-modal="true"
           aria-labelledby="create-party-title"
+          @click.self="emit('close')"
+          @keydown.esc="emit('close')"
         >
           <Card class="w-full max-w-md shadow-xl border-2 my-auto" @click.stop>
             <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 p-4 sm:p-6">
@@ -43,8 +43,8 @@ const emit = defineEmits<{
                 variant="ghost"
                 size="icon"
                 class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation"
-                @click="emit('close')"
                 aria-label="Cerrar"
+                @click="emit('close')"
               >
                 <X class="h-4 w-4" />
               </Button>
@@ -55,7 +55,6 @@ const emit = defineEmits<{
                 <Input
                   id="party-name"
                   :model-value="name"
-                  @update:model-value="emit('update:name', $event)"
                   placeholder="Ej: Nakamas del Anime"
                   class="w-full"
                   maxlength="50"
@@ -64,6 +63,7 @@ const emit = defineEmits<{
                   aria-invalid="false"
                   aria-describedby="name-helper name-count"
                   autofocus
+                  @update:model-value="emit('update:name', $event)"
                   @keydown.enter.prevent="!isSubmitting && name.trim() && emit('submit')"
                 />
                 <div class="flex items-center justify-between">
@@ -84,12 +84,12 @@ const emit = defineEmits<{
                 <Input
                   id="party-description"
                   :model-value="description"
-                  @update:model-value="emit('update:description', $event)"
                   placeholder="Describe el propósito de esta party..."
                   class="w-full"
                   maxlength="200"
                   :disabled="isSubmitting"
                   aria-describedby="description-helper description-count"
+                  @update:model-value="emit('update:description', $event)"
                   @keydown.enter.prevent="!isSubmitting && name.trim() && emit('submit')"
                 />
                 <div class="flex items-center justify-between">
@@ -107,9 +107,9 @@ const emit = defineEmits<{
               </div>
               <Button
                 class="w-full min-h-[44px]"
-                @click="emit('submit')"
                 :disabled="!name.trim() || isSubmitting"
                 aria-label="Crear party con nombre {{ name }}"
+                @click="emit('submit')"
               >
                 <Plus v-if="!isSubmitting" class="h-4 w-4 mr-2" aria-hidden="true" />
                 <span

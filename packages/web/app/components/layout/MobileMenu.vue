@@ -70,8 +70,8 @@ const emit = defineEmits<{
               <Trophy class="h-4 w-4 text-exp-legendary" />
             </NuxtLink>
             <button
-              @click="emit('logout')"
               class="w-full flex items-center gap-3 p-4 hover:bg-destructive/10 transition-colors text-destructive text-left"
+              @click="emit('logout')"
             >
               <LogOut class="h-5 w-5" />
               <span class="font-medium">Cerrar Sesión</span>

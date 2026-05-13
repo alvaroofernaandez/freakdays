@@ -210,8 +210,8 @@ onMounted(() => {
                     size="icon"
                     variant="secondary"
                     class="h-10 w-10"
-                    @click="triggerBannerUploadLocal"
                     :disabled="uploadingBanner"
+                    @click="triggerBannerUploadLocal"
                   >
                     <Upload class="h-5 w-5" />
                   </Button>
@@ -227,8 +227,8 @@ onMounted(() => {
                     size="icon"
                     variant="destructive"
                     class="h-10 w-10"
-                    @click="handleDeleteBanner"
                     :disabled="uploadingBanner"
+                    @click="handleDeleteBanner"
                   >
                     <Trash2 class="h-5 w-5" />
                   </Button>
@@ -340,8 +340,8 @@ onMounted(() => {
               <Button
                 variant="outline"
                 class="h-auto py-3 flex-col gap-1"
-                @click="handleDisableAll"
                 :disabled="savingModules"
+                @click="handleDisableAll"
               >
                 <Power class="h-4 w-4" />
                 <span class="text-xs">Desactivar Todos</span>

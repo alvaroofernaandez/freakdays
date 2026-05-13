@@ -122,10 +122,10 @@ const displayTitle = computed(() => props.title || severityConfig.value.title);
       <div v-if="details" class="flex items-center justify-between">
         <Button
           v-if="details"
-          @click="showDetailsState = !showDetailsState"
           variant="ghost"
           size="sm"
           class="text-xs hover:bg-muted/50 transition-colors"
+          @click="showDetailsState = !showDetailsState"
         >
           {{ showDetailsState ? 'Ocultar' : 'Mostrar' }} detalles
         </Button>
@@ -135,7 +135,6 @@ const displayTitle = computed(() => props.title || severityConfig.value.title);
 
       <Button
         v-if="onAction && actionLabel"
-        @click="onAction"
         :variant="severity === 'error' ? 'destructive' : 'outline'"
         :class="[
           'w-full transition-all duration-300',
@@ -143,6 +142,7 @@ const displayTitle = computed(() => props.title || severityConfig.value.title);
             ? 'glow-primary hover:glow-primary hover:scale-[1.02]'
             : 'hover:bg-muted/50 hover:scale-[1.02]',
         ]"
+        @click="onAction"
       >
         {{ actionLabel }}
       </Button>

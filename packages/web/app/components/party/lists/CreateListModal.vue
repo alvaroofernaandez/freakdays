@@ -114,15 +114,15 @@ function handleSubmit() {
         <Button
           variant="outline"
           class="w-full sm:w-auto min-h-[44px]"
-          @click="$emit('close')"
           :disabled="isSubmittingValue"
+          @click="$emit('close')"
         >
           Cancelar
         </Button>
         <Button
           class="w-full sm:w-auto min-h-[44px]"
-          @click="handleSubmit"
           :disabled="!name.trim() || isSubmittingValue"
+          @click="handleSubmit"
         >
           <Plus v-if="!isSubmittingValue" class="h-4 w-4 mr-2" aria-hidden="true" />
           <span v-else class="animate-spin mr-2 inline-block" role="status">⏳</span>

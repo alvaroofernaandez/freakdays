@@ -134,8 +134,8 @@ function handleEventUpdate(eventId: string, date: Date) {
       <Button
         size="sm"
         class="h-10 sm:h-9 px-3 sm:px-3 glow-primary touch-manipulation shrink-0 min-h-[44px] sm:min-h-[36px]"
-        @click="modal.open()"
         aria-label="Añadir nuevo evento"
+        @click="modal.open()"
       >
         <Plus class="h-4 w-4 sm:h-4 sm:w-4 sm:mr-1.5" />
         <span class="hidden sm:inline">Añadir</span>
@@ -149,9 +149,9 @@ function handleEventUpdate(eventId: string, date: Date) {
       @update:current-month="handleMonthChange"
       @update:event="handleEventUpdate"
       @delete="deleteReleaseEntry"
-      @deleteRequest="handleDeleteRequest"
-      @editRequest="handleEditRequest"
-      @dayClick="handleDayClick"
+      @delete-request="handleDeleteRequest"
+      @edit-request="handleEditRequest"
+      @day-click="handleDayClick"
       @add="modal.open()"
     />
 
@@ -162,11 +162,11 @@ function handleEventUpdate(eventId: string, date: Date) {
             v-if="modal.isOpen.value"
             class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-background/95 backdrop-blur-sm overflow-y-auto"
             style="pointer-events: auto"
-            @click.self="modal.close()"
-            @keydown.esc="modal.close()"
             role="dialog"
             aria-modal="true"
             aria-labelledby="add-event-title"
+            @click.self="modal.close()"
+            @keydown.esc="modal.close()"
           >
             <Card class="w-full max-w-md shadow-xl border-2 my-auto" @click.stop>
               <CardHeader
@@ -177,8 +177,8 @@ function handleEventUpdate(eventId: string, date: Date) {
                   variant="ghost"
                   size="icon"
                   class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation"
-                  @click="modal.close()"
                   aria-label="Cerrar"
+                  @click="modal.close()"
                 >
                   <X class="h-4 w-4" />
                 </Button>
@@ -241,8 +241,8 @@ function handleEventUpdate(eventId: string, date: Date) {
                 <div class="pt-2">
                   <Button
                     class="w-full min-h-[44px] text-sm font-semibold glow-primary"
-                    @click="addRelease"
                     :disabled="!newRelease.title.trim() || !newRelease.release_date"
+                    @click="addRelease"
                   >
                     <Plus class="h-4 w-4 mr-2" />
                     Añadir Evento

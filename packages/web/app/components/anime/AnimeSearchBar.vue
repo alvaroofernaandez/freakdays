@@ -63,7 +63,6 @@ function handleClear() {
       />
       <Input
         :model-value="localQuery"
-        @update:model-value="handleInput"
         placeholder="Buscar anime (ej: One Piece, Naruto...)"
         class="pl-10 pr-10 h-12 text-base w-full bg-background"
         style="
@@ -74,6 +73,7 @@ function handleClear() {
           opacity: 1 !important;
         "
         autofocus
+        @update:model-value="handleInput"
       />
       <Button
         v-if="localQuery"

@@ -35,7 +35,6 @@ const handleCheckedChange = (checked: boolean) => {
 <template>
   <SwitchRoot
     :checked="props.checked"
-    @update:checked="handleCheckedChange"
     v-bind="forwarded"
     :class="
       cn(
@@ -43,6 +42,7 @@ const handleCheckedChange = (checked: boolean) => {
         props.class,
       )
     "
+    @update:checked="handleCheckedChange"
   >
     <SwitchThumb
       :class="

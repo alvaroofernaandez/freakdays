@@ -86,8 +86,8 @@ function handleSubmit() {
                   placeholder="Ej: Meditar 10 minutos"
                   class="w-full h-11 text-base"
                   :disabled="submitting"
-                  @keyup.enter="handleSubmit"
                   autofocus
+                  @keyup.enter="handleSubmit"
                 />
               </div>
               <div class="space-y-2">

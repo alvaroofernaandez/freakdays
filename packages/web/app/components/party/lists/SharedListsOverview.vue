@@ -47,10 +47,10 @@ function formatDate(date: Date | string) {
       class="cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 group focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
       role="listitem"
       tabindex="0"
+      :aria-label="`Lista: ${list.name}, tipo: ${list.listType === 'anime' ? 'Anime List' : 'Tier List'}`"
       @click="emit('select', list)"
       @keydown.enter="emit('select', list)"
       @keydown.space.prevent="emit('select', list)"
-      :aria-label="`Lista: ${list.name}, tipo: ${list.listType === 'anime' ? 'Anime List' : 'Tier List'}`"
     >
       <CardHeader class="space-y-3">
         <div class="flex justify-between items-start">
@@ -87,7 +87,7 @@ function formatDate(date: Date | string) {
             <Clock class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span class="text-xs">{{ formatDate(list.createdAt) }}</span>
           </div>
-          <div class="flex items-center gap-1.5" v-if="list.creator" role="status">
+          <div v-if="list.creator" class="flex items-center gap-1.5" role="status">
             <User class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span class="text-xs truncate">{{
               list.creator.displayName || list.creator.username

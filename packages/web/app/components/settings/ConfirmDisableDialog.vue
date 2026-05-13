@@ -47,10 +47,10 @@ const emit = defineEmits<{
         </p>
       </CardContent>
       <CardFooter class="flex gap-2 pt-4 border-t">
-        <Button variant="outline" class="flex-1" @click="emit('cancel')" :disabled="saving">
+        <Button variant="outline" class="flex-1" :disabled="saving" @click="emit('cancel')">
           Cancelar
         </Button>
-        <Button variant="destructive" class="flex-1" @click="emit('confirm')" :disabled="saving">
+        <Button variant="destructive" class="flex-1" :disabled="saving" @click="emit('confirm')">
           <Power v-if="!saving" class="h-4 w-4 mr-2" />
           <div
             v-else

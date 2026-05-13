@@ -96,8 +96,8 @@ function handleStart() {
         <Button
           size="lg"
           class="w-full h-12 text-base font-semibold mt-2"
-          @click="handleStart"
           :disabled="!form.name.trim() || starting"
+          @click="handleStart"
         >
           <Play v-if="!starting" class="h-5 w-5 mr-2" />
           <Loader2 v-else class="h-5 w-5 mr-2 animate-spin" />

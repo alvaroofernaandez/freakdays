@@ -59,12 +59,12 @@ watch(
           v-if="open && workout"
           class="fixed inset-0 z-100 flex items-start sm:items-center justify-center p-0 sm:p-4 bg-background/95 backdrop-blur-sm overflow-hidden"
           style="pointer-events: auto"
-          @click.self="handleClose"
-          @keydown.esc="handleClose"
           role="dialog"
           aria-modal="true"
           aria-labelledby="workout-detail-title"
           aria-describedby="workout-detail-description"
+          @click.self="handleClose"
+          @keydown.esc="handleClose"
         >
           <Card
             class="w-full max-w-3xl h-full sm:h-auto sm:max-h-[90vh] my-0 sm:my-8 shadow-xl border-0 sm:border-2 rounded-none sm:rounded-lg flex flex-col"
@@ -102,8 +102,8 @@ watch(
                 variant="ghost"
                 size="icon"
                 class="h-9 w-9 sm:h-10 sm:w-10 hover:bg-muted hover:text-foreground cursor-pointer shrink-0 touch-manipulation"
-                @click="handleClose"
                 aria-label="Cerrar detalles del entrenamiento"
+                @click="handleClose"
               >
                 <X class="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>

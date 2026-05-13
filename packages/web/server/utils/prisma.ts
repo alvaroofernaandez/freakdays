@@ -14,7 +14,7 @@ export async function getPrisma() {
     throw new Error("PrismaClient could not be loaded. Make sure you're running on the server.");
   });
 
-  let databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = process.env.DATABASE_URL;
 
   if (!databaseUrl) {
     throw new Error('Missing DATABASE_URL environment variable. Please set it in your .env file.');

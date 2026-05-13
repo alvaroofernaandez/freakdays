@@ -34,11 +34,11 @@ function handleInput(event: Event) {
           v-if="open"
           class="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6 bg-background/95 backdrop-blur-sm overflow-y-auto"
           style="pointer-events: auto"
-          @click.self="emit('close')"
-          @keydown.esc="emit('close')"
           role="dialog"
           aria-modal="true"
           aria-labelledby="join-party-title"
+          @click.self="emit('close')"
+          @keydown.esc="emit('close')"
         >
           <Card class="w-full max-w-md shadow-xl border-2 my-auto" @click.stop>
             <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 p-4 sm:p-6">
@@ -47,8 +47,8 @@ function handleInput(event: Event) {
                 variant="ghost"
                 size="icon"
                 class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation"
-                @click="emit('close')"
                 aria-label="Cerrar"
+                @click="emit('close')"
               >
                 <X class="h-4 w-4" />
               </Button>
@@ -59,7 +59,6 @@ function handleInput(event: Event) {
                 <Input
                   id="invite-code"
                   :model-value="code"
-                  @input="handleInput"
                   placeholder="ABC123"
                   class="w-full font-mono uppercase text-center text-lg tracking-widest"
                   maxlength="6"
@@ -68,6 +67,7 @@ function handleInput(event: Event) {
                   aria-required="true"
                   aria-invalid="code.length > 0 && code.length !== 6"
                   aria-describedby="code-helper code-status"
+                  @input="handleInput"
                   @keydown.enter.prevent="code.length === 6 && !isSubmitting && emit('submit')"
                 />
                 <div class="space-y-1">
@@ -75,8 +75,8 @@ function handleInput(event: Event) {
                     Introduce el código de 6 caracteres que te compartieron
                   </p>
                   <p
-                    id="code-status"
                     v-if="code.length > 0 && code.length !== 6"
+                    id="code-status"
                     class="text-xs text-destructive text-center"
                     role="alert"
                   >
@@ -93,9 +93,9 @@ function handleInput(event: Event) {
               </div>
               <Button
                 class="w-full min-h-[44px]"
-                @click="emit('submit')"
                 :disabled="code.length !== 6 || isSubmitting"
                 aria-label="Unirse a la party con código {{ code }}"
+                @click="emit('submit')"
               >
                 <UserPlus v-if="!isSubmitting" class="h-4 w-4 mr-2" aria-hidden="true" />
                 <span

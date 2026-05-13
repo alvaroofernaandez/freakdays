@@ -99,8 +99,8 @@ function handleDeleteClick(event: MouseEvent) {
           variant="ghost"
           size="icon"
           class="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors touch-manipulation"
-          @click="handleViewClick"
           aria-label="Ver detalles del entrenamiento"
+          @click="handleViewClick"
         >
           <Eye class="h-4 w-4" />
         </Button>
@@ -114,8 +114,8 @@ function handleDeleteClick(event: MouseEvent) {
           variant="ghost"
           size="icon"
           class="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors touch-manipulation"
-          @click="handleDeleteClick"
           aria-label="Eliminar entrenamiento"
+          @click="handleDeleteClick"
         >
           <Trash2 class="h-4 w-4" />
         </Button>

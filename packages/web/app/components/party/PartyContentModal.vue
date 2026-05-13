@@ -132,7 +132,7 @@ async function handleCreateList(data: { name: string; type: any }) {
         <!-- Close button is implicit in DialogContent usually, but we can add explicit if needed or rely on default X -->
       </DialogHeader>
 
-      <div class="flex-1 overflow-y-auto p-0" v-if="party">
+      <div v-if="party" class="flex-1 overflow-y-auto p-0">
         <Tabs v-model="activeTab" class="w-full h-full flex flex-col">
           <div class="px-6 pt-4 border-b">
             <TabsList>

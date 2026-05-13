@@ -169,8 +169,8 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
               variant="ghost"
               size="icon"
               class="h-7 w-7"
-              @click="handleRemoveLastVolume"
               :disabled="manga.ownedVolumes.length === 0"
+              @click="handleRemoveLastVolume"
             >
               <Minus class="h-3 w-3" />
             </Button>
@@ -178,10 +178,10 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
               variant="ghost"
               size="icon"
               class="h-7 w-7"
-              @click="handleAddVolume"
               :disabled="
                 manga.totalVolumes ? manga.ownedVolumes.length >= manga.totalVolumes : false
               "
+              @click="handleAddVolume"
             >
               <Plus class="h-3 w-3" />
             </Button>

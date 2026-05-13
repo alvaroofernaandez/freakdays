@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { assertLegacyFallbackEnabled, canUseLegacyFallback } from '../../../app/utils/legacy-guard';
+
 let legacyFallbackEnabled = false;
 
 vi.mock('../../../app/utils/migration-flags', () => ({
   isSupabaseFallbackEnabled: () => legacyFallbackEnabled,
 }));
-
-import { assertLegacyFallbackEnabled, canUseLegacyFallback } from '../../../app/utils/legacy-guard';
 
 describe('legacy-guard', () => {
   beforeEach(() => {

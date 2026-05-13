@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { AppModule } from '~~/domain/types';
-import type { ModuleId } from '~~/domain/types';
+import type { AppModule, ModuleId } from '~~/domain/types';
 import ModuleCard from './ModuleCard.vue';
 
 interface Props {

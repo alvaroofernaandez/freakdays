@@ -140,8 +140,8 @@ function handleKeydown(e: KeyboardEvent) {
 <template>
   <div
     class="space-y-1 sm:space-y-1.5 flex-1 flex flex-col min-h-0"
-    @keydown="handleKeydown"
     tabindex="0"
+    @keydown="handleKeydown"
   >
     <div class="flex items-center justify-between gap-2 px-2 sm:px-3 py-2 sm:py-1.5 shrink-0">
       <div class="flex items-center gap-1 sm:gap-1.5 flex-1">
@@ -149,8 +149,8 @@ function handleKeydown(e: KeyboardEvent) {
           variant="ghost"
           size="icon"
           class="h-10 w-10 sm:h-8 sm:w-8 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-[32px]"
-          @click="previousMonth"
           aria-label="Mes anterior"
+          @click="previousMonth"
         >
           <ChevronLeft class="h-4 w-4 sm:h-4 sm:w-4" />
         </Button>
@@ -161,8 +161,8 @@ function handleKeydown(e: KeyboardEvent) {
           variant="ghost"
           size="icon"
           class="h-10 w-10 sm:h-8 sm:w-8 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-[32px]"
-          @click="nextMonth"
           aria-label="Mes siguiente"
+          @click="nextMonth"
         >
           <ChevronRight class="h-4 w-4 sm:h-4 sm:w-4" />
         </Button>
@@ -171,8 +171,8 @@ function handleKeydown(e: KeyboardEvent) {
         variant="outline"
         size="sm"
         class="h-10 sm:h-8 px-3 sm:px-3 text-xs touch-manipulation shrink-0 min-h-[44px] sm:min-h-[32px]"
-        @click="goToToday"
         aria-label="Ir a hoy"
+        @click="goToToday"
       >
         <CalendarIcon class="h-4 w-4 sm:h-3.5 sm:w-3.5 sm:mr-1.5" />
         <span class="hidden sm:inline">Hoy</span>
@@ -210,9 +210,9 @@ function handleKeydown(e: KeyboardEvent) {
           :is-hovered="hoveredDate?.getTime() === day.getTime()"
           @drop="handleDrop"
           @delete="emit('delete', $event)"
-          @deleteRequest="emit('deleteRequest', $event)"
-          @editRequest="emit('editRequest', $event)"
-          @dayClick="emit('dayClick', $event)"
+          @delete-request="emit('deleteRequest', $event)"
+          @edit-request="emit('editRequest', $event)"
+          @day-click="emit('dayClick', $event)"
           @dragstart="handleDragStart"
           @dragend="handleDragEnd"
           @hover="handleDateHover"

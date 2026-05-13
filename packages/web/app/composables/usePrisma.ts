@@ -1,7 +1,7 @@
 let prismaInstance: any = null;
 
 export async function usePrisma() {
-  if (process.client || typeof window !== 'undefined') {
+  if (import.meta.client || typeof window !== 'undefined') {
     throw new Error('PrismaClient can only be used on the server side');
   }
 

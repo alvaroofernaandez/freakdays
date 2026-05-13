@@ -124,8 +124,8 @@ const statusLabels: Record<string, string> = {
           size="icon"
           class="h-9 w-9 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
           :disabled="isDeleting"
-          @click="emit('delete', anime.id)"
           :aria-label="`Eliminar ${anime.title} de la lista`"
+          @click="emit('delete', anime.id)"
         >
           <Loader2 v-if="isDeleting" class="h-4 w-4 animate-spin" aria-hidden="true" />
           <Trash2 v-else class="h-4 w-4" aria-hidden="true" />
