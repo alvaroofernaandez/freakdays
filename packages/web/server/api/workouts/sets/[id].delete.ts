@@ -1,51 +1,15 @@
-import { getPrisma } from '../../../utils/prisma';
+/**
+ * DELETE /api/workouts/sets/:id — proxies to NestJS DELETE /v1/workouts/sets/:id.
+ *
+ * S5.f of the supabase→clerk+nestjs migration.
+ */
+import { createError, defineEventHandler, getRouterParam } from 'h3';
 
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { createApiClient } from '../../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
-  const setId = getRouterParam(event, 'id');
+  const id = getRouterParam(event, 'id');
+  if (!id) throw createError({ statusCode: 400, statusMessage: 'Set ID is required' });
 
-  if (!setId) {
-    throw createError({
-      statusCode: 400,
-      message: 'Set ID is required',
-    });
-  }
-
-  if (!UUID_REGEX.test(setId)) {
-    throw createError({
-      statusCode: 400,
-      message: 'Invalid set ID format',
-    });
-  }
-
-  try {
-    const prisma = await getPrisma();
-
-    const existingSet = await prisma.workoutSet.findUnique({
-      where: { id: setId },
-    });
-
-    if (!existingSet) {
-      throw createError({
-        statusCode: 404,
-        message: 'Set not found',
-      });
-    }
-
-    await prisma.workoutSet.delete({
-      where: { id: setId },
-    });
-
-    return { success: true };
-  } catch (error: any) {
-    if (error.statusCode) {
-      throw error;
-    }
-    console.error('Error deleting set:', error);
-    throw createError({
-      statusCode: 500,
-      message: error.message || 'Error deleting set',
-    });
-  }
+  return createApiClient(event)(`/v1/workouts/sets/${id}`, { method: 'DELETE' });
 });
