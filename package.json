@@ -9,7 +9,9 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "typecheck": "pnpm --filter freak-days typecheck"
+    "typecheck": "pnpm --filter freak-days typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "pnpm": {
     "overrides": {
@@ -44,5 +46,8 @@
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
   },
-  "packageManager": "pnpm@10.6.3"
+  "packageManager": "pnpm@10.6.3",
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
 }
