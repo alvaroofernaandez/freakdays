@@ -5,6 +5,7 @@
   "description": "Backend desacoplado de FreakDays (NestJS + Clerk + PostgreSQL + Prisma)",
   "license": "UNLICENSED",
   "scripts": {
+    "postinstall": "prisma generate",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "dev:bootstrap": "node scripts/bootstrap-dev.mjs",
