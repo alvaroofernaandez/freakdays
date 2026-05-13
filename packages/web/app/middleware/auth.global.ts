@@ -1,51 +1,61 @@
+/**
+ * Global auth middleware — Clerk + NestJS API.
+ *
+ * Migrated from Supabase in S4 of the supabase→clerk+nestjs migration.
+ * The Supabase-flavoured version called useSupabaseUser(), useSupabase(),
+ * supabase.auth.getUser/getSession(), and supabase.from('user_modules').
+ * All of that is now: useAuthContext().refresh() + window.Clerk.user +
+ * $fetch('/api/modules').
+ *
+ * Behaviour preserved:
+ * - Server-side: noop (return immediately).
+ * - Public routes (/login, /register): skip auth gate.
+ * - Authenticated + public route: redirect to /onboarding or /.
+ * - Unauthenticated + protected route: redirect to /login.
+ * - Modules loaded lazily once per session via the proxy endpoint.
+ * - Onboarding redirect once modules are synced and onboarding isn't complete.
+ */
+import type { ModuleId } from '../../domain/types/modules';
 import { useAuthStore } from '../../stores/auth';
 import { useModulesStore } from '../../stores/modules';
+
+interface ModulesPayloadRow {
+  module_id: ModuleId;
+  enabled: boolean;
+}
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.server) {
     return;
   }
 
-  const user = useSupabaseUser();
+  const authContext = useAuthContext();
   const authStore = useAuthStore();
   const modulesStore = useModulesStore();
-  const supabase = useSupabase();
+
+  await authContext.refresh();
+
+  const clerkUser = window.Clerk?.user ?? null;
+  const isAuthenticated = clerkUser !== null && clerkUser !== undefined;
 
   const publicRoutes = ['/login', '/register'];
   const isPublicRoute = publicRoutes.includes(to.path);
   const isOnboardingRoute = to.path === '/onboarding';
 
-  // Sync Supabase user with Auth Store
-  if (user.value) {
-    if (!authStore.session) {
-      try {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError || !userData.user) {
-          authStore.reset();
-          return;
-        }
-        const { data: sessionData } = await supabase.auth.getSession();
-        authStore.setSession(sessionData.session);
-      } catch (error) {
-        console.error('Error syncing auth:', error);
-        authStore.reset();
-      }
-    }
-  } else {
-    // No user, clear store if it has data
+  if (!isAuthenticated) {
     if (authStore.session) {
       authStore.reset();
     }
+
+    if (!isPublicRoute) {
+      return navigateTo('/login');
+    }
+
+    return;
   }
 
-  // Redirect if not authenticated and trying to access protected route
-  if (!user.value && !isPublicRoute) {
-    return navigateTo('/login');
-  }
-
-  // Check onboarding status for authenticated users (only if not already on onboarding)
-  // Always load modules if not synced OR if synced but no enabled modules (page refresh scenario)
-  if (user.value && !isOnboardingRoute) {
+  // Lazy-load module preferences once.
+  if (!isOnboardingRoute) {
     const needsLoad =
       !modulesStore.synced ||
       (modulesStore.synced &&
@@ -54,21 +64,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
     if (needsLoad) {
       try {
-        if (!user.value.id) {
-          modulesStore.synced = true;
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from('user_modules')
-          .select('module_id, enabled')
-          .eq('user_id', user.value.id);
-
-        if (error) {
-          console.error('Error loading modules:', error);
-          modulesStore.synced = true;
-          return;
-        }
+        const token = authContext.getAccessToken();
+        const data = await $fetch<ModulesPayloadRow[]>('/api/modules', {
+          headers: token ? { authorization: `Bearer ${token}` } : {},
+        });
 
         if (data && data.length > 0) {
           modulesStore.setModulesFromDb(data);
@@ -82,26 +81,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   }
 
-  // Redirect if authenticated and trying to access public route
-  if (user.value && isPublicRoute) {
+  // Authenticated user landing on /login or /register — bounce them home.
+  if (isPublicRoute) {
     if (modulesStore.synced && !modulesStore.hasCompletedOnboarding) {
       return navigateTo('/onboarding');
     }
+
     if (modulesStore.hasCompletedOnboarding) {
       return navigateTo('/');
     }
+
     return;
   }
 
-  // Redirect to onboarding if not completed and trying to access protected route
-  // Only redirect if we're not already on the onboarding route and we've synced
-  if (
-    user.value &&
-    !isOnboardingRoute &&
-    !isPublicRoute &&
-    modulesStore.synced &&
-    !modulesStore.hasCompletedOnboarding
-  ) {
+  // Authenticated, not on /onboarding, and modules say onboarding incomplete.
+  if (!isOnboardingRoute && modulesStore.synced && !modulesStore.hasCompletedOnboarding) {
     return navigateTo('/onboarding');
   }
 });
