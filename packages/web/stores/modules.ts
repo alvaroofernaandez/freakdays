@@ -113,29 +113,18 @@ export const useModulesStore = defineStore('modules', {
       });
     },
 
-    async syncToDatabase(supabase: any, userId: string) {
-      const enabledModules = this.modules.filter((m) => m.enabled);
+    async syncToDatabase() {
+      const payload = {
+        modules: ALL_MODULES.map((module) => ({
+          moduleId: module.id,
+          enabled: this.moduleMap[module.id] ?? false,
+        })),
+      };
 
-      for (const module of ALL_MODULES) {
-        const isEnabled = this.moduleMap[module.id] ?? false;
-
-        const { error: upsertError } = await supabase.from('user_modules').upsert(
-          {
-            user_id: userId,
-            module_id: module.id,
-            enabled: isEnabled,
-            enabled_at: isEnabled ? new Date().toISOString() : null,
-          },
-          {
-            onConflict: 'user_id,module_id',
-          },
-        );
-
-        if (upsertError) {
-          console.error(`Error syncing module ${module.id}:`, upsertError);
-          throw upsertError;
-        }
-      }
+      await $fetch('/api/modules', {
+        method: 'PUT',
+        body: payload,
+      });
 
       this.synced = true;
     },

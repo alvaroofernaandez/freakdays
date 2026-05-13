@@ -1,8 +1,25 @@
 import { defineStore } from 'pinia';
-import type { Session } from '@supabase/supabase-js';
+
+/**
+ * Minimal session shape kept for backward compatibility with components that
+ * still read `authStore.session?.user?.id / .email`. Replaces the previous
+ * `Session` import from `@supabase/supabase-js` (Supabase was removed in S8.2
+ * of the migration; see docs/migrations/supabase-to-clerk-nestjs.md).
+ *
+ * Live auth state lives in `useAuthContext()` (Clerk-backed). This store now
+ * only holds optional loading/error UI state. Writing to `session` is no
+ * longer wired in the migrated middleware — kept as a read API for callers
+ * during the deprecation window.
+ */
+interface MinimalSession {
+  user?: {
+    id?: string;
+    email?: string;
+  };
+}
 
 interface AuthState {
-  session: Session | null;
+  session: MinimalSession | null;
   loading: boolean;
   error: string | null;
 }
@@ -29,7 +46,7 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    setSession(session: Session | null) {
+    setSession(session: MinimalSession | null) {
       this.session = session;
     },
 

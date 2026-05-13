@@ -9,7 +9,6 @@ import { useModulesStore } from '~~/stores/modules';
 
 const modulesStore = useModulesStore();
 const authStore = useAuthStore();
-const supabase = useSupabase();
 const router = useRouter();
 const toast = useToast();
 const errorHandler = useErrorHandler();
@@ -43,16 +42,16 @@ async function completeOnboarding() {
 
   try {
     modulesStore.enableModules([...selectedModules.value]);
-    await modulesStore.syncToDatabase(supabase, authStore.userId);
+    await modulesStore.syncToDatabase();
 
-    // Force reload modules from database to ensure consistency
-    const { data, error: reloadError } = await supabase
-      .from('user_modules')
-      .select('module_id, enabled')
-      .eq('user_id', authStore.userId);
-
-    if (!reloadError && data && data.length > 0) {
-      modulesStore.setModulesFromDb(data);
+    // Reload modules to ensure store reflects backend state.
+    try {
+      const data = await $fetch<Array<{ module_id: ModuleId; enabled: boolean }>>('/api/modules');
+      if (data && data.length > 0) {
+        modulesStore.setModulesFromDb(data);
+      }
+    } catch (reloadError) {
+      console.error('Error reloading modules after sync:', reloadError);
     }
 
     toast.success('¡Configuración guardada! Bienvenido a FreakDays');
