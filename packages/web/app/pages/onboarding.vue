@@ -92,7 +92,7 @@ onMounted(() => {
         <div
           class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-2 animate-in fade-in slide-in-from-top-4 duration-500"
         >
-          <img src="/logo.png" alt="FreakDays" class="h-8 w-8 rounded-lg" width="32" height="32" />
+          <img src="/logo.png" alt="FreakDays" class="h-8 w-8 rounded-lg" width="32" height="32" >
         </div>
         <div class="space-y-2 animate-in fade-in slide-in-from-top-4 duration-500 delay-100">
           <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Configura tu Aventura</h1>
