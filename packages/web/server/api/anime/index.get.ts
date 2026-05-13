@@ -1,44 +1,22 @@
-import type { AnimeEntry } from '@prisma/client';
-import { getPrisma } from '../../utils/prisma';
+/**
+ * GET /api/anime — proxies to NestJS GET /v1/anime.
+ *
+ * S5.a of the supabase→clerk+nestjs migration.
+ *
+ * The `userId` query param is no longer required: NestJS scopes the list to
+ * the authenticated user via the Clerk JWT. The proxy forwards `status` if
+ * present and ignores `userId` (still tolerated for backward compatibility
+ * during the migration window).
+ */
+import { defineEventHandler, getQuery } from 'h3';
+
+import { createApiClient } from '../../utils/api-client';
 
 export default defineEventHandler(async (event) => {
-  const userId = getQuery(event).userId as string;
+  const apiClient = createApiClient(event);
+  const query = getQuery(event);
 
-  if (!userId) {
-    throw createError({
-      statusCode: 400,
-      message: 'User ID is required',
-    });
-  }
-
-  try {
-    const prisma = await getPrisma();
-    const data = await prisma.animeEntry.findMany({
-      where: {
-        userId,
-      },
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    });
-
-    return data.map((row: AnimeEntry) => ({
-      id: row.id,
-      title: row.title,
-      status: row.status,
-      currentEpisode: row.currentEpisode,
-      totalEpisodes: row.totalEpisodes,
-      score: row.score,
-      notes: row.notes,
-      coverUrl: row.coverUrl,
-      startDate: row.startDate,
-      endDate: row.endDate,
-      rewatchCount: row.rewatchCount,
-    }));
-  } catch (error) {
-    throw createError({
-      statusCode: 500,
-      message: 'Error fetching anime list',
-    });
-  }
+  return apiClient('/v1/anime', {
+    query: query.status ? { status: query.status } : undefined,
+  });
 });
