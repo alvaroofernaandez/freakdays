@@ -48,6 +48,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "eslint": "^9.25.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "happy-dom": "^20.9.0",
     "lucide-vue-next": "^0.561.0",
     "radix-vue": "^1.9.17",
