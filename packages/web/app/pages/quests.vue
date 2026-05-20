@@ -31,6 +31,11 @@ const {
   initialize,
 } = useQuestsPage();
 
+useSeoMeta({
+  title: 'Tus quests',
+  description: 'Gestiona tus misiones diarias y quests en FreakDays',
+});
+
 onMounted(() => {
   initialize();
 });

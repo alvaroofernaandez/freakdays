@@ -7,6 +7,7 @@ import WelcomeSection from '@/components/index/WelcomeSection.vue';
 import ProfileCard from '@/components/index/ProfileCard.vue';
 import ProfileCardSkeleton from '@/components/index/ProfileCardSkeleton.vue';
 import StatsCardSkeleton from '@/components/index/StatsCardSkeleton.vue';
+import StatCard from '@/components/index/StatCard.vue';
 import ModuleGrid from '@/components/index/ModuleGrid.vue';
 import SettingsPrompt from '@/components/index/SettingsPrompt.vue';
 import { useIndexPage } from '@/composables/useIndexPage';
@@ -105,132 +106,40 @@ const { profile, isLoading, greeting, expProgress, quickStats, loadingStats, mod
             />
 
             <StatsCardSkeleton v-if="loadingStats" />
-            <Card
+            <StatCard
               v-else
-              class="group relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              />
-              <div
-                class="absolute top-0 right-0 w-40 h-40 bg-primary/20 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-              />
-              <CardContent class="relative p-6 sm:p-7">
-                <div class="flex flex-col h-full min-h-[120px] sm:min-h-[140px]">
-                  <div class="flex-1 space-y-2">
-                    <p class="text-sm font-medium text-muted-foreground/90 uppercase tracking-wide">
-                      Quests Pendientes
-                    </p>
-                    <p class="text-4xl sm:text-5xl font-bold text-primary leading-none">
-                      {{ quickStats.questsPending }}
-                    </p>
-                  </div>
-                  <div class="flex justify-end mt-auto">
-                    <div
-                      class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/30 transition-all duration-300"
-                    >
-                      <Target class="h-7 w-7 sm:h-8 sm:w-8 text-primary" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              label="Quests Pendientes"
+              :value="quickStats.questsPending"
+              :icon="Target"
+              color-variant="primary"
+            />
 
             <StatsCardSkeleton v-if="loadingStats" />
-            <Card
+            <StatCard
               v-else
-              class="group relative overflow-hidden border-exp-easy/30 bg-gradient-to-br from-exp-easy/15 via-exp-easy/10 to-exp-easy/5 hover:border-exp-easy/50 hover:shadow-lg hover:shadow-exp-easy/10 transition-all duration-300"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-exp-easy/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              />
-              <div
-                class="absolute top-0 right-0 w-40 h-40 bg-exp-easy/20 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-              />
-              <CardContent class="relative p-6 sm:p-7">
-                <div class="flex flex-col h-full min-h-[120px] sm:min-h-[140px]">
-                  <div class="flex-1 space-y-2">
-                    <p class="text-sm font-medium text-muted-foreground/90 uppercase tracking-wide">
-                      Animes en Curso
-                    </p>
-                    <p class="text-4xl sm:text-5xl font-bold text-exp-easy leading-none">
-                      {{ quickStats.animeWatching }}
-                    </p>
-                  </div>
-                  <div class="flex justify-end mt-auto">
-                    <div
-                      class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-exp-easy/20 backdrop-blur-sm border border-exp-easy/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-exp-easy/30 transition-all duration-300"
-                    >
-                      <TrendingUp class="h-7 w-7 sm:h-8 sm:w-8 text-exp-easy" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              label="Animes en Curso"
+              :value="quickStats.animeWatching"
+              :icon="TrendingUp"
+              color-variant="exp-easy"
+            />
 
             <StatsCardSkeleton v-if="loadingStats" />
-            <Card
+            <StatCard
               v-else
-              class="group relative overflow-hidden border-exp-legendary/30 bg-gradient-to-br from-exp-legendary/15 via-exp-legendary/10 to-exp-legendary/5 hover:border-exp-legendary/50 hover:shadow-lg hover:shadow-exp-legendary/10 transition-all duration-300"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-exp-legendary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              />
-              <div
-                class="absolute top-0 right-0 w-40 h-40 bg-exp-legendary/20 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-              />
-              <CardContent class="relative p-6 sm:p-7">
-                <div class="flex flex-col h-full min-h-[120px] sm:min-h-[140px]">
-                  <div class="flex-1 space-y-2">
-                    <p class="text-sm font-medium text-muted-foreground/90 uppercase tracking-wide">
-                      Quests Hoy
-                    </p>
-                    <p class="text-4xl sm:text-5xl font-bold text-exp-legendary leading-none">
-                      {{ quickStats.questsToday }}
-                    </p>
-                  </div>
-                  <div class="flex justify-end mt-auto">
-                    <div
-                      class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-exp-legendary/20 backdrop-blur-sm border border-exp-legendary/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-exp-legendary/30 transition-all duration-300"
-                    >
-                      <Award class="h-7 w-7 sm:h-8 sm:w-8 text-exp-legendary" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              label="Quests Hoy"
+              :value="quickStats.questsToday"
+              :icon="Award"
+              color-variant="exp-legendary"
+            />
 
             <StatsCardSkeleton v-if="loadingStats" />
-            <Card
+            <StatCard
               v-else
-              class="group relative overflow-hidden border-accent/30 bg-gradient-to-br from-accent/15 via-accent/10 to-accent/5 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10 transition-all duration-300"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              />
-              <div
-                class="absolute top-0 right-0 w-40 h-40 bg-accent/20 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-300"
-              />
-              <CardContent class="relative p-6 sm:p-7">
-                <div class="flex flex-col h-full min-h-[120px] sm:min-h-[140px]">
-                  <div class="flex-1 space-y-2">
-                    <p class="text-sm font-medium text-muted-foreground/90 uppercase tracking-wide">
-                      Entrenamientos Semana
-                    </p>
-                    <p class="text-4xl sm:text-5xl font-bold text-accent leading-none">
-                      {{ quickStats.workoutsThisWeek }}
-                    </p>
-                  </div>
-                  <div class="flex justify-end mt-auto">
-                    <div
-                      class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-accent/20 backdrop-blur-sm border border-accent/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-accent/30 transition-all duration-300"
-                    >
-                      <Calendar class="h-7 w-7 sm:h-8 sm:w-8 text-accent" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              label="Entrenamientos Semana"
+              :value="quickStats.workoutsThisWeek"
+              :icon="Calendar"
+              color-variant="accent"
+            />
           </div>
 
           <div class="space-y-3">

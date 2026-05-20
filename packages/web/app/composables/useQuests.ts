@@ -1,3 +1,4 @@
+import { devError } from '@/utils/logger';
 import type { Quest, QuestDifficulty } from '~~/domain/types';
 import { useAuthStore } from '~~/stores/auth';
 
@@ -63,7 +64,7 @@ export function useQuests() {
       });
       return data.map(mapApiToQuest);
     } catch (error) {
-      console.error('Error fetching quests:', error);
+      devError('Error fetching quests:', error);
       return [];
     }
   }
@@ -78,19 +79,19 @@ export function useQuests() {
         requireOrg: true,
       });
     } catch (error) {
-      console.error('Error fetching today completions:', error);
+      devError('Error fetching today completions:', error);
       return [];
     }
   }
 
   async function createQuest(dto: CreateQuestDTO): Promise<Quest | null> {
     if (!authStore.userId) {
-      console.error('No user ID available');
+      devError('No user ID available');
       return null;
     }
 
     if (!dto.title || !dto.title.trim()) {
-      console.error('Title is required');
+      devError('Title is required');
       return null;
     }
 
@@ -102,7 +103,7 @@ export function useQuests() {
       });
       return mapApiToQuest(data);
     } catch (error) {
-      console.error('Error in createQuest:', error);
+      devError('Error in createQuest:', error);
       throw apiClient.normalizeApiError(error);
     }
   }
@@ -125,7 +126,7 @@ export function useQuests() {
 
       return result.expEarned || 0;
     } catch (error) {
-      console.error('Error completing quest:', error);
+      devError('Error completing quest:', error);
       return 0;
     }
   }
@@ -135,7 +136,7 @@ export function useQuests() {
       const quests = await fetchQuests();
       return quests.find((q) => q.id === id) || null;
     } catch (error) {
-      console.error('Error fetching quest:', error);
+      devError('Error fetching quest:', error);
       return null;
     }
   }
@@ -155,7 +156,7 @@ export function useQuests() {
       );
       return true;
     } catch (error) {
-      console.error('Error deleting quest:', error);
+      devError('Error deleting quest:', error);
       return false;
     }
   }
@@ -216,7 +217,7 @@ export function useQuests() {
         read_at: n.read_at ? new Date(n.read_at) : null,
       }));
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      devError('Error fetching notifications:', error);
       return [];
     }
   }
@@ -234,7 +235,7 @@ export function useQuests() {
       );
       return true;
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      devError('Error marking notification as read:', error);
       return false;
     }
   }

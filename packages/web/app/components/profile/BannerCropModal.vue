@@ -266,7 +266,7 @@ onUnmounted(() => {
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation"
+                class="h-9 w-9 sm:h-8 sm:w-8 touch-manipulation focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Cerrar"
                 @click="handleCancel"
               >
@@ -340,14 +340,15 @@ onUnmounted(() => {
                 <div class="flex gap-2">
                   <Button
                     variant="outline"
-                    class="min-h-[44px] touch-manipulation"
+                    class="min-h-[44px] touch-manipulation focus-visible:ring-2 focus-visible:ring-primary"
                     :disabled="isProcessing"
                     @click="handleCancel"
                   >
                     Cancelar
                   </Button>
                   <Button
-                    class="min-h-[44px] touch-manipulation glow-primary"
+                    autofocus
+                    class="min-h-[44px] touch-manipulation glow-primary focus-visible:ring-2 focus-visible:ring-primary"
                     :disabled="isProcessing"
                     @click="handleCrop"
                   >

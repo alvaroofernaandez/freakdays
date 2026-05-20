@@ -1,3 +1,4 @@
+import { devError } from '@/utils/logger';
 import { useAuthStore } from '~~/stores/auth';
 
 export type AnimeStatus =
@@ -93,12 +94,12 @@ export function useAnime() {
 
   async function addAnime(dto: CreateAnimeDTO): Promise<AnimeEntry | null> {
     if (!authStore.userId) {
-      console.error('No user ID available');
+      devError('No user ID available');
       return null;
     }
 
     if (!dto.title || !dto.title.trim()) {
-      console.error('Title is required');
+      devError('Title is required');
       return null;
     }
 
@@ -110,7 +111,7 @@ export function useAnime() {
       });
       return mapApiToAnime(data);
     } catch (error) {
-      console.error('Error in addAnime:', error);
+      devError('Error in addAnime:', error);
       throw apiClient.normalizeApiError(error);
     }
   }

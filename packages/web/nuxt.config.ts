@@ -68,8 +68,13 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: {
         lang: 'es',
-        class: 'dark',
       },
+      script: [
+        {
+          innerHTML: `(function(){try{var m=localStorage.getItem('freakdays-theme')||'dark';var d=m==='dark'||(m==='system'&&matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
+          tagPosition: 'head',
+        },
+      ],
       title: 'FreakDays - Tu compañero definitivo para gestionar tu vida friki',
       titleTemplate: '%s | FreakDays',
       meta: [

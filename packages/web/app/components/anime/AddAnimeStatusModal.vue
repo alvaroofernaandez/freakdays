@@ -106,7 +106,8 @@ watch(
         <Button
           variant="ghost"
           size="icon"
-          class="h-8 w-8 sm:h-9 sm:w-9 hover:bg-muted hover:text-foreground cursor-pointer"
+          class="h-8 w-8 sm:h-9 sm:w-9 hover:bg-muted hover:text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
+          aria-label="Cerrar"
           @click="handleCancel"
         >
           <X class="h-4 w-4" />
@@ -125,6 +126,8 @@ watch(
               :src="coverUrl"
               :alt="displayTitle"
               class="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
             <div v-else class="w-full h-full flex items-center justify-center">
               <Tv class="h-6 w-6 text-muted-foreground/50" />
@@ -177,8 +180,20 @@ watch(
       </CardContent>
 
       <CardFooter class="flex justify-end gap-2 pt-4 border-t">
-        <Button variant="outline" @click="handleCancel"> Cancelar </Button>
-        <Button @click="handleConfirm"> Añadir Anime </Button>
+        <Button
+          variant="outline"
+          class="focus-visible:ring-2 focus-visible:ring-primary"
+          @click="handleCancel"
+        >
+          Cancelar
+        </Button>
+        <Button
+          autofocus
+          class="focus-visible:ring-2 focus-visible:ring-primary"
+          @click="handleConfirm"
+        >
+          Añadir Anime
+        </Button>
       </CardFooter>
     </Card>
   </div>

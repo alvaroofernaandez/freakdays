@@ -27,6 +27,11 @@ const {
   updateReleaseEntry,
 } = useCalendarPage();
 
+useSeoMeta({
+  title: 'Calendario de lanzamientos',
+  description: 'Sigue los próximos lanzamientos de anime, manga y eventos en FreakDays',
+});
+
 const deleteModal = useModal();
 const releaseToDelete = ref<Release | null>(null);
 const isDeleting = ref(false);

@@ -26,6 +26,7 @@ const props = defineProps<{
 const toast = useToast();
 const _authStore = useAuthStore();
 const authContext = useAuthContext();
+const apiClient = useApiClient();
 const isSaving = ref(false);
 const isDragging = ref(false);
 
@@ -70,36 +71,24 @@ async function save() {
 
   isSaving.value = true;
   try {
-    const token = await getAuthToken();
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
+    await authContext.refresh();
 
     const content: TierListState = {
       tiers: tiers.value,
       pool: pool.value,
     };
 
-    await $fetch(`/api/party/lists/${props.list.id}`, {
-      method: 'PUT',
-      body: { name: listName.value, content },
-      credentials: 'include',
-      headers,
+    await apiClient.put(`/v1/party/lists/${props.list.id}`, {
+      name: listName.value,
+      content,
     });
     toast.success('Tier List guardada exitosamente');
   } catch (e: unknown) {
-    if (import.meta.dev) console.error('Error saving tier list:', e);
-    const msg = e instanceof Error ? e.message : 'Error al guardar la tier list';
-    toast.error(msg);
+    const normalized = apiClient.normalizeApiError(e);
+    toast.error(normalized.message || 'Error al guardar la tier list');
   } finally {
     isSaving.value = false;
   }
-}
-
-async function getAuthToken(): Promise<string | null> {
-  await authContext.refresh();
-  return authContext.getAccessToken();
 }
 
 function addItem() {

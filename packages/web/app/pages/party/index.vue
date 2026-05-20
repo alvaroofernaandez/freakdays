@@ -47,6 +47,11 @@ const {
   initialize,
 } = usePartyPage();
 
+useSeoMeta({
+  title: 'Tu party',
+  description: 'Gestiona tu grupo de amigos frikis en FreakDays',
+});
+
 const hasParties = computed(() => !loading.value && parties.value.length > 0);
 const isEmpty = computed(() => !loading.value && parties.value.length === 0);
 

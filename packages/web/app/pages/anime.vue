@@ -52,6 +52,11 @@ const {
 
 const CloseIcon = X;
 
+useSeoMeta({
+  title: 'Tus animes',
+  description: 'Gestiona tu lista de animes en FreakDays',
+});
+
 const statusConfig: Record<AnimeStatus, { icon: Component; color: string; label: string }> = {
   watching: { icon: Play, color: 'text-primary', label: 'En curso' },
   completed: { icon: CheckCircle2, color: 'text-exp-easy', label: 'Visto' },

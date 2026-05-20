@@ -103,6 +103,8 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
           :src="manga.coverUrl"
           :alt="manga.title"
           class="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         <BookOpen v-else class="h-6 w-6 text-muted-foreground" />
       </div>

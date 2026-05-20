@@ -1,3 +1,4 @@
+import { devError } from '@/utils/logger';
 import { useAuthStore } from '~~/stores/auth';
 
 export interface MangaEntry {
@@ -68,12 +69,12 @@ export function useManga() {
 
   async function addManga(dto: CreateMangaDTO): Promise<MangaEntry | null> {
     if (!authStore.userId) {
-      console.error('No user ID available');
+      devError('No user ID available');
       return null;
     }
 
     if (!dto.title || !dto.title.trim()) {
-      console.error('Title is required');
+      devError('Title is required');
       return null;
     }
 
@@ -85,7 +86,7 @@ export function useManga() {
       });
       return mapApiToManga(data);
     } catch (error) {
-      console.error('Error in addManga:', error);
+      devError('Error in addManga:', error);
       throw apiClient.normalizeApiError(error);
     }
   }
@@ -131,7 +132,7 @@ export function useManga() {
 
       return true;
     } catch (error) {
-      console.error('Error adding volume:', error);
+      devError('Error adding volume:', error);
       return false;
     }
   }
@@ -167,7 +168,7 @@ export function useManga() {
 
       return true;
     } catch (error) {
-      console.error('Error removing volume:', error);
+      devError('Error removing volume:', error);
       return false;
     }
   }
@@ -185,7 +186,7 @@ export function useManga() {
       );
       return true;
     } catch (error) {
-      console.error('Error updating score:', error);
+      devError('Error updating score:', error);
       return false;
     }
   }
@@ -213,7 +214,7 @@ export function useManga() {
 
       return true;
     } catch (error) {
-      console.error('Error updating price:', error);
+      devError('Error updating price:', error);
       return false;
     }
   }
@@ -248,7 +249,7 @@ export function useManga() {
 
       return true;
     } catch (error) {
-      console.error('Error updating status:', error);
+      devError('Error updating status:', error);
       return false;
     }
   }
@@ -258,7 +259,7 @@ export function useManga() {
       const collection = await fetchCollection();
       return collection.find((m) => m.id === id) || null;
     } catch (error) {
-      console.error('Error fetching manga:', error);
+      devError('Error fetching manga:', error);
       return null;
     }
   }
@@ -272,7 +273,7 @@ export function useManga() {
       });
       return true;
     } catch (error) {
-      console.error('Error deleting manga:', error);
+      devError('Error deleting manga:', error);
       return false;
     }
   }

@@ -2,6 +2,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
+import ThemeToggle from '@/components/ui/theme-toggle/ThemeToggle.vue';
 import type { UserProfile } from '@/composables/useProfile';
 import { Trophy } from 'lucide-vue-next';
 
@@ -61,6 +62,7 @@ const _emit = defineEmits<{
       <slot name="nav" />
 
       <div class="ml-auto flex items-center gap-2 md:gap-3 shrink-0">
+        <ThemeToggle />
         <template v-if="loading">
           <div class="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border/50">
             <div class="hidden lg:flex flex-col items-end gap-1.5">

@@ -59,6 +59,11 @@ const {
   initialize,
 } = profilePage;
 
+useSeoMeta({
+  title: 'Tu perfil',
+  description: 'Gestiona tu perfil y configuración en FreakDays',
+});
+
 const uploadingBanner = toRef(profilePage, 'uploadingBanner');
 const bannerPreview = toRef(profilePage, 'bannerPreview');
 

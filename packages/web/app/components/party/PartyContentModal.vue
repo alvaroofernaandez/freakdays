@@ -82,8 +82,8 @@ watch(
         // I'll add a note for the parent to use :key.
         await fetchLists(props.party.id); // Assuming fetchLists might optinally take an ID or I force it.
         // If fetchLists doesn't take ID, this relies on the closure.
-      } catch (e) {
-        if (import.meta.dev) console.error(e);
+      } catch {
+        // fetch silently failed
       } finally {
         loading.value = false;
       }
@@ -169,7 +169,10 @@ async function handleCreateList(data: {
                       <img
                         v-if="member.profile?.avatarUrl"
                         :src="member.profile.avatarUrl"
+                        :alt="member.profile?.displayName || 'Miembro de la party'"
                         class="h-full w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <span v-else>{{ member.profile?.username?.charAt(0).toUpperCase() }}</span>
                     </div>

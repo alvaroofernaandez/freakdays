@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { devError } from '@/utils/logger';
 import type { AnimeStatus } from '~~/domain/types/anime';
 import type { PartySharedList, SharedListType } from '~~/domain/types/party';
 
@@ -138,7 +139,7 @@ export function usePartyLists(partyId: string) {
     } catch (e: unknown) {
       const err = e as { message?: string; data?: { message?: string } };
       error.value = err.message || err.data?.message || 'Error fetching lists';
-      if (import.meta.dev) console.error('Error fetching party lists:', e);
+      devError('Error fetching party lists:', e);
     } finally {
       loading.value = false;
     }

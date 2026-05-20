@@ -93,7 +93,7 @@ const emit = defineEmits<{
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-9 w-9 sm:h-8 sm:w-8 shrink-0 touch-manipulation"
+                class="h-9 w-9 sm:h-8 sm:w-8 shrink-0 touch-manipulation focus-visible:ring-2 focus-visible:ring-primary"
                 aria-label="Cerrar"
                 @click="emit('close')"
               >

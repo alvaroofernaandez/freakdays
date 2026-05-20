@@ -1,3 +1,4 @@
+import { devError } from '@/utils/logger';
 import { useAuthStore } from '~~/stores/auth';
 
 export interface Workout {
@@ -66,7 +67,7 @@ export function useWorkouts() {
 
       return (data ?? []).map(mapDbToWorkout);
     } catch (error) {
-      console.error('Error fetching workouts:', error);
+      devError('Error fetching workouts:', error);
       return [];
     }
   }
@@ -84,7 +85,7 @@ export function useWorkouts() {
       if (!data) return null;
       return mapDbToWorkout(data);
     } catch (error) {
-      console.error('Error fetching in-progress workout:', error);
+      devError('Error fetching in-progress workout:', error);
       return null;
     }
   }
@@ -98,7 +99,7 @@ export function useWorkouts() {
       });
       return mapDbToWorkout(data);
     } catch (error) {
-      console.error('Error fetching workout:', error);
+      devError('Error fetching workout:', error);
       return null;
     }
   }
@@ -125,7 +126,7 @@ export function useWorkouts() {
 
       return mapDbToWorkout(data);
     } catch (error) {
-      console.error('Error creating workout:', error);
+      devError('Error creating workout:', error);
       return null;
     }
   }
@@ -155,7 +156,7 @@ export function useWorkouts() {
         sets: [],
       };
     } catch (error) {
-      console.error('Error adding exercise:', error);
+      devError('Error adding exercise:', error);
       return null;
     }
   }
@@ -198,7 +199,7 @@ export function useWorkouts() {
         notes: data.notes as string | null,
       };
     } catch (error) {
-      console.error('Error adding set:', error);
+      devError('Error adding set:', error);
       return null;
     }
   }
@@ -241,7 +242,7 @@ export function useWorkouts() {
         notes: data.notes as string | null,
       };
     } catch (error) {
-      console.error('Error updating set:', error);
+      devError('Error updating set:', error);
       return null;
     }
   }
@@ -259,7 +260,7 @@ export function useWorkouts() {
       });
       return true;
     } catch (error) {
-      console.error('Error deleting set:', error);
+      devError('Error deleting set:', error);
       return false;
     }
   }
@@ -280,7 +281,7 @@ export function useWorkouts() {
       );
       return true;
     } catch (error) {
-      console.error('Error completing workout:', error);
+      devError('Error completing workout:', error);
       return false;
     }
   }
@@ -294,7 +295,7 @@ export function useWorkouts() {
       });
       return true;
     } catch (error) {
-      console.error('Error deleting workout:', error);
+      devError('Error deleting workout:', error);
       return false;
     }
   }
@@ -317,7 +318,7 @@ export function useWorkouts() {
 
       return data;
     } catch (error) {
-      console.error('Error fetching weekly stats:', error);
+      devError('Error fetching weekly stats:', error);
       return { count: 0, totalMinutes: 0 };
     }
   }

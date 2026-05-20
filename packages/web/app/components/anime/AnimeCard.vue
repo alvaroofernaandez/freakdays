@@ -78,6 +78,8 @@ const hasAdditionalInfo = computed(() => {
           :src="anime.coverUrl"
           :alt="anime.title"
           class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          loading="lazy"
+          decoding="async"
         />
         <div v-else class="w-full h-full flex items-center justify-center">
           <Tv class="h-8 w-8 text-muted-foreground/50" />

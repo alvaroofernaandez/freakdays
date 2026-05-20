@@ -26,6 +26,11 @@ const {
   reloadManga,
 } = useMangaPage();
 
+useSeoMeta({
+  title: 'Tu colección de manga',
+  description: 'Gestiona tu colección de manga en FreakDays',
+});
+
 const tabs = [
   { value: 'all' as const, label: 'Todos', icon: List },
   { value: 'collecting' as const, label: 'En curso', icon: TrendingUp },

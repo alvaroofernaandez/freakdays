@@ -1,3 +1,5 @@
+import { devError } from '@/utils/logger';
+
 export interface AnimeSearchResult {
   mal_id: number;
   title: string;
@@ -112,7 +114,7 @@ export function useAnimeSearch() {
 
       // Solo mostrar error si esta búsqueda no fue cancelada
       if (abortController === currentAbortController && !currentAbortController.signal.aborted) {
-        if (import.meta.dev) console.error('Error searching anime:', error);
+        devError('Error searching anime:', error);
         searchResults.value = [];
       }
 
@@ -191,7 +193,7 @@ export function useAnimeSearch() {
       const data = await response.json();
       return data.data;
     } catch (error) {
-      if (import.meta.dev) console.error('Error fetching anime details:', error);
+      devError('Error fetching anime details:', error);
       return null;
     }
   }

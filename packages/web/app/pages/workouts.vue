@@ -43,6 +43,11 @@ const {
   initialize,
 } = useWorkoutsPage();
 
+useSeoMeta({
+  title: 'Tus entrenamientos',
+  description: 'Gestiona y registra tus entrenamientos en FreakDays',
+});
+
 onMounted(() => {
   initialize();
 });

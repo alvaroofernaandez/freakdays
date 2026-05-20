@@ -35,6 +35,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   await authContext.refresh();
 
+  // Wait for Clerk to finish loading (up to 3 s) before reading .user.
+  // Clerk sets window.Clerk.loaded once initialization is complete.
+  if (window.Clerk && !(window.Clerk as unknown as Record<string, unknown>).loaded) {
+    const start = Date.now();
+    await new Promise<void>((resolve) => {
+      const interval = setInterval(() => {
+        const loaded = (window.Clerk as unknown as Record<string, unknown>)?.loaded;
+        if (loaded || Date.now() - start >= 3000) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 50);
+    });
+  }
+
   const clerkUser = window.Clerk?.user ?? null;
   const isAuthenticated = clerkUser !== null && clerkUser !== undefined;
 
