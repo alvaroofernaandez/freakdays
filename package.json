@@ -48,7 +48,8 @@
       "jest-mock": ">=30.4.1",
       "@jest/environment": ">=30.4.1",
       "@jest/types": ">=30.4.1",
-      "@jest/fake-timers": ">=30.4.1"
+      "@jest/fake-timers": ">=30.4.1",
+      "ws@>=8.0.0 <8.20.1": ">=8.20.1"
     }
   },
   "engines": {
