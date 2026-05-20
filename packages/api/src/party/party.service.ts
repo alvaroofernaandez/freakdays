@@ -1,3 +1,5 @@
+import { randomInt } from 'node:crypto';
+
 import {
   BadRequestException,
   ConflictException,
@@ -519,8 +521,7 @@ export class PartyService {
     let code = '';
 
     for (let index = 0; index < 6; index += 1) {
-      const randomIndex = Math.floor(Math.random() * chars.length);
-      code += chars.charAt(randomIndex);
+      code += chars.charAt(randomInt(chars.length));
     }
 
     return code;

@@ -1,7 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Req } from '@nestjs/common';
+import type { Request } from 'express';
 
 import { Public } from '../auth/decorators/public.decorator';
-import { HealthService, type AuthHealthStatus } from './health.service';
+import { HealthService } from './health.service';
 
 @Controller('v1/health')
 export class AuthHealthController {
@@ -9,7 +10,15 @@ export class AuthHealthController {
 
   @Public()
   @Get('auth')
-  getAuthHealth(): AuthHealthStatus {
-    return this.healthService.getAuthStatus();
+  getAuthHealth(
+    @Req() req: Request,
+  ): { status: 'ok' | 'degraded' } | ReturnType<HealthService['getAuthStatus']> {
+    const full = this.healthService.getAuthStatus();
+
+    if (req.user) {
+      return full;
+    }
+
+    return { status: full.status };
   }
 }

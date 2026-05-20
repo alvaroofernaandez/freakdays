@@ -11,7 +11,7 @@ import { StorageService } from '../storage/storage.service';
 export interface ProfileView {
   id: string;
   userId: string;
-  username: string;
+  username: string | null;
   displayName: string | null;
   avatarUrl: string | null;
   avatarKey: string | null;
@@ -92,6 +92,14 @@ export class ProfileService {
 
     if (input.amount <= 0) {
       throw new BadRequestException('El amount de exp debe ser mayor a cero');
+    }
+
+    const MAX_EXP_PER_REQUEST = 1000;
+
+    if (input.amount > MAX_EXP_PER_REQUEST) {
+      throw new BadRequestException(
+        `El amount de exp no puede superar ${MAX_EXP_PER_REQUEST} por request`,
+      );
     }
 
     const { profile } = await this.ensureProfileForCurrentUser(clerkUserId);
@@ -297,7 +305,8 @@ export class ProfileService {
     }
 
     if (Object.prototype.hasOwnProperty.call(input, 'website')) {
-      updateData.website = this.normalizeNullableString(input.website);
+      const raw = this.normalizeNullableString(input.website);
+      updateData.website = raw !== null ? this.normalizeUrl(raw, 'website') : null;
     }
 
     if (socialLinks !== undefined) {
@@ -316,7 +325,10 @@ export class ProfileService {
         const normalizedValue = value.trim();
 
         if (normalizedKey.length > 0 && normalizedValue.length > 0) {
-          normalizedSocialLinks[normalizedKey] = normalizedValue;
+          normalizedSocialLinks[normalizedKey] = this.normalizeUrl(
+            normalizedValue,
+            `socialLinks.${normalizedKey}`,
+          );
         }
       }
 
@@ -381,6 +393,22 @@ export class ProfileService {
     }
 
     return result;
+  }
+
+  private normalizeUrl(value: string, field: string): string {
+    let parsed: URL;
+
+    try {
+      parsed = new URL(value);
+    } catch {
+      throw new BadRequestException(`${field} debe ser una URL válida`);
+    }
+
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new BadRequestException(`${field} solo acepta URLs con protocolo http o https`);
+    }
+
+    return value;
   }
 
   private calculateLevel(exp: number): number {

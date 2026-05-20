@@ -95,10 +95,11 @@ model User {
   workoutSets          WorkoutSet[]
 }
 
+// MIGRATION REQUIRED: bring username from "" to NULL where empty, then apply unique constraint
 model Profile {
   id              String   @id @default(cuid())
   userId          String   @unique
-  username        String   @default("")
+  username        String?  @unique
   displayName     String?
   avatarUrl       String?
   avatarKey       String?

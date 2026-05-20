@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { AuthModule } from './auth/auth.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { ClerkJwtGuard } from './auth/guards/clerk-jwt.guard';
 import { CommonModule } from './common/common.module';
+import { validateEnv } from './common/config/env.schema';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { OrgContextGuard } from './common/guards/org-context.guard';
 import { RequestContextInterceptor } from './common/interceptors/request-context.interceptor';
 import { HealthModule } from './health/health.module';
@@ -29,7 +32,9 @@ import { WorkoutsModule } from './workouts/workouts.module';
       isGlobal: true,
       cache: true,
       expandVariables: true,
+      validate: validateEnv,
     }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     CommonModule,
     AuthModule,
     CalendarModule,
@@ -55,11 +60,19 @@ import { WorkoutsModule } from './workouts/workouts.module';
     },
     {
       provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
       useClass: ClerkJwtGuard,
     },
     {
       provide: APP_GUARD,
       useClass: OrgContextGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
     },
   ],
 })
