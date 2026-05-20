@@ -10,9 +10,6 @@ module.exports = {
   },
   clearMocks: true,
 
-  // Coverage configuration. CI uploads the report; thresholds start
-  // intentionally low because only 3 tests exist today (audit baseline).
-  // Raise as more test coverage is added.
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.spec.ts',
@@ -23,15 +20,15 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'json-summary', 'html', 'lcov'],
-  // Floor — baseline is ~3% (only 3 tests exist today). Floor sits 1pp below
-  // baseline so legitimate refactors don't false-fail, but anything dropping
-  // coverage beyond rounding does. Raise as test count grows.
+  // Floor sits a few points below post-hardening baseline (50 tests, ~29% lines
+  // / ~35% functions / ~23% branches) so refactors don't false-fail. Raise as
+  // controllers and the remaining services get covered.
   coverageThreshold: {
     global: {
-      lines: 2,
-      functions: 3,
-      branches: 1,
-      statements: 2,
+      lines: 25,
+      functions: 30,
+      branches: 20,
+      statements: 25,
     },
   },
 };
