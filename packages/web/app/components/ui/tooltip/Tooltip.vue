@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TooltipRoot, TooltipProvider } from 'radix-vue';
+import { TooltipRoot, TooltipProvider } from 'reka-ui';
 
 interface Props {
   delayDuration?: number;

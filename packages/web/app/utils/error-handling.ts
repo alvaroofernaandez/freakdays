@@ -3,7 +3,7 @@ export class AppError extends Error {
     message: string,
     public readonly code?: string,
     public readonly statusCode?: number,
-    public readonly details?: Record<string, any>,
+    public readonly details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'AppError';
@@ -14,7 +14,7 @@ export interface ErrorInfo {
   message: string;
   code?: string;
   statusCode?: number;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   userMessage?: string;
 }
 
@@ -28,7 +28,13 @@ export function handleError(error: unknown): AppError {
   }
 
   if (typeof error === 'object' && error !== null) {
-    const errorObj = error as any;
+    const errorObj = error as {
+      message?: string;
+      code?: string;
+      statusCode?: number;
+      status?: number;
+      details?: Record<string, unknown>;
+    };
     return new AppError(
       errorObj.message || 'An unexpected error occurred',
       errorObj.code,

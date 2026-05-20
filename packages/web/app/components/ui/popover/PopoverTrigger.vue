@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PopoverTrigger as RadixPopoverTrigger } from 'radix-vue';
+import { PopoverTrigger as RadixPopoverTrigger } from 'reka-ui';
 
 defineProps<{
   asChild?: boolean;

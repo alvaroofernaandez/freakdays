@@ -19,7 +19,7 @@ import { usePartyLists } from '@/composables/usePartyLists';
 import { ArrowLeft, Layers, Plus, Users } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import type { PartySharedList } from '~~/domain/types/party';
+import type { Party, PartySharedList, SharedListType } from '~~/domain/types/party';
 
 const route = useRoute();
 const router = useRouter();
@@ -28,7 +28,7 @@ const partyId = route.params.id as string;
 const { fetchPartyById } = useParties();
 const { lists, fetchLists, createList } = usePartyLists(partyId);
 
-const party = ref<any>(null);
+const party = ref<Party | null>(null);
 const loading = ref(true);
 const activeTab = ref('lists');
 const selectedList = ref<PartySharedList | null>(null);
@@ -58,7 +58,7 @@ function handleBackToLists() {
   fetchLists(); // Refresh to update counts/metadata if changed
 }
 
-async function handleCreateList(data: { name: string; type: any }) {
+async function handleCreateList(data: { name: string; type: SharedListType }) {
   await createList(data.name, data.type);
   isCreateListOpen.value = false;
 }
@@ -190,7 +190,7 @@ async function handleCreateList(data: { name: string; type: any }) {
         role="tabpanel"
         aria-labelledby="members-tab"
       >
-        <div class="space-y-3 sm:space-y-4">
+        <div v-if="party" class="space-y-3 sm:space-y-4">
           <div>
             <h3 class="text-lg sm:text-xl font-semibold">Miembros de la Party</h3>
             <p class="text-sm text-muted-foreground mt-1">

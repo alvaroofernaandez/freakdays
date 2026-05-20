@@ -14,17 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePartyLists } from '@/composables/usePartyLists';
 import { Layers, Plus, Users } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import type { PartySharedList } from '~~/domain/types/party'; // Adjust import if needed
-
-// Adjusting imports based on file structure I saw earlier
-// I'll assume PartyListDetailModal is in @/components/party/PartyListDetailModal.vue based on my previous tool call
-// But commonly it might be better placed. I put it in @/components/party/PartyListDetailModal.vue
+import type { Party, PartySharedList } from '~~/domain/types/party';
 
 import PartyListDetailModalInternal from '@/components/party/PartyListDetailModal.vue';
 
 interface Props {
   open: boolean;
-  party: any | null; // typing 'any' for now to match usage in page, or strict Party
+  party: Party | null;
 }
 
 const props = defineProps<Props>();
@@ -87,7 +83,7 @@ watch(
         await fetchLists(props.party.id); // Assuming fetchLists might optinally take an ID or I force it.
         // If fetchLists doesn't take ID, this relies on the closure.
       } catch (e) {
-        console.error(e);
+        if (import.meta.dev) console.error(e);
       } finally {
         loading.value = false;
       }
@@ -108,7 +104,10 @@ function handleBackToLists() {
   }
 }
 
-async function handleCreateList(data: { name: string; type: any }) {
+async function handleCreateList(data: {
+  name: string;
+  type: import('~~/domain/types/party').SharedListType;
+}) {
   await createList(data.name, data.type);
   isCreateListOpen.value = false;
 }

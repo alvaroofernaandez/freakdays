@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { AlertTriangle, Info, XCircle } from 'lucide-vue-next';
+import type { Component } from 'vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -26,7 +27,7 @@ const severityConfig = computed(() => {
   const configs: Record<
     ErrorSeverity,
     {
-      icon: any;
+      icon: Component;
       color: string;
       bgColor: string;
       borderColor: string;

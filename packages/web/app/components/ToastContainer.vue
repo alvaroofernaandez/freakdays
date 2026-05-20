@@ -4,7 +4,7 @@ import { useToast, type ToastType } from '@/composables/useToast';
 
 const { toasts, remove } = useToast();
 
-const iconMap: Record<ToastType, any> = {
+const iconMap: Record<ToastType, Component> = {
   success: CheckCircle2,
   error: XCircle,
   info: Info,

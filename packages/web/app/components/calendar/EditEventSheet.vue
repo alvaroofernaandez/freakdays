@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Ticket, Tv, BookOpen, Save } from 'lucide-vue-next';
+import type { Component } from 'vue';
 import type { Release, ReleaseType, CreateReleaseDTO } from '@/composables/useCalendar';
 
 interface Props {
@@ -34,7 +35,7 @@ const editForm = ref<Partial<CreateReleaseDTO>>({
   url: '',
 });
 
-const typeConfig: Record<ReleaseType, { icon: any; color: string; label: string }> = {
+const typeConfig: Record<ReleaseType, { icon: Component; color: string; label: string }> = {
   anime_episode: { icon: Tv, color: 'text-primary', label: 'Episodio Anime' },
   manga_volume: { icon: BookOpen, color: 'text-exp-easy', label: 'Tomo Manga' },
   event: { icon: Ticket, color: 'text-exp-legendary', label: 'Evento' },

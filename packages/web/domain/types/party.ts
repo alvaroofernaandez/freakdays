@@ -84,5 +84,5 @@ export interface TierItem {
   id: string;
   content: string;
   type: 'text' | 'image';
-  meta?: any;
+  meta?: Record<string, unknown>;
 }

@@ -6,10 +6,9 @@ import { defineStore } from 'pinia';
  * `Session` import from `@supabase/supabase-js` (Supabase was removed in S8.2
  * of the migration; see docs/migrations/supabase-to-clerk-nestjs.md).
  *
- * Live auth state lives in `useAuthContext()` (Clerk-backed). This store now
- * only holds optional loading/error UI state. Writing to `session` is no
- * longer wired in the migrated middleware — kept as a read API for callers
- * during the deprecation window.
+ * Live auth state lives in `useAuthContext()` (Clerk-backed). `isAuthenticated`
+ * is derived from `user` (set from `window.Clerk.user` after initialization)
+ * rather than `session`, which is always null in the Clerk-only runtime.
  */
 interface MinimalSession {
   user?: {
@@ -18,8 +17,14 @@ interface MinimalSession {
   };
 }
 
+interface ClerkUserLike {
+  id?: string;
+  primaryEmailAddress?: { emailAddress?: string } | null;
+}
+
 interface AuthState {
   session: MinimalSession | null;
+  user: ClerkUserLike | null;
   loading: boolean;
   error: string | null;
 }
@@ -27,25 +32,30 @@ interface AuthState {
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     session: null,
+    user: null,
     loading: false,
     error: null,
   }),
 
   getters: {
     isAuthenticated: (state): boolean => {
-      return !!state.session;
+      return !!state.user;
     },
 
     userId: (state): string | null => {
-      return state.session?.user?.id ?? null;
+      return state.user?.id ?? state.session?.user?.id ?? null;
     },
 
     userEmail: (state): string | null => {
-      return state.session?.user?.email ?? null;
+      return state.user?.primaryEmailAddress?.emailAddress ?? state.session?.user?.email ?? null;
     },
   },
 
   actions: {
+    setUser(user: ClerkUserLike | null) {
+      this.user = user;
+    },
+
     setSession(session: MinimalSession | null) {
       this.session = session;
     },
@@ -60,6 +70,7 @@ export const useAuthStore = defineStore('auth', {
 
     reset() {
       this.session = null;
+      this.user = null;
       this.loading = false;
       this.error = null;
     },

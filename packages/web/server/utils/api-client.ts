@@ -27,13 +27,13 @@ type ApiClient = ReturnType<typeof $fetch.create>;
 
 export function createApiClient(event: H3Event): ApiClient {
   const config = useRuntimeConfig();
-  const baseURL = config.public.apiUrl;
+  const baseURL = config.public.apiBaseUrl;
 
   if (!baseURL) {
     throw createError({
       statusCode: 500,
       statusMessage:
-        'NUXT_PUBLIC_API_URL is not configured. Set it in .env or runtimeConfig.public.apiUrl.',
+        'NUXT_PUBLIC_API_URL is not configured. Set it in .env or runtimeConfig.public.apiBaseUrl.',
     });
   }
 

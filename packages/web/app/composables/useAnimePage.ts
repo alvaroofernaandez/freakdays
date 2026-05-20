@@ -115,9 +115,10 @@ export function useAnimePage() {
       } else {
         toast.error('No se pudo añadir el anime');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string; error?: { message?: string } };
       const errorMessage =
-        error?.message || error?.error?.message || 'Error al añadir el anime. Inténtalo de nuevo.';
+        err?.message || err?.error?.message || 'Error al añadir el anime. Inténtalo de nuevo.';
       toast.error(errorMessage);
     } finally {
       addingAnime.value = false;

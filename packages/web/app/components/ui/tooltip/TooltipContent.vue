@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TooltipContent as RadixTooltipContent } from 'radix-vue';
+import { TooltipContent as RadixTooltipContent } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
 import { cn } from '@/lib/utils';
 

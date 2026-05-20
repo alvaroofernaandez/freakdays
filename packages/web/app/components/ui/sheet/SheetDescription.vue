@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DialogDescription } from 'radix-vue';
+import { DialogDescription } from 'reka-ui';
 </script>
 
 <template>

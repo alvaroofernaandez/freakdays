@@ -14,6 +14,7 @@ import {
   Wrench,
   X,
 } from 'lucide-vue-next';
+import type { Component } from 'vue';
 
 interface ErrorProps {
   error: {
@@ -34,7 +35,7 @@ const errorInfo = computed(() => {
   const statusCode = error.value?.statusCode || 500;
   const statusMessage = error.value?.statusMessage || 'Error desconocido';
 
-  const errorMessages: Record<number, { title: string; description: string; icon: any }> = {
+  const errorMessages: Record<number, { title: string; description: string; icon: Component }> = {
     404: {
       title: 'Página no encontrada',
       description: 'Lo sentimos, la página que buscas no existe o ha sido movida.',

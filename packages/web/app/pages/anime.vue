@@ -26,6 +26,7 @@ import {
   X,
   XCircle,
 } from 'lucide-vue-next';
+import type { Component } from 'vue';
 
 const {
   animeList: _animeList,
@@ -51,7 +52,7 @@ const {
 
 const CloseIcon = X;
 
-const statusConfig: Record<AnimeStatus, { icon: any; color: string; label: string }> = {
+const statusConfig: Record<AnimeStatus, { icon: Component; color: string; label: string }> = {
   watching: { icon: Play, color: 'text-primary', label: 'En curso' },
   completed: { icon: CheckCircle2, color: 'text-exp-easy', label: 'Visto' },
   on_hold: { icon: Pause, color: 'text-exp-medium', label: 'En pausa' },
@@ -60,7 +61,7 @@ const statusConfig: Record<AnimeStatus, { icon: any; color: string; label: strin
   rewatching: { icon: Repeat, color: 'text-accent', label: 'Reviendo' },
 };
 
-const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: any }> = [
+const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }> = [
   { value: 'all', label: 'Todos', icon: List },
   { value: 'watching', label: 'En curso', icon: Play },
   { value: 'completed', label: 'Visto', icon: CheckCircle2 },

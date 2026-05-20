@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import type { AnimeStatus } from '~~/domain/types/anime';
 import type { PartySharedList, SharedListType } from '~~/domain/types/party';
 
 interface ApiPartyListItem {
@@ -85,7 +86,7 @@ export function usePartyLists(partyId: string) {
       listId: item.listId,
       addedBy: item.addedBy,
       title: item.title,
-      status: (item.status as any) || 'plan_to_watch',
+      status: (item.status as AnimeStatus) || 'plan_to_watch',
       currentEpisode: item.currentEpisode ?? 0,
       totalEpisodes: item.totalEpisodes ?? null,
       score: item.score ?? null,
@@ -134,9 +135,10 @@ export function usePartyLists(partyId: string) {
       });
 
       lists.value = data.map(mapApiList);
-    } catch (e: any) {
-      error.value = e.message || e.data?.message || 'Error fetching lists';
-      console.error('Error fetching party lists:', e);
+    } catch (e: unknown) {
+      const err = e as { message?: string; data?: { message?: string } };
+      error.value = err.message || err.data?.message || 'Error fetching lists';
+      if (import.meta.dev) console.error('Error fetching party lists:', e);
     } finally {
       loading.value = false;
     }
@@ -161,8 +163,9 @@ export function usePartyLists(partyId: string) {
       const newList = mapApiList(created);
       lists.value.unshift(newList);
       return newList;
-    } catch (e: any) {
-      error.value = e.message || e.data?.message || 'Error creating list';
+    } catch (e: unknown) {
+      const err = e as { message?: string; data?: { message?: string } };
+      error.value = err.message || err.data?.message || 'Error creating list';
       throw e;
     } finally {
       loading.value = false;

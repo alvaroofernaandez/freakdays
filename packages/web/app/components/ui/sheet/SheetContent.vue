@@ -2,7 +2,7 @@
 import type { HTMLAttributes } from 'vue';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-vue-next';
-import { DialogClose, DialogContent, DialogOverlay, DialogPortal } from 'radix-vue';
+import { DialogClose, DialogContent, DialogOverlay, DialogPortal } from 'reka-ui';
 import { cn } from '@/lib/utils';
 
 defineOptions({

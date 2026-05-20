@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/composables/useToast';
 import { AlertCircle, Plus, RefreshCw, Search, Tv, X } from 'lucide-vue-next';
 import { computed, onMounted, ref } from 'vue';
+import type { AnimeSearchResult } from '@/composables/useAnimeSearch';
 import type { PartyAnimeItem, PartySharedList } from '~~/domain/types/party';
 
 const props = defineProps<{
@@ -51,8 +52,9 @@ async function fetchItems() {
       headers,
     });
     items.value = data.animeItems || [];
-  } catch (e: any) {
-    const errorMsg = e.message || e.data?.message || 'Error al cargar items';
+  } catch (e: unknown) {
+    const err = e as { message?: string; data?: { message?: string } };
+    const errorMsg = err.message || err.data?.message || 'Error al cargar items';
     error.value = errorMsg;
     toast.error(errorMsg);
   } finally {
@@ -60,7 +62,7 @@ async function fetchItems() {
   }
 }
 
-async function handleAddItem(anime: any) {
+async function handleAddItem(anime: AnimeSearchResult) {
   if (addingAnime.value) return;
 
   addingAnime.value = true;
@@ -80,8 +82,9 @@ async function handleAddItem(anime: any) {
     items.value.unshift(newItem);
     toast.success('Anime añadido a la lista compartida');
     showMarketplace.value = false;
-  } catch (e: any) {
-    const errorMsg = e.message || e.data?.message || 'Error al añadir anime';
+  } catch (e: unknown) {
+    const err = e as { message?: string; data?: { message?: string } };
+    const errorMsg = err.message || err.data?.message || 'Error al añadir anime';
     toast.error(errorMsg);
   } finally {
     addingAnime.value = false;
@@ -99,16 +102,20 @@ async function handleDelete(itemId: string) {
       headers.Authorization = `Bearer ${token}`;
     }
 
-    await $fetch(`/api/party/lists/${props.list.id}/items/${itemId}`, {
-      method: 'DELETE' as any,
-      credentials: 'include',
-      headers,
-    });
+    await ($fetch as unknown as typeof $fetch<void, never>)(
+      `/api/party/lists/${props.list.id}/items/${itemId}` as never,
+      {
+        method: 'DELETE',
+        credentials: 'include',
+        headers,
+      } as never,
+    );
 
     items.value = items.value.filter((i) => i.id !== itemId);
     toast.success('Anime eliminado de la lista');
-  } catch (e: any) {
-    const errorMsg = e.message || e.data?.message || 'Error al eliminar anime';
+  } catch (e: unknown) {
+    const err = e as { message?: string; data?: { message?: string } };
+    const errorMsg = err.message || err.data?.message || 'Error al eliminar anime';
     toast.error(errorMsg);
   } finally {
     deletingItemId.value = null;

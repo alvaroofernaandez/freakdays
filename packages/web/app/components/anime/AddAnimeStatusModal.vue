@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Play, CheckCircle2, Pause, X, Tv } from 'lucide-vue-next';
+import type { Component } from 'vue';
 import type { AnimeStatus } from '@/composables/useAnime';
 import type { AnimeSearchResult } from '@/composables/useAnimeSearch';
 
@@ -20,7 +21,7 @@ const selectedStatus = ref<AnimeStatus>('plan_to_watch');
 const statusOptions: Array<{
   value: AnimeStatus;
   label: string;
-  icon: any;
+  icon: Component;
   color: string;
   description: string;
 }> = [

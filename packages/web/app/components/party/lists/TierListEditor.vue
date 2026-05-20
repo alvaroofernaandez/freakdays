@@ -88,9 +88,10 @@ async function save() {
       headers,
     });
     toast.success('Tier List guardada exitosamente');
-  } catch (e: any) {
-    console.error('Error saving tier list:', e);
-    toast.error(e.message || 'Error al guardar la tier list');
+  } catch (e: unknown) {
+    if (import.meta.dev) console.error('Error saving tier list:', e);
+    const msg = e instanceof Error ? e.message : 'Error al guardar la tier list';
+    toast.error(msg);
   } finally {
     isSaving.value = false;
   }

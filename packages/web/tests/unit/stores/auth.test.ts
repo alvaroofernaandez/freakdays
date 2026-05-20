@@ -33,25 +33,10 @@ describe('useAuthStore', () => {
       expect(store.isAuthenticated).toBe(false);
     });
 
-    it('isAuthenticated should return true when session exists', () => {
+    it('isAuthenticated should return true when user is set', () => {
       const store = useAuthStore();
-      const mockSession: LegacyAuthSession = {
-        access_token: 'token',
-        token_type: 'bearer',
-        expires_in: 3600,
-        expires_at: Date.now() + 3600,
-        refresh_token: 'refresh',
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          app_metadata: {},
-          user_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-        },
-      };
 
-      store.setSession(mockSession);
+      store.setUser({ id: 'user-123' });
 
       expect(store.isAuthenticated).toBe(true);
     });
@@ -167,6 +152,7 @@ describe('useAuthStore', () => {
       };
 
       store.setSession(mockSession);
+      store.setUser({ id: 'user-123' });
 
       expect(store.session).toStrictEqual(mockSession);
       expect(store.isAuthenticated).toBe(true);

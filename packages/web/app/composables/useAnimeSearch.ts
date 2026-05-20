@@ -103,15 +103,16 @@ export function useAnimeSearch() {
       hasMorePages.value = data.pagination.has_next_page;
 
       return data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignorar errores de cancelación
-      if (error.name === 'AbortError' || currentAbortController.signal.aborted) {
+      const err = error as { name?: string };
+      if (err.name === 'AbortError' || currentAbortController.signal.aborted) {
         return [];
       }
 
       // Solo mostrar error si esta búsqueda no fue cancelada
       if (abortController === currentAbortController && !currentAbortController.signal.aborted) {
-        console.error('Error searching anime:', error);
+        if (import.meta.dev) console.error('Error searching anime:', error);
         searchResults.value = [];
       }
 
@@ -190,7 +191,7 @@ export function useAnimeSearch() {
       const data = await response.json();
       return data.data;
     } catch (error) {
-      console.error('Error fetching anime details:', error);
+      if (import.meta.dev) console.error('Error fetching anime details:', error);
       return null;
     }
   }

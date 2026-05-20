@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import type { CreateReleaseDTO, Release, ReleaseType } from '@/composables/useCalendar';
 import { useCalendarPage } from '@/composables/useCalendarPage';
 import { BookOpen, Calendar as CalendarIcon, Plus, Ticket, Tv, X } from 'lucide-vue-next';
+import type { Component } from 'vue';
 
 const {
   releases,
@@ -109,7 +110,7 @@ function handleDaySheetDelete(release: Release) {
   handleDeleteRequest(release);
 }
 
-const typeConfig: Record<ReleaseType, { icon: any; color: string; label: string }> = {
+const typeConfig: Record<ReleaseType, { icon: Component; color: string; label: string }> = {
   anime_episode: { icon: Tv, color: 'text-primary', label: 'Episodio Anime' },
   manga_volume: { icon: BookOpen, color: 'text-exp-easy', label: 'Tomo Manga' },
   event: { icon: Ticket, color: 'text-exp-legendary', label: 'Evento' },

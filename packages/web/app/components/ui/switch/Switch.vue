@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { SwitchRoot, SwitchThumb, useForwardPropsEmits } from 'radix-vue';
-import type { SwitchRootProps } from 'radix-vue';
+import { SwitchRoot, SwitchThumb, useForwardPropsEmits } from 'reka-ui';
+import type { SwitchRootProps } from 'reka-ui';
 import type { HTMLAttributes } from 'vue';
 import { cn } from '@/lib/utils';
 
-const props = withDefaults(
-  defineProps<
-    SwitchRootProps & {
-      class?: HTMLAttributes['class'];
-    }
-  >(),
-  {
-    checked: false,
-  },
-);
+interface SwitchProps extends Omit<SwitchRootProps, 'modelValue'> {
+  class?: HTMLAttributes['class'];
+  checked?: boolean;
+}
+
+const props = withDefaults(defineProps<SwitchProps>(), {
+  checked: false,
+});
 
 const emits = defineEmits<{
   'update:checked': [checked: boolean];
@@ -27,14 +25,14 @@ const delegatedProps = computed(() => {
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits);
 
-const handleCheckedChange = (checked: boolean) => {
-  emits('update:checked', checked);
+const handleCheckedChange = (value: boolean) => {
+  emits('update:checked', value);
 };
 </script>
 
 <template>
   <SwitchRoot
-    :checked="props.checked"
+    :model-value="props.checked"
     v-bind="forwarded"
     :class="
       cn(
@@ -42,7 +40,7 @@ const handleCheckedChange = (checked: boolean) => {
         props.class,
       )
     "
-    @update:checked="handleCheckedChange"
+    @update:model-value="handleCheckedChange"
   >
     <SwitchThumb
       :class="

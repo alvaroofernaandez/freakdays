@@ -39,6 +39,9 @@ export function useAuth() {
     try {
       await authContext.refresh();
       authStore.setSession(null);
+      if (import.meta.client) {
+        authStore.setUser(window.Clerk?.user ?? null);
+      }
     } catch (_err) {
       authStore.setError('Error initializing auth');
     } finally {
@@ -95,7 +98,7 @@ export function useAuth() {
       modulesStore.reset();
       authContext.clear();
       organizationContext.clearActiveOrgId();
-      router.push('/login');
+      await router.push('/login');
     } catch (_err) {
       authStore.setError('Error signing out');
     } finally {
