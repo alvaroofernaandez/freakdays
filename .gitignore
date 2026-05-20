@@ -53,3 +53,7 @@ Thumbs.db
 # ── AI / dev tooling local state ────────────────────────────────────────────
 .code-review-graph
 .claude
+
+# Skill registry cache (local orchestrator artifact)
+.atl/
+
