@@ -8,6 +8,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -20,6 +21,8 @@ import {
   type UpdateQuestInput,
 } from './quests.service';
 
+@ApiTags('quests')
+@ApiBearerAuth()
 @Controller('v1/quests')
 export class QuestsController {
   constructor(private readonly questsService: QuestsService) {}

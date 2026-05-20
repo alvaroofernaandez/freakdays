@@ -10,6 +10,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -21,6 +22,8 @@ import {
   type UpdateAnimeInput,
 } from './anime.service';
 
+@ApiTags('anime')
+@ApiBearerAuth()
 @Controller('v1/anime')
 export class AnimeController {
   constructor(private readonly animeService: AnimeService) {}

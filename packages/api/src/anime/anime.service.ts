@@ -3,6 +3,13 @@ import { Prisma } from '@prisma/client';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import {
+  normalizeInteger,
+  normalizeOptionalDate,
+  normalizeOptionalInteger,
+  normalizeOptionalText,
+  normalizeTitle,
+} from '../common/utils/normalizers';
 
 export type AnimeStatus =
   | 'watching'
@@ -31,6 +38,8 @@ export interface AnimeView {
   updatedAt: Date;
 }
 
+// TODO: Remove snake_case fields (total_episodes, cover_url, current_episode) once
+// packages/web migrates useAnimePage.ts and useAnime.ts to camelCase
 export interface CreateAnimeInput {
   title: string;
   status?: AnimeStatus;
@@ -106,7 +115,7 @@ export class AnimeService {
       orgId,
     );
 
-    const title = this.normalizeTitle(input.title);
+    const title = normalizeTitle(input.title);
 
     const created = await this.prisma.animeEntry.create({
       data: {
@@ -114,21 +123,21 @@ export class AnimeService {
         organizationId: organization.id,
         title,
         status: this.normalizeStatus(input.status, 'plan_to_watch'),
-        currentEpisode: this.normalizeInteger(
+        currentEpisode: normalizeInteger(
           input.currentEpisode ?? input.current_episode,
           'currentEpisode',
           0,
         ),
-        totalEpisodes: this.normalizeOptionalInteger(
+        totalEpisodes: normalizeOptionalInteger(
           input.totalEpisodes ?? input.total_episodes,
           'totalEpisodes',
         ),
-        score: this.normalizeOptionalInteger(input.score, 'score'),
-        notes: this.normalizeOptionalText(input.notes),
-        coverUrl: this.normalizeOptionalText(input.coverUrl ?? input.cover_url),
-        startDate: this.normalizeOptionalDate(input.startDate, 'startDate'),
-        endDate: this.normalizeOptionalDate(input.endDate, 'endDate'),
-        rewatchCount: this.normalizeInteger(input.rewatchCount, 'rewatchCount', 0),
+        score: normalizeOptionalInteger(input.score, 'score'),
+        notes: normalizeOptionalText(input.notes),
+        coverUrl: normalizeOptionalText(input.coverUrl ?? input.cover_url),
+        startDate: normalizeOptionalDate(input.startDate, 'startDate'),
+        endDate: normalizeOptionalDate(input.endDate, 'endDate'),
+        rewatchCount: normalizeInteger(input.rewatchCount, 'rewatchCount', 0),
       },
     });
 
@@ -165,7 +174,7 @@ export class AnimeService {
     }
 
     if (input.currentEpisode !== undefined || input.current_episode !== undefined) {
-      data.currentEpisode = this.normalizeInteger(
+      data.currentEpisode = normalizeInteger(
         input.currentEpisode ?? input.current_episode,
         'currentEpisode',
         existing.currentEpisode,
@@ -173,34 +182,34 @@ export class AnimeService {
     }
 
     if (input.totalEpisodes !== undefined || input.total_episodes !== undefined) {
-      data.totalEpisodes = this.normalizeOptionalInteger(
+      data.totalEpisodes = normalizeOptionalInteger(
         input.totalEpisodes ?? input.total_episodes,
         'totalEpisodes',
       );
     }
 
     if (input.score !== undefined) {
-      data.score = this.normalizeOptionalInteger(input.score, 'score');
+      data.score = normalizeOptionalInteger(input.score, 'score');
     }
 
     if (input.notes !== undefined) {
-      data.notes = this.normalizeOptionalText(input.notes);
+      data.notes = normalizeOptionalText(input.notes);
     }
 
     if (input.coverUrl !== undefined || input.cover_url !== undefined) {
-      data.coverUrl = this.normalizeOptionalText(input.coverUrl ?? input.cover_url);
+      data.coverUrl = normalizeOptionalText(input.coverUrl ?? input.cover_url);
     }
 
     if (input.startDate !== undefined) {
-      data.startDate = this.normalizeOptionalDate(input.startDate, 'startDate');
+      data.startDate = normalizeOptionalDate(input.startDate, 'startDate');
     }
 
     if (input.endDate !== undefined) {
-      data.endDate = this.normalizeOptionalDate(input.endDate, 'endDate');
+      data.endDate = normalizeOptionalDate(input.endDate, 'endDate');
     }
 
     if (input.rewatchCount !== undefined) {
-      data.rewatchCount = this.normalizeInteger(
+      data.rewatchCount = normalizeInteger(
         input.rewatchCount,
         'rewatchCount',
         existing.rewatchCount,
@@ -241,20 +250,6 @@ export class AnimeService {
     return { success: true };
   }
 
-  private normalizeTitle(value: string): string {
-    const title = typeof value === 'string' ? value.trim() : '';
-
-    if (title.length === 0) {
-      throw new BadRequestException('El título es obligatorio');
-    }
-
-    if (title.length > 180) {
-      throw new BadRequestException('El título no puede superar 180 caracteres');
-    }
-
-    return title;
-  }
-
   private normalizeStatus(value: string | undefined, fallback: AnimeStatus): AnimeStatus;
   private normalizeStatus(
     value: string | undefined,
@@ -282,55 +277,6 @@ export class AnimeService {
     }
 
     throw new BadRequestException('Estado de anime inválido');
-  }
-
-  private normalizeInteger(value: NumberInput, field: string, fallback: number): number {
-    if (value === undefined || value === null || value === '') {
-      return fallback;
-    }
-
-    const parsed = typeof value === 'string' ? Number(value) : value;
-
-    if (typeof parsed !== 'number' || Number.isNaN(parsed)) {
-      throw new BadRequestException(`El campo ${field} debe ser numérico`);
-    }
-
-    if (parsed < 0) {
-      throw new BadRequestException(`El campo ${field} no puede ser negativo`);
-    }
-
-    return Math.floor(parsed);
-  }
-
-  private normalizeOptionalInteger(value: NumberInput, field: string): number | null {
-    if (value === undefined || value === null || value === '') {
-      return null;
-    }
-
-    return this.normalizeInteger(value, field, 0);
-  }
-
-  private normalizeOptionalText(value?: string | null): string | null {
-    if (value === undefined || value === null) {
-      return null;
-    }
-
-    const normalized = value.trim();
-    return normalized.length > 0 ? normalized : null;
-  }
-
-  private normalizeOptionalDate(value: DateInput, field: string): Date | null {
-    if (value === undefined || value === null || value === '') {
-      return null;
-    }
-
-    const parsed = value instanceof Date ? value : new Date(value);
-
-    if (Number.isNaN(parsed.getTime())) {
-      throw new BadRequestException(`El campo ${field} tiene un formato inválido`);
-    }
-
-    return parsed;
   }
 
   private toAnimeView(entry: {

@@ -1,9 +1,12 @@
 import { Controller, Post, Req, UnauthorizedException } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
 import { QuestsNotificationsService } from './quests-notifications.service';
 
+@ApiTags('quests-notifications')
+@ApiBearerAuth()
 @Controller('v1/quests/notifications')
 export class QuestsNotificationsController {
   constructor(private readonly questsNotificationsService: QuestsNotificationsService) {}

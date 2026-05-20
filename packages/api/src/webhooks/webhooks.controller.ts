@@ -1,4 +1,6 @@
 import { BadRequestException, Controller, HttpCode, Post, Req } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { Request } from 'express';
 
 import { Public } from '../auth/decorators/public.decorator';
@@ -8,6 +10,8 @@ interface RawBodyRequest extends Request {
   rawBody?: Buffer;
 }
 
+@ApiTags('webhooks')
+@SkipThrottle()
 @Controller('v1/webhooks')
 export class WebhooksController {
   constructor(private readonly webhooksService: WebhooksService) {}

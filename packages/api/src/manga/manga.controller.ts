@@ -9,6 +9,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -19,6 +20,8 @@ import {
   type UpdateMangaInput,
 } from './manga.service';
 
+@ApiTags('manga')
+@ApiBearerAuth()
 @Controller('v1/manga')
 export class MangaController {
   constructor(private readonly mangaService: MangaService) {}

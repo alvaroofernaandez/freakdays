@@ -3,6 +3,12 @@ import { Prisma } from '@prisma/client';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import {
+  normalizeInteger,
+  normalizeOptionalInteger,
+  normalizeOptionalText,
+  normalizeTitle,
+} from '../common/utils/normalizers';
 
 export type MangaStatus = 'collecting' | 'completed' | 'dropped' | 'wishlist';
 
@@ -94,7 +100,7 @@ export class MangaService {
       orgId,
     );
 
-    const title = this.normalizeTitle(input.title);
+    const title = normalizeTitle(input.title);
     const ownedVolumes = this.normalizeOwnedVolumes(input.ownedVolumes ?? []);
     const pricePerVolume = this.normalizeOptionalFloat(
       input.pricePerVolume ?? input.price_per_volume,
@@ -107,16 +113,16 @@ export class MangaService {
         userId: currentUser.id,
         organizationId: organization.id,
         title,
-        author: this.normalizeOptionalText(input.author),
-        totalVolumes: this.normalizeOptionalInteger(
+        author: normalizeOptionalText(input.author),
+        totalVolumes: normalizeOptionalInteger(
           input.totalVolumes ?? input.total_volumes,
           'totalVolumes',
         ),
         ownedVolumes,
         status: this.normalizeStatus(input.status, 'collecting'),
-        score: this.normalizeOptionalInteger(input.score, 'score'),
-        notes: this.normalizeOptionalText(input.notes),
-        coverUrl: this.normalizeOptionalText(input.coverUrl ?? input.cover_url),
+        score: normalizeOptionalInteger(input.score, 'score'),
+        notes: normalizeOptionalText(input.notes),
+        coverUrl: normalizeOptionalText(input.coverUrl ?? input.cover_url),
         pricePerVolume,
         totalCost,
       },
@@ -151,15 +157,15 @@ export class MangaService {
     const data: Prisma.MangaEntryUpdateInput = {};
 
     if (input.title !== undefined) {
-      data.title = this.normalizeTitle(input.title);
+      data.title = normalizeTitle(input.title);
     }
 
     if (input.author !== undefined) {
-      data.author = this.normalizeOptionalText(input.author);
+      data.author = normalizeOptionalText(input.author);
     }
 
     if (input.totalVolumes !== undefined || input.total_volumes !== undefined) {
-      data.totalVolumes = this.normalizeOptionalInteger(
+      data.totalVolumes = normalizeOptionalInteger(
         input.totalVolumes ?? input.total_volumes,
         'totalVolumes',
       );
@@ -174,15 +180,15 @@ export class MangaService {
     }
 
     if (input.score !== undefined) {
-      data.score = this.normalizeOptionalInteger(input.score, 'score');
+      data.score = normalizeOptionalInteger(input.score, 'score');
     }
 
     if (input.notes !== undefined) {
-      data.notes = this.normalizeOptionalText(input.notes);
+      data.notes = normalizeOptionalText(input.notes);
     }
 
     if (input.coverUrl !== undefined || input.cover_url !== undefined) {
-      data.coverUrl = this.normalizeOptionalText(input.coverUrl ?? input.cover_url);
+      data.coverUrl = normalizeOptionalText(input.coverUrl ?? input.cover_url);
     }
 
     if (input.pricePerVolume !== undefined || input.price_per_volume !== undefined) {
@@ -233,20 +239,6 @@ export class MangaService {
     return { success: true };
   }
 
-  private normalizeTitle(value: string): string {
-    const title = typeof value === 'string' ? value.trim() : '';
-
-    if (title.length === 0) {
-      throw new BadRequestException('El título es obligatorio');
-    }
-
-    if (title.length > 180) {
-      throw new BadRequestException('El título no puede superar 180 caracteres');
-    }
-
-    return title;
-  }
-
   private normalizeStatus(value: string | undefined, fallback: MangaStatus): MangaStatus;
   private normalizeStatus(
     value: string | undefined,
@@ -274,41 +266,6 @@ export class MangaService {
     throw new BadRequestException('Estado de manga inválido');
   }
 
-  private normalizeOptionalText(value?: string | null): string | null {
-    if (value === undefined || value === null) {
-      return null;
-    }
-
-    const normalized = value.trim();
-    return normalized.length > 0 ? normalized : null;
-  }
-
-  private normalizeInteger(value: NumberInput, field: string, fallback: number): number {
-    if (value === undefined || value === null || value === '') {
-      return fallback;
-    }
-
-    const parsed = typeof value === 'string' ? Number(value) : value;
-
-    if (typeof parsed !== 'number' || Number.isNaN(parsed)) {
-      throw new BadRequestException(`El campo ${field} debe ser numérico`);
-    }
-
-    if (parsed < 0) {
-      throw new BadRequestException(`El campo ${field} no puede ser negativo`);
-    }
-
-    return Math.floor(parsed);
-  }
-
-  private normalizeOptionalInteger(value: NumberInput, field: string): number | null {
-    if (value === undefined || value === null || value === '') {
-      return null;
-    }
-
-    return this.normalizeInteger(value, field, 0);
-  }
-
   private normalizeOptionalFloat(value: NumberInput, field: string): number | null {
     if (value === undefined || value === null || value === '') {
       return null;
@@ -329,7 +286,7 @@ export class MangaService {
 
   private normalizeOwnedVolumes(values: NumberInput[]): number[] {
     const normalized = values.map((value, index) =>
-      this.normalizeInteger(value, `ownedVolumes[${index}]`, 0),
+      normalizeInteger(value, `ownedVolumes[${index}]`, 0),
     );
 
     return [...new Set(normalized)].sort((a, b) => a - b);

@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { AnimeStatus, Prisma } from '@prisma/client';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -16,7 +16,7 @@ export interface PartyListItemView {
   listId: string;
   addedBy: string | null;
   title: string;
-  status: string;
+  status: AnimeStatus;
   currentEpisode: number;
   totalEpisodes: number | null;
   score: number | null;
@@ -429,9 +429,22 @@ export class PartyListsService {
     return title;
   }
 
-  private normalizeStatus(status?: string): string {
+  private normalizeStatus(status?: string): AnimeStatus {
     const normalized = typeof status === 'string' ? status.trim() : '';
-    return normalized.length > 0 ? normalized : 'plan_to_watch';
+    const validStatuses: AnimeStatus[] = [
+      'watching',
+      'completed',
+      'on_hold',
+      'dropped',
+      'plan_to_watch',
+      'rewatching',
+    ];
+
+    if (validStatuses.includes(normalized as AnimeStatus)) {
+      return normalized as AnimeStatus;
+    }
+
+    return 'plan_to_watch';
   }
 
   private normalizeNumber(value: number | undefined, fallback: number): number {
@@ -500,7 +513,7 @@ export class PartyListsService {
     id: string;
     listId: string;
     title: string;
-    status: string;
+    status: AnimeStatus;
     currentEpisode: number;
     totalEpisodes: number | null;
     score: number | null;
@@ -599,7 +612,7 @@ export class PartyListsService {
       id: string;
       listId: string;
       title: string;
-      status: string;
+      status: AnimeStatus;
       currentEpisode: number;
       totalEpisodes: number | null;
       score: number | null;

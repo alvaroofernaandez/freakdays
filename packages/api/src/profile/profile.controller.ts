@@ -8,6 +8,8 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 
 import {
@@ -18,6 +20,8 @@ import {
   ProfileService,
 } from './profile.service';
 
+@ApiTags('profile')
+@ApiBearerAuth()
 @Controller('v1/profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
@@ -36,6 +40,7 @@ export class ProfileController {
     return this.profileService.updateMyProfile(user.sub, body);
   }
 
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @Post('me/exp')
   addExp(@Req() request: Request, @Body() body: AddProfileExpInput) {
     const user = this.getRequestUser(request);

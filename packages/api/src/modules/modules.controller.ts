@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Put, Req, UnauthorizedException } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -8,6 +9,8 @@ import {
   ModulesService,
 } from './modules.service';
 
+@ApiTags('modules')
+@ApiBearerAuth()
 @Controller('v1/modules')
 export class ModulesController {
   constructor(private readonly modulesService: ModulesService) {}

@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { PrismaService } from '../common/prisma/prisma.service';
+
 export interface HealthStatus {
-  status: 'ok';
+  status: 'ok' | 'degraded';
+  db: 'ok' | 'error';
   service: 'freak-days-api';
   timestamp: string;
   uptime: number;
@@ -20,11 +23,23 @@ export interface AuthHealthStatus {
 
 @Injectable()
 export class HealthService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  getStatus(): HealthStatus {
+  async getStatus(): Promise<HealthStatus> {
+    let dbStatus: 'ok' | 'error' = 'ok';
+
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+    } catch {
+      dbStatus = 'error';
+    }
+
     return {
-      status: 'ok',
+      status: dbStatus === 'ok' ? 'ok' : 'degraded',
+      db: dbStatus,
       service: 'freak-days-api',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),

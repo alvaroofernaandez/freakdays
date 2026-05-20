@@ -209,22 +209,21 @@ export class WorkoutsService {
     weekAgo.setDate(weekAgo.getDate() - 7);
     weekAgo.setHours(0, 0, 0, 0);
 
-    const workouts = await this.prisma.workoutSession.findMany({
-      where: {
-        userId: currentUser.id,
-        organizationId: organization.id,
-        workoutDate: {
-          gte: weekAgo,
-        },
-      },
-      select: {
-        durationMinutes: true,
-      },
+    const where = {
+      userId: currentUser.id,
+      organizationId: organization.id,
+      workoutDate: { gte: weekAgo },
+    };
+
+    const result = await this.prisma.workoutSession.aggregate({
+      _sum: { durationMinutes: true },
+      _count: { _all: true },
+      where,
     });
 
     return {
-      count: workouts.length,
-      totalMinutes: workouts.reduce((sum, workout) => sum + (workout.durationMinutes ?? 0), 0),
+      count: result._count._all,
+      totalMinutes: result._sum.durationMinutes ?? 0,
     };
   }
 

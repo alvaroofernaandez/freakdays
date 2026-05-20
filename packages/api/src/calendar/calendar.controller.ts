@@ -10,6 +10,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -20,6 +21,8 @@ import {
   type UpdateCalendarReleaseInput,
 } from './calendar.service';
 
+@ApiTags('calendar')
+@ApiBearerAuth()
 @Controller('v1/calendar')
 export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}

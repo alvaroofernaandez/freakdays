@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { LoggerModule } from 'nestjs-pino';
 
 import { AuthModule } from './auth/auth.module';
 import { CalendarModule } from './calendar/calendar.module';
@@ -35,6 +36,26 @@ import { WorkoutsModule } from './workouts/workouts.module';
       validate: validateEnv,
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV !== 'prod'
+            ? { target: 'pino-pretty', options: { colorize: true, singleLine: true } }
+            : undefined,
+        redact: ['req.headers.authorization', 'req.headers.cookie'],
+        customLogLevel: (_req, res) => {
+          if (res.statusCode >= 500) return 'error';
+          if (res.statusCode >= 400) return 'warn';
+          return 'info';
+        },
+        genReqId: (req) => {
+          const existing = req.headers['x-request-id'];
+          if (typeof existing === 'string' && existing.length > 0) return existing;
+          if (Array.isArray(existing) && existing[0]) return existing[0];
+          return crypto.randomUUID();
+        },
+      },
+    }),
     CommonModule,
     AuthModule,
     CalendarModule,

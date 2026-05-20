@@ -1,9 +1,10 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { Logger } from 'nestjs-pino';
 
 import { AppModule } from './app.module';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { PrismaService } from './common/prisma/prisma.service';
 
 async function bootstrap(): Promise<void> {
@@ -39,9 +40,22 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useLogger(app.get(Logger));
 
   app.setGlobalPrefix('api');
+
+  const enableDocs = process.env.NODE_ENV !== 'prod' || process.env.ENABLE_API_DOCS === 'true';
+
+  if (enableDocs) {
+    const config = new DocumentBuilder()
+      .setTitle('FreakDays API')
+      .setDescription('Backend API for FreakDays')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   const prisma = app.get(PrismaService);
   await prisma.enableShutdownHooks(app);
@@ -49,7 +63,8 @@ async function bootstrap(): Promise<void> {
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port);
 
-  Logger.log(`FreakDays API listening on port ${port}`, 'Bootstrap');
+  const logger = app.get(Logger);
+  logger.log(`FreakDays API listening on port ${port}`, 'Bootstrap');
 }
 
 void bootstrap();

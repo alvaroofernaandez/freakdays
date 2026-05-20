@@ -8,6 +8,8 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -18,6 +20,8 @@ import {
   type PartyView,
 } from './party.service';
 
+@ApiTags('party')
+@ApiBearerAuth()
 @Controller('v1/party')
 export class PartyController {
   constructor(private readonly partyService: PartyService) {}
@@ -40,6 +44,7 @@ export class PartyController {
     return this.partyService.createParty(user.sub, orgId, body);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('join')
   joinByCode(
     @Req() request: Request,

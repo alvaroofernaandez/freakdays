@@ -10,6 +10,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -26,6 +27,8 @@ import {
   WorkoutsService,
 } from './workouts.service';
 
+@ApiTags('workouts')
+@ApiBearerAuth()
 @Controller('v1/workouts')
 export class WorkoutsController {
   constructor(private readonly workoutsService: WorkoutsService) {}

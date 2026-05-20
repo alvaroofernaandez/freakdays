@@ -9,6 +9,7 @@ import {
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { CurrentOrg } from '../common/decorators/current-org.decorator';
@@ -22,6 +23,8 @@ import {
   type UpdatePartyListInput,
 } from './party-lists.service';
 
+@ApiTags('party-lists')
+@ApiBearerAuth()
 @Controller('v1/party')
 export class PartyListsController {
   constructor(private readonly partyListsService: PartyListsService) {}

@@ -1,8 +1,11 @@
 import { Controller, Get, Post, Req, UnauthorizedException } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
 import { OrganizationsService, type OrganizationMembershipSummary } from './organizations.service';
 
+@ApiTags('organizations')
+@ApiBearerAuth()
 @Controller('v1/organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}

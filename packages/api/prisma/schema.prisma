@@ -394,12 +394,13 @@ model PartyList {
   @@index([createdByUserId])
 }
 
+// MIGRATION REQUIRED: status column must be altered from String to AnimeStatus enum
 model PartyListItem {
-  id               String   @id @default(cuid())
+  id               String      @id @default(cuid())
   listId            String
   title             String
-  completed         Boolean  @default(false)
-  status            String   @default("plan_to_watch")
+  completed         Boolean     @default(false)
+  status            AnimeStatus @default(plan_to_watch)
   currentEpisode    Int      @default(0)
   totalEpisodes     Int?
   score             Int?
@@ -464,4 +465,6 @@ model AuditLog {
 
   @@index([organizationId, createdAt])
   @@index([actorUserId, createdAt])
+  // MIGRATION REQUIRED
+  @@index([targetType, targetId])
 }

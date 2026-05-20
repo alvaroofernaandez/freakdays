@@ -6,6 +6,7 @@ import {
   IdentityContextService,
 } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { normalizeUrl } from '../common/utils/normalizers';
 import { StorageService } from '../storage/storage.service';
 
 export interface ProfileView {
@@ -306,7 +307,7 @@ export class ProfileService {
 
     if (Object.prototype.hasOwnProperty.call(input, 'website')) {
       const raw = this.normalizeNullableString(input.website);
-      updateData.website = raw !== null ? this.normalizeUrl(raw, 'website') : null;
+      updateData.website = raw !== null ? normalizeUrl(raw, 'website') : null;
     }
 
     if (socialLinks !== undefined) {
@@ -325,7 +326,7 @@ export class ProfileService {
         const normalizedValue = value.trim();
 
         if (normalizedKey.length > 0 && normalizedValue.length > 0) {
-          normalizedSocialLinks[normalizedKey] = this.normalizeUrl(
+          normalizedSocialLinks[normalizedKey] = normalizeUrl(
             normalizedValue,
             `socialLinks.${normalizedKey}`,
           );
@@ -393,22 +394,6 @@ export class ProfileService {
     }
 
     return result;
-  }
-
-  private normalizeUrl(value: string, field: string): string {
-    let parsed: URL;
-
-    try {
-      parsed = new URL(value);
-    } catch {
-      throw new BadRequestException(`${field} debe ser una URL válida`);
-    }
-
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      throw new BadRequestException(`${field} solo acepta URLs con protocolo http o https`);
-    }
-
-    return value;
   }
 
   private calculateLevel(exp: number): number {
