@@ -70,9 +70,13 @@ const hasAdditionalInfo = computed(() => {
 </script>
 
 <template>
-  <Card class="group hover:border-primary/30 transition-all overflow-hidden">
+  <Card
+    class="group rounded-none border-2 overflow-hidden transition-[transform,filter,box-shadow,border-color] duration-100 shadow-[0_5px_0_0_oklch(0.35_0.15_190)] hover:shadow-[0_5px_0_0_oklch(0.45_0.18_190)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.35_0.15_190)] motion-reduce:active:translate-y-0"
+  >
     <div class="flex gap-4 p-4">
-      <div class="relative w-20 h-28 sm:w-24 sm:h-32 rounded-lg overflow-hidden shrink-0 bg-muted">
+      <div
+        class="relative w-20 h-28 sm:w-24 sm:h-32 overflow-hidden shrink-0 bg-muted rounded-none"
+      >
         <img
           v-if="anime.coverUrl"
           :src="anime.coverUrl"
@@ -81,12 +85,12 @@ const hasAdditionalInfo = computed(() => {
           loading="lazy"
           decoding="async"
         />
-        <div v-else class="w-full h-full flex items-center justify-center">
+        <div v-else class="w-full h-full flex items-center justify-center" aria-hidden="true">
           <Tv class="h-8 w-8 text-muted-foreground/50" />
         </div>
         <div
           v-if="anime.status === 'watching' && anime.totalEpisodes"
-          class="absolute bottom-0 left-0 right-0 h-1 bg-background/50"
+          class="absolute bottom-0 left-0 right-0 h-1.5 bg-background/50"
         >
           <div
             class="h-full bg-primary transition-all duration-300"
@@ -98,37 +102,37 @@ const hasAdditionalInfo = computed(() => {
       <div class="flex-1 min-w-0 space-y-2">
         <div>
           <h3
-            class="font-semibold text-sm sm:text-base line-clamp-2 group-hover:text-primary transition-colors"
+            class="font-semibold text-sm sm:text-base line-clamp-2 group-hover:text-accent transition-colors"
           >
             {{ anime.title }}
           </h3>
           <div class="flex items-center gap-2 mt-1 flex-wrap">
             <Badge
               :variant="anime.status === 'completed' ? 'default' : 'outline'"
-              class="text-[10px]"
+              class="font-pixel text-[8px] rounded-none"
             >
               {{
                 anime.status === 'watching'
-                  ? 'En curso'
+                  ? 'EN CURSO'
                   : anime.status === 'completed'
-                    ? 'Visto'
+                    ? 'VISTO'
                     : anime.status === 'on_hold'
-                      ? 'En pausa'
+                      ? 'EN PAUSA'
                       : anime.status === 'dropped'
-                        ? 'Droppeado'
-                        : 'Pendiente'
+                        ? 'DROPPEADO'
+                        : 'PENDIENTE'
               }}
             </Badge>
             <div v-if="anime.score" class="flex items-center gap-1 text-xs text-exp-legendary">
-              <Star class="h-3 w-3 fill-current" />
-              <span class="font-medium">{{ anime.score }}/10</span>
+              <Star class="h-3 w-3 fill-current" aria-hidden="true" />
+              <span class="font-pixel text-[9px]">{{ anime.score }}/10</span>
             </div>
             <div
               v-if="anime.rewatchCount > 0"
               class="flex items-center gap-1 text-xs text-muted-foreground"
             >
-              <RotateCcw class="h-3 w-3" />
-              <span>{{ anime.rewatchCount }}x</span>
+              <RotateCcw class="h-3 w-3" aria-hidden="true" />
+              <span class="font-pixel text-[8px]">{{ anime.rewatchCount }}x</span>
             </div>
           </div>
         </div>
@@ -137,33 +141,38 @@ const hasAdditionalInfo = computed(() => {
           <Tooltip>
             <TooltipTrigger as-child>
               <div
-                class="flex items-center gap-1.5 px-2 py-1 rounded-md bg-exp-easy/20 text-exp-easy cursor-help"
+                class="flex items-center gap-1.5 px-2 py-1 rounded-none border border-exp-easy/30 bg-exp-easy/20 text-exp-easy cursor-help"
               >
-                <CheckCircle2 class="h-3.5 w-3.5 fill-current" />
-                <span class="font-medium">Completado</span>
+                <CheckCircle2 class="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                <span class="font-pixel text-[8px] uppercase">COMPLETADO</span>
               </div>
             </TooltipTrigger>
             <TooltipContent>
               <p>Anime completado</p>
             </TooltipContent>
           </Tooltip>
-          <span v-if="anime.totalEpisodes" class="text-muted-foreground">
-            {{ anime.totalEpisodes }} episodios
+          <span v-if="anime.totalEpisodes" class="text-xs text-muted-foreground">
+            {{ anime.totalEpisodes }} eps
           </span>
         </div>
 
         <div v-else class="space-y-1">
           <div class="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-            <span class="font-medium">Ep. {{ anime.currentEpisode }}</span>
-            <span v-if="anime.totalEpisodes">/ {{ anime.totalEpisodes }}</span>
-            <span v-if="anime.totalEpisodes" class="text-muted-foreground/70">
+            <span class="font-pixel text-[9px]">Ep. {{ anime.currentEpisode }}</span>
+            <span v-if="anime.totalEpisodes" class="font-pixel text-[8px]"
+              >/ {{ anime.totalEpisodes }}</span
+            >
+            <span v-if="anime.totalEpisodes" class="font-pixel text-[8px] text-muted-foreground/70">
               ({{ progress }}%)
             </span>
           </div>
-          <div v-if="anime.totalEpisodes" class="h-1.5 bg-muted rounded-full overflow-hidden">
+          <div v-if="anime.totalEpisodes" class="h-1.5 bg-muted overflow-hidden">
             <div
-              class="h-full bg-primary transition-all duration-300"
+              class="h-full bg-accent transition-all duration-300"
               :style="{ width: `${progress}%` }"
+            />
+            <div
+              class="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0_6px,var(--color-background)_6px_8px)] opacity-20"
             />
           </div>
         </div>
@@ -173,11 +182,11 @@ const hasAdditionalInfo = computed(() => {
           class="flex items-center gap-3 text-xs text-muted-foreground flex-wrap"
         >
           <div v-if="formattedStartDate" class="flex items-center gap-1">
-            <Calendar class="h-3 w-3" />
+            <Calendar class="h-3 w-3" aria-hidden="true" />
             <span>Inicio: {{ formattedStartDate }}</span>
           </div>
           <div v-if="formattedEndDate" class="flex items-center gap-1">
-            <Calendar class="h-3 w-3" />
+            <Calendar class="h-3 w-3" aria-hidden="true" />
             <span>Fin: {{ formattedEndDate }}</span>
           </div>
         </div>
@@ -186,11 +195,11 @@ const hasAdditionalInfo = computed(() => {
           <Button
             variant="ghost"
             size="sm"
-            class="h-7 text-xs text-muted-foreground hover:text-foreground"
+            class="h-7 text-xs text-muted-foreground hover:text-foreground rounded-none cursor-pointer"
             @click="showDetails = !showDetails"
           >
-            <ChevronDown v-if="!showDetails" class="h-3 w-3 mr-1" />
-            <ChevronUp v-else class="h-3 w-3 mr-1" />
+            <ChevronDown v-if="!showDetails" class="h-3 w-3 mr-1" aria-hidden="true" />
+            <ChevronUp v-else class="h-3 w-3 mr-1" aria-hidden="true" />
             {{ showDetails ? 'Ocultar' : 'Ver más' }} detalles
           </Button>
         </div>
@@ -199,13 +208,13 @@ const hasAdditionalInfo = computed(() => {
           <div v-if="showDetails" class="space-y-2 pt-2 border-t border-border">
             <div v-if="synopsis" class="text-xs text-muted-foreground">
               <div class="flex items-start gap-2">
-                <FileText class="h-3 w-3 mt-0.5 shrink-0" />
+                <FileText class="h-3 w-3 mt-0.5 shrink-0" aria-hidden="true" />
                 <p class="line-clamp-4">{{ synopsis }}</p>
               </div>
             </div>
             <div v-if="anime.notes && !synopsis" class="text-xs text-muted-foreground">
               <div class="flex items-start gap-2">
-                <FileText class="h-3 w-3 mt-0.5 shrink-0" />
+                <FileText class="h-3 w-3 mt-0.5 shrink-0" aria-hidden="true" />
                 <p class="line-clamp-3 whitespace-pre-wrap">{{ anime.notes }}</p>
               </div>
             </div>
@@ -220,11 +229,12 @@ const hasAdditionalInfo = computed(() => {
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-8 w-8"
+                class="h-8 w-8 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                 :disabled="anime.currentEpisode <= 0"
+                :aria-label="`Decrementar episodio de ${anime.title}`"
                 @click="emit('decrement', anime)"
               >
-                <Minus class="h-4 w-4" />
+                <Minus class="h-4 w-4" aria-hidden="true" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -236,13 +246,14 @@ const hasAdditionalInfo = computed(() => {
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-8 w-8"
+                class="h-8 w-8 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                 :disabled="
                   anime.totalEpisodes ? anime.currentEpisode >= anime.totalEpisodes : false
                 "
+                :aria-label="`Incrementar episodio de ${anime.title}`"
                 @click="emit('increment', anime)"
               >
-                <Plus class="h-4 w-4" />
+                <Plus class="h-4 w-4" aria-hidden="true" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -255,10 +266,11 @@ const hasAdditionalInfo = computed(() => {
             <Button
               variant="ghost"
               size="icon"
-              class="h-8 w-8 text-muted-foreground hover:text-destructive"
+              class="h-8 w-8 rounded-none text-muted-foreground hover:text-destructive cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+              :aria-label="`Eliminar ${anime.title}`"
               @click="emit('delete', anime.id)"
             >
-              <Trash2 class="h-4 w-4" />
+              <Trash2 class="h-4 w-4" aria-hidden="true" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

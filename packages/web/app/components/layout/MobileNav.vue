@@ -24,14 +24,14 @@ const emit = defineEmits<{
 <template>
   <ClientOnly>
     <nav
-      class="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl lg:hidden"
+      class="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-border bg-background/95 backdrop-blur-xl lg:hidden bottom-nav-safe"
     >
-      <div class="flex h-16 items-center justify-around px-2 max-w-md mx-auto">
+      <div class="flex h-14 items-center justify-around px-2 max-w-md mx-auto">
         <NuxtLink
           v-for="item in items"
           :key="item.to"
           :to="item.to"
-          class="flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 transition-all active:scale-95 w-16"
+          class="flex flex-col items-center justify-center gap-1 px-2 py-2 w-14 transition-all active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           :class="isActive(item.to) ? 'text-primary' : 'text-muted-foreground'"
         >
           <div class="relative">
@@ -39,24 +39,32 @@ const emit = defineEmits<{
               :is="item.icon"
               class="h-5 w-5 transition-transform"
               :class="isActive(item.to) ? 'scale-110' : ''"
+              aria-hidden="true"
             />
             <div
               v-if="isActive(item.to)"
-              class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
+              class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary"
             />
           </div>
-          <span class="text-[10px] font-medium truncate w-full text-center">{{ item.label }}</span>
+          <span class="font-pixel text-[7px] uppercase truncate w-full text-center leading-tight">{{
+            item.label
+          }}</span>
         </NuxtLink>
 
         <button
-          class="flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 transition-all active:scale-95 w-16 text-muted-foreground"
-          :class="menuOpen ? 'text-primary' : ''"
+          type="button"
+          class="flex flex-col items-center justify-center gap-1 px-2 py-2 w-14 transition-all active:translate-y-px cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :class="menuOpen ? 'text-primary' : 'text-muted-foreground'"
+          :aria-label="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
+          :aria-expanded="menuOpen"
           @click="emit('update:menuOpen', !menuOpen)"
         >
-          <div class="relative">
-            <Menu class="h-5 w-5 transition-transform" :class="menuOpen ? 'scale-110' : ''" />
-          </div>
-          <span class="text-[10px] font-medium">Menú</span>
+          <Menu
+            class="h-5 w-5 transition-transform"
+            :class="menuOpen ? 'scale-110' : ''"
+            aria-hidden="true"
+          />
+          <span class="font-pixel text-[7px] uppercase">Menú</span>
         </button>
       </div>
     </nav>

@@ -133,18 +133,25 @@ function handleEventUpdate(eventId: string, date: Date) {
 <template>
   <div class="space-y-2 px-2 sm:px-0 pb-2 h-full flex flex-col overflow-visible">
     <header class="flex items-center justify-between gap-2 sm:gap-3 shrink-0 py-1 sm:py-0">
-      <h1 class="text-base sm:text-lg font-bold flex items-center gap-2">
-        <CalendarIcon class="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" aria-hidden="true" />
-        <span>Calendario</span>
-      </h1>
+      <div>
+        <p
+          class="flex items-center gap-1 font-pixel text-[8px] text-accent/80 uppercase tracking-wider mb-0.5"
+        >
+          <span class="text-accent">▸</span> CALENDAR
+        </p>
+        <h1 class="text-base sm:text-lg font-bold flex items-center gap-2">
+          <CalendarIcon class="h-4 w-4 sm:h-5 sm:w-5 text-accent shrink-0" aria-hidden="true" />
+          <span>Calendario</span>
+        </h1>
+      </div>
       <Button
         size="sm"
-        class="h-10 sm:h-9 px-3 sm:px-3 glow-primary touch-manipulation shrink-0 min-h-[44px] sm:min-h-[36px]"
+        class="btn-game h-10 sm:h-9 px-3 sm:px-3 rounded-none font-pixel text-[9px] touch-manipulation shrink-0 min-h-[44px] sm:min-h-[36px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Añadir nuevo evento"
         @click="modal.open()"
       >
-        <Plus class="h-4 w-4 sm:h-4 sm:w-4 sm:mr-1.5" />
-        <span class="hidden sm:inline">Añadir</span>
+        <Plus class="h-4 w-4 sm:h-4 sm:w-4 sm:mr-1.5" aria-hidden="true" />
+        <span class="hidden sm:inline">AÑADIR</span>
       </Button>
     </header>
 

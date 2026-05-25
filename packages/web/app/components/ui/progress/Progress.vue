@@ -24,11 +24,19 @@ const percentage = computed(() => {
     :aria-valuenow="modelValue"
     :aria-valuemin="0"
     :aria-valuemax="max"
-    :class="cn('relative h-4 w-full overflow-hidden rounded-full bg-secondary', props.class)"
+    :class="
+      cn(
+        'relative h-3 w-full overflow-hidden rounded-none bg-white/10 ring-1 ring-white/10',
+        props.class,
+      )
+    "
   >
     <div
-      class="h-full bg-primary transition-all duration-300 ease-in-out"
+      class="h-full bg-linear-to-r from-primary via-accent to-secondary transition-all duration-300 ease-in-out"
       :style="{ width: `${percentage}%` }"
+    />
+    <div
+      class="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0_8px,var(--color-background)_8px_11px)] pointer-events-none"
     />
   </div>
 </template>

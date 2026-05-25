@@ -72,39 +72,41 @@ async function handleCreateList(data: { name: string; type: SharedListType }) {
         <Button
           variant="ghost"
           size="icon"
-          class="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0"
+          class="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Volver a la lista de parties"
           @click="router.push('/party')"
         >
           <ArrowLeft class="h-5 w-5" aria-hidden="true" />
         </Button>
         <div class="flex-1 min-w-0">
-          <h1 class="text-xl sm:text-2xl font-bold truncate">{{ party.name }}</h1>
-          <p class="text-sm sm:text-base text-muted-foreground truncate">
-            {{ party.description || 'Sin descripción' }}
+          <p
+            class="flex items-center gap-1 font-pixel text-[8px] text-secondary/80 uppercase tracking-wider mb-0.5"
+          >
+            <span class="text-secondary">▸</span> PARTY
           </p>
+          <h1 class="text-xl sm:text-2xl font-bold truncate">{{ party.name }}</h1>
         </div>
       </div>
 
-      <!-- Copy Code / Stats -->
+      <!-- Stats strip -->
       <div
-        class="flex flex-wrap items-center gap-3 sm:gap-4 text-sm text-muted-foreground"
+        class="flex flex-wrap items-center gap-3 sm:gap-4 font-pixel text-[8px] text-muted-foreground"
         role="group"
         aria-label="Información de la party"
       >
         <div class="flex items-center gap-1.5" role="status">
-          <Users class="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span class="font-medium">{{ party.members.length }}</span>
-          <span>/ {{ party.maxMembers }} miembros</span>
+          <Users class="h-3.5 w-3.5 shrink-0 text-secondary/70" aria-hidden="true" />
+          <span class="text-secondary/80">{{ party.members.length }}</span>
+          <span>/ {{ party.maxMembers }} MIEMBROS</span>
         </div>
         <div
-          class="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-muted rounded-md border border-border/50"
+          class="flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-muted border border-border/50"
           role="group"
           aria-label="Código de invitación"
         >
           <code
-            class="font-mono text-xs sm:text-sm select-all"
-            aria-label="Código: {{ party.inviteCode }}"
+            class="font-mono text-xs sm:text-sm select-all text-secondary"
+            :aria-label="`Código: ${party.inviteCode}`"
           >
             {{ party.inviteCode }}
           </code>
@@ -121,11 +123,10 @@ async function handleCreateList(data: { name: string; type: SharedListType }) {
       aria-label="Cargando detalles de la party"
     >
       <div
-        class="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"
-        role="status"
-        aria-label="Cargando"
+        class="h-8 w-8 border-2 border-secondary border-t-transparent motion-safe:animate-spin"
+        aria-hidden="true"
       />
-      <p class="text-muted-foreground text-sm">Cargando detalles...</p>
+      <p class="font-pixel text-[9px] text-muted-foreground uppercase tracking-wider">CARGANDO…</p>
     </div>
 
     <Tabs v-else v-model="activeTab" class="w-full">
@@ -165,18 +166,20 @@ async function handleCreateList(data: { name: string; type: SharedListType }) {
           class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4"
         >
           <div>
-            <h3 class="text-lg sm:text-xl font-semibold">Listas de la Party</h3>
-            <p class="text-sm text-muted-foreground mt-1">
-              Gestiona las listas compartidas con tu party
+            <p
+              class="flex items-center gap-1 font-pixel text-[8px] text-secondary/80 uppercase tracking-wider mb-0.5"
+            >
+              <span class="text-secondary">▸</span> LISTAS COMPARTIDAS
             </p>
+            <h3 class="text-base sm:text-lg font-bold">Listas de la Party</h3>
           </div>
           <Button
-            class="min-h-[44px] sm:min-h-0 w-full sm:w-auto"
+            class="btn-game min-h-[44px] sm:min-h-0 w-full sm:w-auto rounded-none font-pixel text-[9px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Crear nueva lista compartida"
             @click="isCreateListOpen = true"
           >
             <Plus class="h-4 w-4 mr-2" aria-hidden="true" />
-            Nueva Lista
+            NUEVA LISTA
           </Button>
         </div>
 
@@ -192,9 +195,14 @@ async function handleCreateList(data: { name: string; type: SharedListType }) {
       >
         <div v-if="party" class="space-y-3 sm:space-y-4">
           <div>
-            <h3 class="text-lg sm:text-xl font-semibold">Miembros de la Party</h3>
-            <p class="text-sm text-muted-foreground mt-1">
-              {{ party.members.length }} de {{ party.maxMembers }} miembros
+            <p
+              class="flex items-center gap-1 font-pixel text-[8px] text-secondary/80 uppercase tracking-wider mb-0.5"
+            >
+              <span class="text-secondary">▸</span> MIEMBROS
+            </p>
+            <h3 class="text-base sm:text-lg font-bold">Miembros de la Party</h3>
+            <p class="font-pixel text-[8px] text-muted-foreground/70 mt-0.5">
+              {{ party.members.length }} / {{ party.maxMembers }} SLOTS
             </p>
           </div>
           <div
@@ -206,11 +214,44 @@ async function handleCreateList(data: { name: string; type: SharedListType }) {
               v-for="member in party.members"
               :key="member.id"
               role="listitem"
-              class="hover:border-primary/40 transition-colors"
+              class="relative rounded-none border-2 border-secondary/20 hover:border-secondary/40 bg-card/60 transition-colors"
             >
+              <!-- HUD corner brackets -->
+              <span
+                class="absolute top-1.5 left-1.5 w-3 h-3 border-t-2 border-l-2 border-secondary/35"
+                aria-hidden="true"
+              />
+              <span
+                class="absolute top-1.5 right-1.5 w-3 h-3 border-t-2 border-r-2 border-secondary/35"
+                aria-hidden="true"
+              />
+              <span
+                class="absolute bottom-1.5 left-1.5 w-3 h-3 border-b-2 border-l-2 border-secondary/35"
+                aria-hidden="true"
+              />
+              <span
+                class="absolute bottom-1.5 right-1.5 w-3 h-3 border-b-2 border-r-2 border-secondary/35"
+                aria-hidden="true"
+              />
               <CardHeader class="flex flex-row items-center gap-3 sm:gap-4 space-y-0">
                 <div
-                  class="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-border shrink-0"
+                  class="h-10 w-10 sm:h-12 sm:w-12 bg-secondary/15 flex items-center justify-center overflow-hidden border-2 border-secondary/25 shrink-0"
+                  style="
+                    clip-path: polygon(
+                      0 4px,
+                      4px 4px,
+                      4px 0,
+                      calc(100% - 4px) 0,
+                      calc(100% - 4px) 4px,
+                      100% 4px,
+                      100% calc(100% - 4px),
+                      calc(100% - 4px) calc(100% - 4px),
+                      calc(100% - 4px) 100%,
+                      4px 100%,
+                      4px calc(100% - 4px),
+                      0 calc(100% - 4px)
+                    );
+                  "
                   role="img"
                   :aria-label="`Avatar de ${member.profile?.displayName || member.profile?.username}`"
                 >
@@ -220,21 +261,21 @@ async function handleCreateList(data: { name: string; type: SharedListType }) {
                     :alt="member.profile?.displayName || member.profile?.username"
                     class="h-full w-full object-cover"
                   />
-                  <span v-else class="text-base sm:text-lg font-bold">
+                  <span v-else class="text-base sm:text-lg font-bold text-secondary">
                     {{ (member.profile?.username || '?').charAt(0).toUpperCase() }}
                   </span>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <CardTitle class="text-base sm:text-lg truncate">
+                  <CardTitle class="text-sm sm:text-base truncate">
                     {{ member.profile?.displayName || member.profile?.username || 'Usuario' }}
                   </CardTitle>
-                  <CardDescription class="capitalize text-sm">
+                  <CardDescription class="font-pixel text-[8px] uppercase tracking-wider">
                     {{
                       member.role === 'owner'
-                        ? 'Dueño'
+                        ? 'DUEÑO'
                         : member.role === 'admin'
-                          ? 'Admin'
-                          : 'Miembro'
+                          ? 'ADMIN'
+                          : 'MIEMBRO'
                     }}
                   </CardDescription>
                 </div>

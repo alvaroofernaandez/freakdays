@@ -140,51 +140,86 @@ onMounted(() => {
 
 <template>
   <div class="container mx-auto py-6 space-y-6">
-    <header class="space-y-2">
-      <h1
-        class="text-3xl sm:text-4xl font-bold bg-linear-to-r from-primary via-accent to-primary bg-clip-text text-transparent flex items-center gap-3"
+    <header class="space-y-1">
+      <p
+        class="flex items-center gap-1.5 font-pixel text-[8px] text-primary/80 uppercase tracking-wider"
       >
+        <span class="text-primary">▸</span> PROFILE
+      </p>
+      <h1 class="text-2xl sm:text-3xl font-bold flex items-center gap-3">
         <div
-          class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20"
+          class="w-10 h-10 bg-primary/10 flex items-center justify-center border-2 border-primary/25"
+          style="
+            clip-path: polygon(
+              0 4px,
+              4px 4px,
+              4px 0,
+              calc(100% - 4px) 0,
+              calc(100% - 4px) 4px,
+              100% 4px,
+              100% calc(100% - 4px),
+              calc(100% - 4px) calc(100% - 4px),
+              calc(100% - 4px) 100%,
+              4px 100%,
+              4px calc(100% - 4px),
+              0 calc(100% - 4px)
+            );
+          "
+          aria-hidden="true"
         >
           <User class="h-5 w-5 text-primary" />
         </div>
         Mi Perfil
       </h1>
-      <p class="text-muted-foreground text-base">
-        Gestiona tu cuenta, estadísticas, preferencias y módulos
-      </p>
     </header>
 
     <div v-if="loading" class="space-y-6">
-      <Card class="overflow-hidden">
-        <div class="h-32 bg-linear-to-r from-primary/20 via-primary/10 to-accent/20 relative">
+      <Card class="rounded-none border-2 border-primary/20 overflow-hidden">
+        <div class="h-32 bg-linear-to-r from-primary/10 via-accent/5 to-primary/10 relative">
           <Skeleton
-            class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-24 h-24 rounded-full"
+            class="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-24 h-24 rounded-none"
           />
         </div>
         <CardContent class="pt-16 pb-6">
-          <div class="space-y-4">
-            <Skeleton class="h-8 w-48 mx-auto" />
-            <Skeleton class="h-4 w-32 mx-auto" />
-            <Skeleton class="h-20 w-full" />
+          <div class="space-y-3">
+            <Skeleton class="h-7 w-48 mx-auto rounded-none" />
+            <Skeleton class="h-3 w-32 mx-auto rounded-none" />
+            <Skeleton class="h-16 w-full rounded-none" />
           </div>
         </CardContent>
       </Card>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Skeleton class="h-24" />
-        <Skeleton class="h-24" />
-        <Skeleton class="h-24" />
-        <Skeleton class="h-24" />
+        <Skeleton v-for="i in 4" :key="i" class="h-28 rounded-none" />
       </div>
     </div>
 
     <template v-else-if="profile">
-      <Card
-        class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 via-background to-accent/5"
-      >
-        <div class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div class="absolute bottom-0 left-0 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+      <Card class="relative overflow-hidden rounded-none border-2 border-primary/25 bg-card/60">
+        <!-- HUD brackets -->
+        <span
+          class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary/40 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary/40 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary/40 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary/40 z-10"
+          aria-hidden="true"
+        />
+        <div
+          class="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"
+          aria-hidden="true"
+        />
+        <div
+          class="absolute bottom-0 left-0 w-80 h-80 bg-accent/5 rounded-full blur-3xl"
+          aria-hidden="true"
+        />
 
         <div class="h-32 sm:h-40 md:h-48 relative overflow-hidden group">
           <img
@@ -302,14 +337,31 @@ onMounted(() => {
         :needed-exp="expProgress.needed"
       />
 
-      <Card
-        class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 via-background to-accent/5"
-      >
-        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+      <Card class="relative overflow-hidden rounded-none border-2 border-primary/20 bg-card/60">
+        <span
+          class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary/35 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary/35 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary/35 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary/35 z-10"
+          aria-hidden="true"
+        />
+        <div
+          class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"
+          aria-hidden="true"
+        />
         <CardHeader>
           <div class="flex items-center justify-between">
             <CardTitle class="flex items-center gap-2">
-              <Settings class="h-5 w-5 text-primary" />
+              <Settings class="h-5 w-5 text-primary" aria-hidden="true" />
               Configuración de Módulos
             </CardTitle>
             <div v-if="savingModules || modulesSaved" class="flex items-center gap-2 text-sm">
@@ -338,23 +390,30 @@ onMounted(() => {
           <Separator />
 
           <div class="space-y-3">
-            <h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-              Acciones Rápidas
-            </h3>
+            <p
+              class="flex items-center gap-1 font-pixel text-[8px] text-muted-foreground/70 uppercase tracking-wider"
+            >
+              <span class="inline-block w-1.5 h-1.5 bg-primary/50" aria-hidden="true" />
+              ACCIONES RÁPIDAS
+            </p>
             <div class="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
-                class="h-auto py-3 flex-col gap-1"
+                class="btn-game h-auto py-3 flex-col gap-1 rounded-none font-pixel text-[8px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
                 :disabled="savingModules"
                 @click="handleDisableAll"
               >
-                <Power class="h-4 w-4" />
-                <span class="text-xs">Desactivar Todos</span>
+                <Power class="h-4 w-4" aria-hidden="true" />
+                <span>DESACTIVAR TODOS</span>
               </Button>
-              <Button variant="outline" class="h-auto py-3 flex-col gap-1" as-child>
+              <Button
+                variant="outline"
+                class="btn-game h-auto py-3 flex-col gap-1 rounded-none font-pixel text-[8px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                as-child
+              >
                 <NuxtLink to="/onboarding">
-                  <RefreshCw class="h-4 w-4" />
-                  <span class="text-xs">Reconfigurar</span>
+                  <RefreshCw class="h-4 w-4" aria-hidden="true" />
+                  <span>RECONFIGURAR</span>
                 </NuxtLink>
               </Button>
             </div>
@@ -363,9 +422,12 @@ onMounted(() => {
           <Separator />
 
           <div class="space-y-3">
-            <h3 class="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-              Información
-            </h3>
+            <p
+              class="flex items-center gap-1 font-pixel text-[8px] text-muted-foreground/70 uppercase tracking-wider"
+            >
+              <span class="inline-block w-1.5 h-1.5 bg-accent/50" aria-hidden="true" />
+              INFORMACIÓN
+            </p>
             <Card>
               <CardContent class="py-4 space-y-2">
                 <div class="flex justify-between text-sm">
@@ -382,17 +444,39 @@ onMounted(() => {
         </CardContent>
       </Card>
 
-      <Card class="border-destructive/30 bg-destructive/5">
+      <Card class="relative rounded-none border-2 border-destructive/30 bg-destructive/5">
+        <span
+          class="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-destructive/40"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-destructive/40"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-destructive/40"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-destructive/40"
+          aria-hidden="true"
+        />
         <CardHeader>
-          <CardTitle class="text-base text-destructive flex items-center gap-2">
-            <LogOut class="h-5 w-5" />
-            Zona de peligro
+          <CardTitle
+            class="font-pixel text-[9px] text-destructive uppercase tracking-wider flex items-center gap-2"
+          >
+            <LogOut class="h-4 w-4" aria-hidden="true" />
+            ▸ ZONA DE PELIGRO
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Button variant="destructive" class="w-full gap-2" @click="handleLogout">
-            <LogOut class="h-4 w-4" />
-            Cerrar sesión
+          <Button
+            variant="destructive"
+            class="btn-game w-full gap-2 rounded-none font-pixel text-[10px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+            @click="handleLogout"
+          >
+            <LogOut class="h-4 w-4" aria-hidden="true" />
+            CERRAR SESIÓN
           </Button>
         </CardContent>
       </Card>

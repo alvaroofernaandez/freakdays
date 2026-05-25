@@ -55,7 +55,12 @@ function handleUpdateStatus(id: string, status: MangaEntry['status']) {
       description="Añade mangas a tu colección para comenzar"
     >
       <template #icon>
-        <BookOpen class="h-12 w-12 text-muted-foreground/30" />
+        <BookOpen class="h-12 w-12 text-secondary/40" aria-hidden="true" />
+      </template>
+      <template #action>
+        <p class="font-pixel text-[9px] text-muted-foreground/70 uppercase mt-2">
+          EMPIEZA TU BIBLIOTECA · AÑADE EL PRIMER TOMO
+        </p>
       </template>
     </Empty>
 

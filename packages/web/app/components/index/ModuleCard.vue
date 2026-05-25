@@ -12,38 +12,35 @@ defineProps<Props>();
 
 <template>
   <Card
-    class="relative h-full transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 overflow-hidden group"
+    class="relative h-full border-2 border-border/50 hover:border-primary/70 shadow-[0_5px_0_0_oklch(0.42_0.16_290)] hover:shadow-[0_5px_0_0_oklch(0.52_0.2_290)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.42_0.16_290)] transition-[transform,filter,box-shadow,border-color] duration-100 motion-reduce:active:translate-y-0 overflow-hidden group cursor-pointer"
   >
     <div
-      class="absolute inset-0 bg-linear-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-0"
-    />
-    <div
-      class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-0"
+      class="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-0"
     />
     <CardHeader class="pb-3 relative z-10">
-      <div class="flex items-center gap-4">
-        <div class="relative flex-shrink-0">
-          <div
-            class="absolute inset-0 bg-primary/20 blur-lg rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+      <div class="flex items-center gap-3">
+        <!-- Notched icon box -->
+        <div
+          class="pixelated relative flex-shrink-0 grid place-items-center w-12 h-12 transition-colors duration-200 bg-primary/15 group-hover:bg-primary/25 [clip-path:polygon(0_4px,4px_4px,4px_0,calc(100%-4px)_0,calc(100%-4px)_4px,100%_4px,100%_calc(100%-4px),calc(100%-4px)_calc(100%-4px),calc(100%-4px)_100%,4px_100%,4px_calc(100%-4px),0_calc(100%-4px))]"
+          aria-hidden="true"
+        >
+          <component
+            :is="getModuleIcon(module.icon)"
+            class="h-6 w-6 text-primary group-hover:text-accent transition-colors"
           />
-          <div
-            class="relative w-14 h-14 rounded-xl bg-linear-to-br from-primary/20 to-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 border border-primary/20"
-          >
-            <component
-              :is="getModuleIcon(module.icon)"
-              class="h-7 w-7 text-primary group-hover:text-accent transition-colors"
-            />
-          </div>
         </div>
+
         <div class="flex-1 min-w-0">
           <CardTitle
-            class="text-lg font-semibold truncate mb-1 group-hover:text-primary transition-colors"
+            class="text-base font-semibold truncate mb-0.5 group-hover:text-primary transition-colors"
             >{{ module.name }}</CardTitle
           >
-          <CardDescription class="text-sm line-clamp-2">{{ module.description }}</CardDescription>
+          <CardDescription class="text-xs line-clamp-2">{{ module.description }}</CardDescription>
         </div>
+
         <ChevronRight
-          class="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0"
+          class="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0"
+          aria-hidden="true"
         />
       </div>
     </CardHeader>

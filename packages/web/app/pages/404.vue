@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { Home, Search, ArrowLeft } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-const SearchIcon = Search;
 
 definePageMeta({
   layout: false,
@@ -18,114 +15,134 @@ function goHome() {
 function goBack() {
   router.back();
 }
+
+const NOTCH_LG =
+  'polygon(0 10px,10px 10px,10px 0,calc(100% - 10px) 0,calc(100% - 10px) 10px,100% 10px,100% calc(100% - 10px),calc(100% - 10px) calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,10px calc(100% - 10px),0 calc(100% - 10px))';
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center p-4 relative">
-    <div class="fixed inset-0 -z-10">
+  <div
+    class="relative min-h-screen animated-gradient-bg flex items-center justify-center p-6 overflow-hidden"
+  >
+    <!-- Ambient background: orbs + HUD grid -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+      <div class="absolute bottom-24 right-10 w-80 h-80 bg-accent/10 rounded-full blur-3xl" />
       <div
-        class="absolute inset-0 bg-linear-to-br from-background via-background to-background/95"
+        class="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] bg-secondary/5 rounded-full blur-3xl"
       />
       <div
-        class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent"
-      />
-      <div
-        class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent"
-      />
-
-      <div
-        class="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"
-        style="animation-duration: 8s"
-      />
-      <div
-        class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse"
-        style="animation-duration: 10s; animation-delay: 2s"
+        class="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,var(--color-primary)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-primary)_1px,transparent_1px)] bg-[size:44px_44px]"
       />
     </div>
 
-    <Card class="w-full max-w-2xl border-primary/20 shadow-2xl glass relative overflow-hidden">
-      <div
-        class="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-accent/5 opacity-50"
-      />
-      <div
-        class="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-primary via-accent to-secondary"
-      />
-
-      <CardHeader class="text-center space-y-4 relative z-10">
-        <div class="relative mx-auto inline-flex items-center justify-center">
-          <div
-            class="absolute -inset-8 bg-primary/20 blur-3xl rounded-full animate-pulse"
-            style="animation-duration: 3s"
-          />
-          <div class="absolute -inset-4 bg-accent/10 blur-2xl rounded-full" />
-          <div
-            class="relative w-32 h-32 rounded-full bg-linear-to-br from-primary/20 via-accent/10 to-secondary/10 flex items-center justify-center border border-primary/30 backdrop-blur-sm animate-[float_3s_ease-in-out_infinite]"
-          >
-            <SearchIcon class="h-16 w-16 text-primary" />
-          </div>
-        </div>
-        <div>
-          <CardTitle class="text-6xl font-logo mb-2 text-gradient"> 404 </CardTitle>
-          <CardDescription class="text-2xl text-muted-foreground">
-            Página no encontrada
-          </CardDescription>
-        </div>
-      </CardHeader>
-
-      <CardContent class="space-y-6 relative z-10">
-        <p class="text-center text-muted-foreground text-lg">
-          Lo sentimos, la página que buscas no existe o ha sido movida.
-        </p>
-
+    <div
+      class="relative z-10 w-full max-w-md space-y-8 text-center motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-500"
+    >
+      <!-- Notched icon emblem -->
+      <div class="flex justify-center">
         <div
-          class="p-4 rounded-lg bg-muted/50 border border-primary/20 backdrop-blur-sm relative overflow-hidden"
+          class="pixelated inline-flex items-center justify-center w-24 h-24 bg-linear-to-br from-primary via-accent to-secondary p-[3px] shadow-[0_0_50px_-8px_var(--color-primary)]"
+          :style="{ clipPath: NOTCH_LG }"
         >
-          <div class="absolute inset-0 bg-primary/5 opacity-50" />
-          <div class="relative flex items-start gap-3">
-            <div class="p-1.5 rounded-full bg-primary/10 border border-primary/20 shrink-0">
-              <Search class="h-4 w-4 text-primary" />
-            </div>
-            <div class="flex-1">
-              <p class="text-sm font-medium mb-2 text-primary">¿Qué puedes hacer?</p>
-              <ul class="text-sm text-muted-foreground space-y-1.5 list-disc list-inside">
-                <li>Verifica que la URL sea correcta</li>
-                <li>Navega desde el menú principal</li>
-                <li>Usa la búsqueda para encontrar lo que necesitas</li>
-              </ul>
-            </div>
+          <div
+            class="w-full h-full bg-card flex items-center justify-center"
+            style="
+              clip-path: polygon(
+                0 8px,
+                8px 8px,
+                8px 0,
+                calc(100% - 8px) 0,
+                calc(100% - 8px) 8px,
+                100% 8px,
+                100% calc(100% - 8px),
+                calc(100% - 8px) calc(100% - 8px),
+                calc(100% - 8px) 100%,
+                8px 100%,
+                8px calc(100% - 8px),
+                0 calc(100% - 8px)
+              );
+            "
+          >
+            <Search class="h-10 w-10 text-primary" aria-hidden="true" />
           </div>
         </div>
+      </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-          <Button
-            variant="outline"
-            class="flex-1 sm:flex-none hover:bg-muted/50 transition-all duration-300"
-            @click="goBack"
-          >
-            <ArrowLeft class="h-4 w-4 mr-2" />
-            Volver
-          </Button>
-          <Button
-            class="flex-1 sm:flex-none glow-primary hover:glow-primary hover:scale-105 transition-all duration-300"
-            @click="goHome"
-          >
-            <Home class="h-4 w-4 mr-2" />
-            Ir al inicio
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <!-- Error code + title -->
+      <div class="space-y-2">
+        <p
+          class="font-pixel text-7xl sm:text-8xl leading-none text-primary drop-shadow-[0_0_24px_var(--color-primary)] tabular-nums"
+          aria-label="Error 404"
+        >
+          404
+        </p>
+        <p class="font-pixel text-[9px] text-muted-foreground/70 uppercase tracking-widest">
+          PÁGINA NO ENCONTRADA
+        </p>
+        <h1 class="text-xl font-bold text-foreground">La ruta no existe</h1>
+      </div>
+
+      <!-- Info panel -->
+      <div class="relative rounded-none border-2 border-primary/20 bg-card/40 p-5 text-left">
+        <!-- HUD brackets -->
+        <span
+          class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary/40"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary/40"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary/40"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary/40"
+          aria-hidden="true"
+        />
+
+        <p class="font-pixel text-[9px] text-primary/80 mb-3 uppercase">
+          <span class="text-primary">▸</span> ¿QUÉ PUEDES HACER?
+        </p>
+        <ul class="text-sm text-muted-foreground space-y-1.5 list-none">
+          <li class="flex items-start gap-2">
+            <span class="inline-block w-1.5 h-1.5 bg-primary mt-1.5 shrink-0" aria-hidden="true" />
+            Verifica que la URL sea correcta
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="inline-block w-1.5 h-1.5 bg-accent mt-1.5 shrink-0" aria-hidden="true" />
+            Navega desde el menú principal
+          </li>
+          <li class="flex items-start gap-2">
+            <span
+              class="inline-block w-1.5 h-1.5 bg-secondary mt-1.5 shrink-0"
+              aria-hidden="true"
+            />
+            Usa la búsqueda para encontrar lo que necesitas
+          </li>
+        </ul>
+      </div>
+
+      <!-- CTAs -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <Button
+          variant="outline"
+          class="btn-game flex-1 sm:flex-none rounded-none border-2 font-pixel text-[10px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+          @click="goBack"
+        >
+          <ArrowLeft class="h-4 w-4 mr-2" aria-hidden="true" />
+          VOLVER
+        </Button>
+        <Button
+          class="btn-game flex-1 sm:flex-none rounded-none font-pixel text-[10px] bg-linear-to-r from-primary to-accent cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+          @click="goHome"
+        >
+          <Home class="h-4 w-4 mr-2" aria-hidden="true" />
+          VOLVER AL INICIO
+        </Button>
+      </div>
+    </div>
   </div>
 </template>
-
-<style scoped>
-@keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-</style>

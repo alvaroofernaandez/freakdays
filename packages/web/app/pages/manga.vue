@@ -41,18 +41,32 @@ const tabs = [
 
 <template>
   <div class="space-y-6">
+    <!-- Page header -->
     <header class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
-          <BookOpen class="h-6 w-6 text-primary" />
+        <p
+          class="flex items-center gap-1.5 font-pixel text-[9px] text-muted-foreground/80 uppercase mb-1"
+        >
+          <span class="text-secondary">▸</span> MANGA
+        </p>
+        <h1 class="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+          <BookOpen class="h-6 w-6 text-secondary" aria-hidden="true" />
           Colección Manga
         </h1>
-        <p class="text-muted-foreground text-sm">Gestiona tu biblioteca física de mangas</p>
+        <p class="font-pixel text-[9px] text-muted-foreground/70 mt-1 uppercase">
+          BIBLIOTECA FÍSICA · RASTREA TOMOS
+        </p>
       </div>
       <Tooltip>
         <TooltipTrigger as-child>
-          <Button size="icon" class="h-10 w-10 rounded-full glow-primary" @click="modal.open()">
-            <Plus class="h-5 w-5" />
+          <Button
+            size="lg"
+            class="btn-game rounded-none font-pixel text-[10px] uppercase shadow-[0_5px_0_0_oklch(0.30_0.12_145)] hover:shadow-[0_5px_0_0_oklch(0.40_0.15_145)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.30_0.12_145)] transition-[transform,filter,box-shadow,border-color] duration-100 motion-reduce:active:translate-y-0 cursor-pointer"
+            :aria-label="'Añadir manga'"
+            @click="modal.open()"
+          >
+            <Plus class="h-5 w-5 mr-2" aria-hidden="true" />
+            <span class="hidden sm:inline">AÑADIR</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -71,14 +85,14 @@ const tabs = [
     <MangaStats v-else :mangas="mangaCollection" />
 
     <Tabs v-model="activeTab" class="w-full">
-      <TabsList class="grid w-full grid-cols-4">
+      <TabsList class="grid w-full grid-cols-4 rounded-none border-2">
         <TabsTrigger
           v-for="tab in tabs"
           :key="tab.value"
           :value="tab.value"
-          class="flex items-center gap-2"
+          class="rounded-none flex items-center gap-2 font-pixel text-[8px] uppercase"
         >
-          <component :is="tab.icon" class="h-4 w-4" />
+          <component :is="tab.icon" class="h-4 w-4" aria-hidden="true" />
           <span class="hidden sm:inline">{{ tab.label }}</span>
         </TabsTrigger>
       </TabsList>

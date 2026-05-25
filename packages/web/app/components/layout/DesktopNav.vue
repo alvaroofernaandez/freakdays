@@ -18,35 +18,28 @@ defineProps<Props>();
 <template>
   <ClientOnly>
     <nav
-      class="ml-4 md:ml-6 lg:ml-8 flex items-center gap-0.5 md:gap-1 overflow-x-auto scrollbar-hide"
+      class="ml-4 md:ml-6 lg:ml-8 flex items-center gap-0.5 overflow-x-auto scrollbar-hide"
       style="position: relative; z-index: 10000"
     >
       <NuxtLink
         v-for="item in items"
         :key="item.to"
         :to="item.to"
-        class="relative flex items-center gap-1.5 md:gap-2 px-2 md:px-3 lg:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-all duration-200 group/nav whitespace-nowrap shrink-0"
+        class="relative flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-none border-2 transition-all duration-150 group/nav whitespace-nowrap shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         style="position: relative; z-index: 10001; pointer-events: auto !important"
-        :class="isActive(item.to) ? 'text-primary' : 'text-muted-foreground hover:text-foreground'"
+        :class="
+          isActive(item.to)
+            ? 'text-primary border-primary/60 bg-primary/10'
+            : 'text-muted-foreground border-transparent hover:border-primary/30 hover:bg-primary/5 hover:text-foreground'
+        "
       >
-        <div
-          v-if="isActive(item.to)"
-          class="absolute inset-0 bg-primary/10 rounded-lg -z-10 pointer-events-none"
-        />
-        <div
-          class="absolute inset-0 bg-muted/50 rounded-lg opacity-0 group-hover/nav:opacity-100 transition-opacity duration-200 -z-10 pointer-events-none"
-          :class="isActive(item.to) && 'opacity-0'"
-        />
         <component
           :is="item.icon"
-          class="h-3.5 w-3.5 md:h-4 md:w-4 transition-transform duration-200 group-hover/nav:scale-110 shrink-0"
+          class="h-3.5 w-3.5 shrink-0"
           :class="isActive(item.to) ? 'text-primary' : ''"
+          aria-hidden="true"
         />
-        <span class="relative hidden sm:inline">{{ item.label }}</span>
-        <div
-          v-if="isActive(item.to)"
-          class="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full pointer-events-none"
-        />
+        <span class="font-pixel text-[9px] uppercase hidden sm:inline">{{ item.label }}</span>
       </NuxtLink>
     </nav>
   </ClientOnly>

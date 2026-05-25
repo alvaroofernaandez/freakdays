@@ -171,7 +171,7 @@ function handleDeleteKeyboard(e: KeyboardEvent) {
     ref="cardElement"
     :class="[
       'group cursor-grab active:cursor-grabbing touch-manipulation w-full',
-      'rounded-lg transition-all duration-200 select-none',
+      'rounded-none transition-all duration-100 select-none',
       'active:scale-[0.98] sm:active:scale-100',
       'relative sm:absolute sm:left-0 sm:right-0',
       config.bgColor,
@@ -213,7 +213,7 @@ function handleDeleteKeyboard(e: KeyboardEvent) {
       <div class="flex items-center gap-1 sm:gap-0.5 md:gap-0.5 lg:gap-1 flex-1 min-w-0">
         <p
           :class="[
-            'text-[9px] sm:text-[9px] md:text-[9px] lg:text-[10px] font-medium truncate leading-tight flex-1 min-w-0',
+            'font-pixel text-[7px] sm:text-[7px] lg:text-[8px] truncate leading-tight flex-1 min-w-0 uppercase',
             config.color,
           ]"
           :title="release.title"

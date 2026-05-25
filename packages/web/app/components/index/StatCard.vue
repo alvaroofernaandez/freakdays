@@ -10,74 +10,138 @@ const props = defineProps<{
   colorVariant: 'primary' | 'accent' | 'exp-easy' | 'exp-legendary';
 }>();
 
-const colorMap = {
+interface VariantStyle {
+  border: string;
+  text: string;
+  soft: string;
+  bar: string;
+  bracket: string;
+  glow: string;
+}
+
+const colorMap: Record<string, VariantStyle> = {
   primary: {
-    card: 'border-primary/30 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10',
-    overlay: 'bg-gradient-to-br from-primary/5 to-transparent',
-    blob: 'bg-primary/20',
+    border: 'border-primary/40',
     text: 'text-primary',
-    iconBg: 'bg-primary/20 border-primary/30 group-hover:bg-primary/30',
+    soft: 'bg-primary/15',
+    bar: 'bg-primary',
+    bracket: 'border-primary/60',
+    glow: 'hover:shadow-[0_0_30px_-6px_var(--color-primary)]',
   },
   accent: {
-    card: 'border-accent/30 bg-gradient-to-br from-accent/15 via-accent/10 to-accent/5 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10',
-    overlay: 'bg-gradient-to-br from-accent/5 to-transparent',
-    blob: 'bg-accent/20',
+    border: 'border-accent/40',
     text: 'text-accent',
-    iconBg: 'bg-accent/20 border-accent/30 group-hover:bg-accent/30',
+    soft: 'bg-accent/15',
+    bar: 'bg-accent',
+    bracket: 'border-accent/60',
+    glow: 'hover:shadow-[0_0_30px_-6px_var(--color-accent)]',
   },
   'exp-easy': {
-    card: 'border-exp-easy/30 bg-gradient-to-br from-exp-easy/15 via-exp-easy/10 to-exp-easy/5 hover:border-exp-easy/50 hover:shadow-lg hover:shadow-exp-easy/10',
-    overlay: 'bg-gradient-to-br from-exp-easy/5 to-transparent',
-    blob: 'bg-exp-easy/20',
+    border: 'border-exp-easy/40',
     text: 'text-exp-easy',
-    iconBg: 'bg-exp-easy/20 border-exp-easy/30 group-hover:bg-exp-easy/30',
+    soft: 'bg-exp-easy/15',
+    bar: 'bg-exp-easy',
+    bracket: 'border-exp-easy/60',
+    glow: 'hover:shadow-[0_0_30px_-6px_var(--color-exp-easy)]',
   },
   'exp-legendary': {
-    card: 'border-exp-legendary/30 bg-gradient-to-br from-exp-legendary/15 via-exp-legendary/10 to-exp-legendary/5 hover:border-exp-legendary/50 hover:shadow-lg hover:shadow-exp-legendary/10',
-    overlay: 'bg-gradient-to-br from-exp-legendary/5 to-transparent',
-    blob: 'bg-exp-legendary/20',
+    border: 'border-exp-legendary/40',
     text: 'text-exp-legendary',
-    iconBg: 'bg-exp-legendary/20 border-exp-legendary/30 group-hover:bg-exp-legendary/30',
+    soft: 'bg-exp-legendary/15',
+    bar: 'bg-exp-legendary',
+    bracket: 'border-exp-legendary/60',
+    glow: 'hover:shadow-[0_0_30px_-6px_var(--color-exp-legendary)]',
   },
 };
 
-const colors = computed(() => colorMap[props.colorVariant]);
+const colors = computed(() => colorMap[props.colorVariant] ?? colorMap.primary!);
+
+// Arcade scoreboard style: pad numbers to 2 digits (0 -> "00", 7 -> "07").
+const displayValue = computed(() =>
+  typeof props.value === 'number' ? String(props.value).padStart(2, '0') : props.value,
+);
+
+// Decorative power meter: fill cells proportionally to the count (capped).
+const CELLS = 10;
+const filledCells = computed(() => {
+  const n = typeof props.value === 'number' ? props.value : Number(props.value) || 0;
+  return Math.max(0, Math.min(n, CELLS));
+});
+
+const NOTCH =
+  'polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px))';
 </script>
 
 <template>
-  <Card :class="['group relative overflow-hidden transition-all duration-300', colors.card]">
-    <div
-      :class="[
-        'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300',
-        colors.overlay,
-      ]"
+  <Card
+    :class="[
+      'crt-scanlines group relative overflow-hidden rounded-none border-2 bg-card/40 transition-all duration-200',
+      colors.border,
+      colors.glow,
+    ]"
+  >
+    <!-- HUD targeting brackets -->
+    <span
+      :class="['absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2', colors.bracket]"
+      aria-hidden="true"
     />
-    <div
-      :class="[
-        'absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity duration-300',
-        colors.blob,
-      ]"
+    <span
+      :class="['absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2', colors.bracket]"
+      aria-hidden="true"
     />
-    <CardContent class="relative p-6 sm:p-7">
-      <div class="flex flex-col h-full min-h-[120px] sm:min-h-[140px]">
-        <div class="flex-1 space-y-2">
-          <p class="text-sm font-medium text-muted-foreground/90 uppercase tracking-wide">
+    <span
+      :class="['absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2', colors.bracket]"
+      aria-hidden="true"
+    />
+    <span
+      :class="['absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2', colors.bracket]"
+      aria-hidden="true"
+    />
+
+    <CardContent class="relative p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0 space-y-2">
+          <p
+            class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider"
+          >
+            <span
+              :class="['inline-block w-1.5 h-1.5 motion-safe:animate-pulse', colors.bar]"
+              aria-hidden="true"
+            />
             {{ label }}
           </p>
-          <p :class="['text-4xl sm:text-5xl font-bold leading-none', colors.text]">
-            {{ value }}
-          </p>
-        </div>
-        <div class="flex justify-end mt-auto">
-          <div
+          <p
             :class="[
-              'w-14 h-14 sm:w-16 sm:h-16 rounded-full backdrop-blur-sm border flex items-center justify-center group-hover:scale-110 transition-all duration-300',
-              colors.iconBg,
+              'font-pixel text-3xl sm:text-4xl leading-none tabular-nums drop-shadow-[0_0_12px_currentColor]',
+              colors.text,
             ]"
           >
-            <component :is="icon" :class="['h-7 w-7 sm:h-8 sm:w-8', colors.text]" />
-          </div>
+            {{ displayValue }}
+          </p>
         </div>
+
+        <div
+          :class="[
+            'pixelated grid place-items-center w-11 h-11 shrink-0 transition-transform duration-200 group-hover:scale-110',
+            colors.soft,
+          ]"
+          :style="{ clipPath: NOTCH }"
+          aria-hidden="true"
+        >
+          <component :is="icon" :class="['h-5 w-5', colors.text]" />
+        </div>
+      </div>
+
+      <!-- Decorative power meter -->
+      <div class="mt-4 flex gap-1" aria-hidden="true">
+        <span
+          v-for="i in CELLS"
+          :key="i"
+          :class="[
+            'h-1.5 flex-1 transition-colors duration-300',
+            i <= filledCells ? colors.bar : 'bg-white/10',
+          ]"
+        />
       </div>
     </CardContent>
   </Card>
