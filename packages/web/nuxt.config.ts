@@ -25,11 +25,14 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ['@freakdays/domain'],
+    },
   },
 
   nitro: {
     externals: {
-      inline: [],
+      inline: ['@freakdays/domain'],
     },
     experimental: {
       wasm: true,

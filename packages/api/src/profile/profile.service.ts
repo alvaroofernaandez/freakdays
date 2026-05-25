@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma, Profile } from '@prisma/client';
+import { computeLevel } from '@freakdays/domain';
 
 import {
   type ActiveIdentityUser,
@@ -105,7 +106,7 @@ export class ProfileService {
 
     const { profile } = await this.ensureProfileForCurrentUser(clerkUserId);
     const newTotal = profile.totalExp + Math.floor(input.amount);
-    const newLevel = this.calculateLevel(newTotal);
+    const newLevel = computeLevel(newTotal);
 
     await this.prisma.profile.update({
       where: { id: profile.id },
@@ -394,10 +395,6 @@ export class ProfileService {
     }
 
     return result;
-  }
-
-  private calculateLevel(exp: number): number {
-    return Math.floor(exp / 100) + 1;
   }
 
   private assertImagePayload(input: RequestUploadUrlInput): void {

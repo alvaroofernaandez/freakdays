@@ -6,9 +6,12 @@ import type {
   QuestNotification,
   QuestNotificationType,
 } from '@prisma/client';
+import { computeLevel } from '@freakdays/domain';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 
 type NumberInput = number | string | null | undefined;
 type DateInput = string | Date | null | undefined;
@@ -83,6 +86,7 @@ export class QuestsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly identityContext: IdentityContextService,
+    private readonly eventBus: EventBusService,
   ) {}
 
   async list(clerkUserId: string, orgId: string | null): Promise<QuestView[]> {
@@ -299,20 +303,37 @@ export class QuestsService {
         },
         select: {
           id: true,
+          totalExp: true,
         },
       });
 
       if (profile) {
+        const newTotal = profile.totalExp + expEarned;
+        const newLevel = computeLevel(newTotal);
+
         await tx.profile.update({
           where: {
             id: profile.id,
           },
           data: {
-            totalExp: {
-              increment: expEarned,
-            },
+            totalExp: newTotal,
+            level: newLevel,
           },
         });
+
+        const event = this.eventBus.buildEvent(
+          EVENT_TYPES.QUEST_COMPLETED,
+          quest.id,
+          {
+            questId: quest.id,
+            userId: currentUser.id,
+            expAwarded: expEarned,
+            level: newLevel,
+          },
+          organization.id,
+        );
+
+        await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
       }
     });
 

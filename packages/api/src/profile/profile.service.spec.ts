@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { computeLevel } from '@freakdays/domain';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -75,6 +76,28 @@ describe('ProfileService', () => {
       expect(mockPrisma.profile.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ totalExp: 100, level: 2 }),
+        }),
+      );
+    });
+
+    it('delegates level computation to shared computeLevel from @freakdays/domain', async () => {
+      // profile.totalExp = 0, adding 195 → newTotal = 195 → computeLevel(195) = 2
+      const addAmount = 195;
+      const expectedTotal = mockProfile.totalExp + addAmount;
+      const expectedLevel = computeLevel(expectedTotal);
+
+      mockPrisma.profile.update.mockResolvedValue({
+        ...mockProfile,
+        totalExp: expectedTotal,
+        level: expectedLevel,
+      });
+
+      const result = await service.addExp('clerk-u1', { amount: addAmount });
+
+      expect(result.newLevel).toBe(expectedLevel);
+      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ totalExp: expectedTotal, level: expectedLevel }),
         }),
       );
     });

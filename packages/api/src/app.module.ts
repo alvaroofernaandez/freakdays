@@ -6,6 +6,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { AuthModule } from './auth/auth.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { EventsModule } from './events/events.module';
 import { ClerkJwtGuard } from './auth/guards/clerk-jwt.guard';
 import { CommonModule } from './common/common.module';
 import { validateEnv } from './common/config/env.schema';
@@ -57,6 +58,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
       },
     }),
     CommonModule,
+    EventsModule,
     AuthModule,
     CalendarModule,
     AnimeModule,

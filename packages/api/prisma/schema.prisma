@@ -450,6 +450,44 @@ model Membership {
   @@index([organizationId, role])
 }
 
+// ─── Transactional Outbox ────────────────────────────────────────────────────
+
+enum OutboxStatus {
+  pending
+  processing
+  published
+  failed
+}
+
+model OutboxEvent {
+  id          String       @id @default(cuid())
+  eventId     String       @unique          // uuid v4 — idempotency key
+  type        String                         // e.g. "quest.completed"
+  aggregateId String                         // e.g. quest.id
+  orgId       String?
+  payload     Json
+  status      OutboxStatus @default(pending)
+  attempts    Int          @default(0)
+  availableAt DateTime     @default(now())   // relay skips rows where availableAt > now
+  occurredAt  DateTime     @default(now())
+  processedAt DateTime?
+  lastError   String?
+  createdAt   DateTime     @default(now())
+
+  @@index([status, availableAt])            // HOT path for relay poll
+  @@index([type, occurredAt])
+}
+
+model ProcessedEvent {
+  eventId     String   @id                  // same uuid as envelope — dedup key
+  type        String
+  processedAt DateTime @default(now())
+
+  @@index([type, processedAt])
+}
+
+// ─── Audit ───────────────────────────────────────────────────────────────────
+
 model AuditLog {
   id             String        @id @default(cuid())
   organizationId String?
