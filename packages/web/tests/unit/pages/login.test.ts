@@ -31,7 +31,7 @@ describe('login.vue', () => {
       },
     });
 
-    expect(wrapper.text()).toContain('FreakDays');
+    expect(wrapper.text()).toContain('FREAKDAYS');
     expect(wrapper.text()).toContain('Bienvenido de nuevo');
   });
 

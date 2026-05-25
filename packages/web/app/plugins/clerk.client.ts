@@ -16,7 +16,14 @@ export default defineNuxtPlugin(async () => {
 
   try {
     const clerk = new Clerk(publishableKey);
-    await clerk.load();
+    // Route Clerk session tasks (e.g. the forced "choose organization" step) to
+    // our own custom pages instead of the hosted accounts.dev portal, so the
+    // whole auth journey keeps the FreakDays look & feel.
+    await clerk.load({
+      taskUrls: {
+        'choose-organization': '/session-tasks/choose-organization',
+      },
+    });
     window.Clerk = clerk;
   } catch (error) {
     if (import.meta.dev) {

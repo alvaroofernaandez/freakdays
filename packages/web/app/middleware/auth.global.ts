@@ -29,6 +29,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
+  // The OAuth return route owns its own navigation: it finalizes the Clerk
+  // session and redirects once `handleRedirectCallback` resolves. Gating it here
+  // would either bounce the user away before the callback params are consumed or
+  // redirect them to /login while the session is still being activated.
+  if (to.path === '/sso-callback') {
+    return;
+  }
+
+  // Clerk session-task pages (e.g. forced organization setup) own their own
+  // navigation: the page resolves the pending task and then redirects. Gating
+  // them here would bounce the user mid-task, since the session is still
+  // "pending" until the task completes.
+  if (to.path.startsWith('/session-tasks/')) {
+    return;
+  }
+
   const authContext = useAuthContext();
   const authStore = useAuthStore();
   const modulesStore = useModulesStore();
@@ -80,9 +96,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (needsLoad) {
       try {
         const token = authContext.getAccessToken();
-        const data = await $fetch<ModulesPayloadRow[]>('/api/modules', {
-          headers: token ? { authorization: `Bearer ${token}` } : {},
-        });
+        const orgId = authContext.getOrgId();
+        const headers: Record<string, string> = {};
+        if (token) headers.authorization = `Bearer ${token}`;
+        if (orgId) headers['x-org-id'] = orgId;
+        const data = await $fetch<ModulesPayloadRow[]>('/api/modules', { headers });
 
         if (data && data.length > 0) {
           modulesStore.setModulesFromDb(data);
