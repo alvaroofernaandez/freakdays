@@ -1,55 +1,75 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 
 import { PrismaService } from '../common/prisma/prisma.service';
-import { EVENT_TYPES } from './event-types';
+import type { EventType } from './event-types';
 import type { DomainEvent } from './event.types';
-import { QuestCompletedHandler } from './handlers/quest-completed.handler';
+import { DOMAIN_EVENT_HANDLERS } from './events.constants';
+import type { DomainEventHandler } from './interfaces/domain-event-handler.interface';
 
 @Processor('domain-events')
 @Injectable()
-export class DomainEventsProcessor extends WorkerHost {
+export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
   private readonly logger = new Logger(DomainEventsProcessor.name);
+  private readonly registry = new Map<EventType, DomainEventHandler[]>();
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly questCompletedHandler: QuestCompletedHandler,
+    @Inject(DOMAIN_EVENT_HANDLERS)
+    private readonly handlers: DomainEventHandler[],
   ) {
     super();
   }
 
+  onModuleInit(): void {
+    for (const handler of this.handlers) {
+      for (const eventType of handler.handles) {
+        const existing = this.registry.get(eventType) ?? [];
+        existing.push(handler);
+        this.registry.set(eventType, existing);
+      }
+    }
+
+    this.logger.log(
+      `DomainEventsProcessor: registry built with ${this.handlers.length} handler(s) for ${this.registry.size} event type(s)`,
+    );
+  }
+
   async process(job: Job<DomainEvent>): Promise<void> {
     const event = job.data;
+    const eventHandlers = this.registry.get(event.type as EventType);
 
-    // Idempotency check — if already processed, ack and return
-    const already = await this.prisma.processedEvent.findUnique({
-      where: { eventId: event.eventId },
-    });
-
-    if (already) {
-      this.logger.log(
-        `DomainEventsProcessor: duplicate eventId=${event.eventId} — skipping (idempotent no-op)`,
+    if (!eventHandlers || eventHandlers.length === 0) {
+      this.logger.warn(
+        `DomainEventsProcessor: no handler for event type "${event.type}" — skipping`,
       );
       return;
     }
 
-    await this.prisma.$transaction(async (tx) => {
-      switch (event.type) {
-        case EVENT_TYPES.QUEST_COMPLETED:
-          await this.questCompletedHandler.handle(event as never, tx);
-          break;
+    for (const handler of eventHandlers) {
+      await this.runHandler(event, handler);
+    }
+  }
 
-        default:
-          this.logger.warn(
-            `DomainEventsProcessor: no handler for event type "${event.type}" — skipping`,
-          );
-          // Insert ProcessedEvent so we don't reprocess unknown events
-          await tx.processedEvent.create({
-            data: { eventId: event.eventId, type: event.type },
-          });
-          break;
+  private async runHandler(event: DomainEvent, handler: DomainEventHandler): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.eventHandlerLog.findUnique({
+        where: { eventId_handler: { eventId: event.eventId, handler: handler.name } },
+      });
+
+      if (existing) {
+        this.logger.log(
+          `DomainEventsProcessor: handler=${handler.name} already processed eventId=${event.eventId} — no-op`,
+        );
+        return;
       }
+
+      await handler.handle(event, tx);
+
+      await tx.eventHandlerLog.create({
+        data: { eventId: event.eventId, handler: handler.name },
+      });
     });
   }
 }

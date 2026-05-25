@@ -7,6 +7,8 @@ import {
   IdentityContextService,
 } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 import { normalizeUrl } from '../common/utils/normalizers';
 import { StorageService } from '../storage/storage.service';
 
@@ -65,11 +67,55 @@ export class ProfileService {
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
     private readonly identityContext: IdentityContextService,
+    private readonly eventBus: EventBusService,
   ) {}
 
   async getMyProfile(clerkUserId: string): Promise<ProfileView> {
     const { user, profile } = await this.ensureProfileForCurrentUser(clerkUserId);
+    // Touch daily login on every profile fetch — at-most-once per day guard inside
+    await this.touchDailyLogin(profile.userId, null).catch(() => {
+      // Non-critical — best effort; don't fail the request
+    });
     return this.toProfileView(profile, user.clerkUserId);
+  }
+
+  /**
+   * Emits a DAILY_LOGIN event at most once per calendar day per user.
+   * Returns true if the event was emitted, false if already done today.
+   */
+  async touchDailyLogin(userId: string, orgId: string | null): Promise<boolean> {
+    const today = new Date().toISOString().split('T')[0] as string;
+
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+      select: { id: true, lastLoginDate: true },
+    });
+
+    if (!profile) {
+      return false;
+    }
+
+    if (profile.lastLoginDate === today) {
+      return false;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.profile.update({
+        where: { id: profile.id },
+        data: { lastLoginDate: today },
+      });
+
+      const event = this.eventBus.buildEvent(
+        EVENT_TYPES.DAILY_LOGIN,
+        userId,
+        { userId, orgId: orgId ?? '', loginDate: today },
+        orgId ?? undefined,
+      );
+
+      await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
+    });
+
+    return true;
   }
 
   async updateMyProfile(clerkUserId: string, input: UpdateProfileInput): Promise<ProfileView> {

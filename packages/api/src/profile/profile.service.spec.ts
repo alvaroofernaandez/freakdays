@@ -3,6 +3,8 @@ import { computeLevel } from '@freakdays/domain';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 import { StorageService } from '../storage/storage.service';
 import { ProfileService } from './profile.service';
 
@@ -37,7 +39,12 @@ const mockStorage = {} as unknown as StorageService;
 
 describe('ProfileService', () => {
   let service: ProfileService;
-  let mockPrisma: { profile: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock } };
+  let mockPrisma: {
+    profile: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock };
+    outboxEvent: { create: jest.Mock };
+    $transaction: jest.Mock;
+  };
+  let mockEventBus: { emit: jest.Mock; buildEvent: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,9 +55,30 @@ describe('ProfileService', () => {
         create: jest.fn(),
         update: jest.fn().mockResolvedValue(mockProfile),
       },
+      outboxEvent: { create: jest.fn().mockResolvedValue({}) },
+      $transaction: jest
+        .fn()
+        .mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockPrisma)),
     };
 
-    service = new ProfileService(mockPrisma as unknown as PrismaService, mockStorage, mockIdentity);
+    mockEventBus = {
+      emit: jest.fn().mockResolvedValue(undefined),
+      buildEvent: jest.fn().mockReturnValue({
+        eventId: 'mock-login-evt-id',
+        type: EVENT_TYPES.DAILY_LOGIN,
+        aggregateId: 'u1',
+        orgId: 'o1',
+        payload: {},
+        occurredAt: new Date(),
+      }),
+    };
+
+    service = new ProfileService(
+      mockPrisma as unknown as PrismaService,
+      mockStorage,
+      mockIdentity,
+      mockEventBus as unknown as EventBusService,
+    );
   });
 
   describe('addExp', () => {
@@ -100,6 +128,68 @@ describe('ProfileService', () => {
           data: expect.objectContaining({ totalExp: expectedTotal, level: expectedLevel }),
         }),
       );
+    });
+  });
+
+  describe('touchDailyLogin', () => {
+    it('emits DAILY_LOGIN and updates lastLoginDate when first login of day', async () => {
+      const today = new Date().toISOString().split('T')[0]!;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]!;
+      mockPrisma.profile.findUnique.mockResolvedValue({
+        ...mockProfile,
+        lastLoginDate: yesterday,
+      });
+
+      const result = await service.touchDailyLogin('u1', 'o1');
+
+      expect(result).toBe(true);
+      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ lastLoginDate: today }),
+        }),
+      );
+      expect(mockEventBus.buildEvent).toHaveBeenCalledWith(
+        EVENT_TYPES.DAILY_LOGIN,
+        'u1',
+        expect.objectContaining({ userId: 'u1', orgId: 'o1', loginDate: today }),
+        'o1',
+      );
+      expect(mockEventBus.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('suppresses DAILY_LOGIN when lastLoginDate equals today', async () => {
+      const today = new Date().toISOString().split('T')[0]!;
+      mockPrisma.profile.findUnique.mockResolvedValue({
+        ...mockProfile,
+        lastLoginDate: today,
+      });
+
+      const result = await service.touchDailyLogin('u1', 'o1');
+
+      expect(result).toBe(false);
+      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
+    });
+
+    it('emits DAILY_LOGIN when lastLoginDate is null (new user)', async () => {
+      mockPrisma.profile.findUnique.mockResolvedValue({
+        ...mockProfile,
+        lastLoginDate: null,
+      });
+
+      const result = await service.touchDailyLogin('u1', 'o1');
+
+      expect(result).toBe(true);
+      expect(mockEventBus.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns false without throwing when profile does not exist', async () => {
+      mockPrisma.profile.findUnique.mockResolvedValue(null);
+
+      const result = await service.touchDailyLogin('u1', 'o1');
+
+      expect(result).toBe(false);
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
   });
 });

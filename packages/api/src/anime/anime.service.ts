@@ -3,6 +3,8 @@ import { Prisma } from '@prisma/client';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 import {
   normalizeInteger,
   normalizeOptionalDate,
@@ -76,6 +78,7 @@ export class AnimeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly identityContext: IdentityContextService,
+    private readonly eventBus: EventBusService,
   ) {}
 
   async list(
@@ -216,15 +219,59 @@ export class AnimeService {
       );
     }
 
-    const updated =
-      Object.keys(data).length === 0
-        ? existing
-        : await this.prisma.animeEntry.update({
-            where: {
-              id: existing.id,
-            },
-            data,
-          });
+    if (Object.keys(data).length === 0) {
+      return this.toAnimeView(existing);
+    }
+
+    const episodeIncreased =
+      data.currentEpisode !== undefined &&
+      typeof data.currentEpisode === 'number' &&
+      data.currentEpisode > existing.currentEpisode;
+
+    const isCompletingNow = data.status === 'completed' && existing.status !== 'completed';
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const entry = await tx.animeEntry.update({
+        where: { id: existing.id },
+        data,
+      });
+
+      const orgId = organization.id;
+      const now = new Date();
+
+      if (episodeIncreased) {
+        const event = this.eventBus.buildEvent(
+          EVENT_TYPES.ANIME_PROGRESSED,
+          entry.id,
+          {
+            userId: currentUser.id,
+            orgId,
+            animeId: entry.id,
+            episodeNumber: entry.currentEpisode,
+            progressedAt: now,
+          },
+          orgId,
+        );
+        await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
+      }
+
+      if (isCompletingNow) {
+        const event = this.eventBus.buildEvent(
+          EVENT_TYPES.ANIME_COMPLETED,
+          entry.id,
+          {
+            userId: currentUser.id,
+            orgId,
+            animeId: entry.id,
+            completedAt: now,
+          },
+          orgId,
+        );
+        await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
+      }
+
+      return entry;
+    });
 
     return this.toAnimeView(updated);
   }

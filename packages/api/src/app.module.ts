@@ -26,6 +26,7 @@ import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { AnimeModule } from './anime/anime.module';
+import { GamificationModule } from './gamification/gamification.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 
 @Module({
@@ -59,6 +60,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
     }),
     CommonModule,
     EventsModule,
+    GamificationModule,
     AuthModule,
     CalendarModule,
     AnimeModule,

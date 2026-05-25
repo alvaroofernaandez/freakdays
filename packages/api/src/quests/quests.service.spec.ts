@@ -1,5 +1,4 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { computeLevel } from '@freakdays/domain';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -189,10 +188,9 @@ describe('QuestsService', () => {
       );
     });
 
-    it('creates QuestCompletion and increments Profile totalExp and level', async () => {
+    it('creates QuestCompletion and emits quest.completed event (EXP now eventually-consistent via ProgressionHandler)', async () => {
       const quest = makeQuest({ expReward: 75 });
       mockPrisma.quest.findFirst.mockResolvedValue(quest);
-      mockPrisma.profile.findUnique.mockResolvedValue({ id: 'p1', totalExp: 0 });
 
       const result = await service.complete('c1', 'o1', 'q1');
 
@@ -206,41 +204,14 @@ describe('QuestsService', () => {
           }),
         }),
       );
-      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'p1' },
-          data: expect.objectContaining({
-            totalExp: 75,
-            level: computeLevel(75),
-          }),
-        }),
-      );
+      // ProgressionHandler is the sole writer — no inline profile.update
+      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
       expect(result.expEarned).toBe(75);
-    });
-
-    it('recomputes level using computeLevel when exp crosses a level boundary', async () => {
-      // User has 195 exp, award 10 → total = 205 → level 3
-      const quest = makeQuest({ expReward: 10 });
-      mockPrisma.quest.findFirst.mockResolvedValue(quest);
-      mockPrisma.profile.findUnique.mockResolvedValue({ id: 'p1', totalExp: 195 });
-
-      const result = await service.complete('c1', 'o1', 'q1');
-
-      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            totalExp: 205,
-            level: computeLevel(205), // 3
-          }),
-        }),
-      );
-      expect(result.expEarned).toBe(10);
     });
 
     it('emits quest.completed event via EventBusService.emit inside the tx', async () => {
       const quest = makeQuest({ expReward: 10 });
       mockPrisma.quest.findFirst.mockResolvedValue(quest);
-      mockPrisma.profile.findUnique.mockResolvedValue({ id: 'p1', totalExp: 195 });
 
       await service.complete('c1', 'o1', 'q1');
 
@@ -251,34 +222,27 @@ describe('QuestsService', () => {
           questId: 'q1',
           userId: 'u1',
           expAwarded: 10,
-          level: computeLevel(205),
         }),
         'o1',
       );
       expect(mockEventBus.emit).toHaveBeenCalledTimes(1);
     });
 
-    it('does NOT emit event when EventBusService.emit is not called on rollback', async () => {
-      mockPrisma.$transaction.mockRejectedValue(new Error('DB error'));
-      const quest = makeQuest({ expReward: 10 });
+    it('returns { expEarned } response shape unchanged (non-breaking guarantee)', async () => {
+      const quest = makeQuest({ expReward: 50 });
       mockPrisma.quest.findFirst.mockResolvedValue(quest);
-      mockPrisma.profile.findUnique.mockResolvedValue({ id: 'p1', totalExp: 195 });
-
-      await expect(service.complete('c1', 'o1', 'q1')).rejects.toThrow('DB error');
-      // emit is called INSIDE the tx callback — if tx throws, emit was called but tx rolled back
-      // At unit level we verify emit is invoked within the tx callback
-    });
-
-    it('skips profile update and event when profile does not exist', async () => {
-      const quest = makeQuest({ expReward: 30 });
-      mockPrisma.quest.findFirst.mockResolvedValue(quest);
-      mockPrisma.profile.findUnique.mockResolvedValue(null);
 
       const result = await service.complete('c1', 'o1', 'q1');
 
-      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
-      expect(mockEventBus.emit).not.toHaveBeenCalled();
-      expect(result.expEarned).toBe(30);
+      expect(result).toEqual({ expEarned: 50 });
+    });
+
+    it('throws on DB error', async () => {
+      mockPrisma.$transaction.mockRejectedValue(new Error('DB error'));
+      const quest = makeQuest({ expReward: 10 });
+      mockPrisma.quest.findFirst.mockResolvedValue(quest);
+
+      await expect(service.complete('c1', 'o1', 'q1')).rejects.toThrow('DB error');
     });
   });
 });

@@ -4,6 +4,7 @@ import { PrismaService } from '../common/prisma/prisma.service';
 import { DomainEventsProcessor } from './domain-events.processor';
 import { EVENT_TYPES } from './event-types';
 import type { DomainEvent, QuestCompletedPayload } from './event.types';
+import type { DomainEventHandler } from './interfaces/domain-event-handler.interface';
 
 const makeJob = (event: DomainEvent): Job<DomainEvent> =>
   ({
@@ -23,87 +24,126 @@ const makeEvent = (
   occurredAt: new Date(),
 });
 
-describe('DomainEventsProcessor', () => {
+const makeHandler = (
+  name: string,
+  handles: (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES][],
+): DomainEventHandler & { handle: jest.Mock } => ({
+  name,
+  handles,
+  handle: jest.fn().mockResolvedValue(undefined),
+});
+
+describe('DomainEventsProcessor — registry + per-handler idempotency', () => {
   let processor: DomainEventsProcessor;
   let mockPrisma: {
-    processedEvent: { findUnique: jest.Mock; create: jest.Mock };
     $transaction: jest.Mock;
+    eventHandlerLog: { findUnique: jest.Mock; create: jest.Mock };
   };
-  let mockQuestCompletedHandler: { handle: jest.Mock };
+  let questHandler: ReturnType<typeof makeHandler>;
 
   beforeEach(() => {
-    mockQuestCompletedHandler = { handle: jest.fn().mockResolvedValue(undefined) };
+    questHandler = makeHandler('quest-handler', [EVENT_TYPES.QUEST_COMPLETED]);
 
     mockPrisma = {
-      processedEvent: {
-        findUnique: jest.fn().mockResolvedValue(null), // default: not processed
-        create: jest.fn().mockResolvedValue({}),
-      },
       $transaction: jest.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
         return fn(mockPrisma);
       }),
+      eventHandlerLog: {
+        findUnique: jest.fn().mockResolvedValue(null), // default: not yet processed
+        create: jest.fn().mockResolvedValue({}),
+      },
     };
 
     processor = new DomainEventsProcessor(
       mockPrisma as unknown as PrismaService,
-      mockQuestCompletedHandler as never,
+      [questHandler] as DomainEventHandler[],
     );
+    processor.onModuleInit();
   });
 
-  describe('process', () => {
-    it('calls handler once for a new eventId', async () => {
-      mockPrisma.processedEvent.findUnique.mockResolvedValue(null);
+  describe('registry initialization', () => {
+    it('builds registry from provided handlers', async () => {
+      const job = makeJob(makeEvent('evt-new'));
+      await processor.process(job);
+      expect(questHandler.handle).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('per-handler idempotency', () => {
+    it('calls handler when no EventHandlerLog row exists', async () => {
+      mockPrisma.eventHandlerLog.findUnique.mockResolvedValue(null);
       const job = makeJob(makeEvent('evt-new'));
 
       await processor.process(job);
 
-      expect(mockQuestCompletedHandler.handle).toHaveBeenCalledTimes(1);
+      expect(questHandler.handle).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.eventHandlerLog.create).toHaveBeenCalledWith({
+        data: { eventId: 'evt-new', handler: 'quest-handler' },
+      });
     });
 
-    it('does NOT call handler for an already-processed eventId', async () => {
-      mockPrisma.processedEvent.findUnique.mockResolvedValue({
+    it('skips handler when EventHandlerLog row already exists (replay is a no-op)', async () => {
+      mockPrisma.eventHandlerLog.findUnique.mockResolvedValue({
         eventId: 'evt-seen',
-        type: EVENT_TYPES.QUEST_COMPLETED,
+        handler: 'quest-handler',
         processedAt: new Date(),
       });
       const job = makeJob(makeEvent('evt-seen'));
 
       await processor.process(job);
 
-      expect(mockQuestCompletedHandler.handle).not.toHaveBeenCalled();
+      expect(questHandler.handle).not.toHaveBeenCalled();
+      expect(mockPrisma.eventHandlerLog.create).not.toHaveBeenCalled();
     });
 
-    it('propagates handler error so BullMQ retries the job', async () => {
-      mockPrisma.processedEvent.findUnique.mockResolvedValue(null);
-      mockQuestCompletedHandler.handle.mockRejectedValue(new Error('Transient DB error'));
-      const job = makeJob(makeEvent('evt-transient'));
+    it('partial failure: re-run processes only un-logged handlers', async () => {
+      const handlerA = makeHandler('handler-a', [EVENT_TYPES.QUEST_COMPLETED]);
+      const handlerB = makeHandler('handler-b', [EVENT_TYPES.QUEST_COMPLETED]);
 
-      await expect(processor.process(job)).rejects.toThrow('Transient DB error');
-    });
-
-    it('routes quest.completed events to QuestCompletedHandler', async () => {
-      mockPrisma.processedEvent.findUnique.mockResolvedValue(null);
-      const job = makeJob(makeEvent('evt-route', EVENT_TYPES.QUEST_COMPLETED));
-
-      await processor.process(job);
-
-      expect(mockQuestCompletedHandler.handle).toHaveBeenCalledWith(
-        job.data,
-        expect.anything(), // tx
+      // handlerA already logged, handlerB not
+      mockPrisma.eventHandlerLog.findUnique.mockImplementation(
+        ({ where }: { where: { eventId_handler: { handler: string } } }) => {
+          if (where.eventId_handler.handler === 'handler-a') {
+            return Promise.resolve({ eventId: 'evt-partial', handler: 'handler-a' });
+          }
+          return Promise.resolve(null);
+        },
       );
-    });
 
-    it('logs and skips unknown event types without calling handler', async () => {
-      mockPrisma.processedEvent.findUnique.mockResolvedValue(null);
+      const p = new DomainEventsProcessor(
+        mockPrisma as unknown as PrismaService,
+        [handlerA, handlerB] as DomainEventHandler[],
+      );
+      p.onModuleInit();
+
+      const job = makeJob(makeEvent('evt-partial'));
+      await p.process(job);
+
+      expect(handlerA.handle).not.toHaveBeenCalled(); // already logged
+      expect(handlerB.handle).toHaveBeenCalledTimes(1); // not yet logged
+    });
+  });
+
+  describe('unknown event types', () => {
+    it('logs and skips when no handlers registered for event type', async () => {
       const unknownEvent: DomainEvent = {
         ...makeEvent('evt-unknown'),
         type: 'unknown.event' as DomainEvent['type'],
       };
       const job = makeJob(unknownEvent);
 
-      // Should not throw even though there's no handler
       await expect(processor.process(job)).resolves.not.toThrow();
-      expect(mockQuestCompletedHandler.handle).not.toHaveBeenCalled();
+      expect(questHandler.handle).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('error propagation', () => {
+    it('propagates handler error so BullMQ retries the job', async () => {
+      questHandler.handle.mockRejectedValue(new Error('Transient DB error'));
+      mockPrisma.eventHandlerLog.findUnique.mockResolvedValue(null);
+      const job = makeJob(makeEvent('evt-transient'));
+
+      await expect(processor.process(job)).rejects.toThrow('Transient DB error');
     });
   });
 });

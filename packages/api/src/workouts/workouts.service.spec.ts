@@ -2,6 +2,8 @@ import { BadRequestException } from '@nestjs/common';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 import { WorkoutsService } from './workouts.service';
 
 const mockIdentity = {
@@ -54,7 +56,10 @@ describe('WorkoutsService', () => {
       update: jest.Mock;
       deleteMany: jest.Mock;
     };
+    outboxEvent: { create: jest.Mock };
+    $transaction: jest.Mock;
   };
+  let mockEventBus: { emit: jest.Mock; buildEvent: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -81,9 +86,29 @@ describe('WorkoutsService', () => {
         update: jest.fn(),
         deleteMany: jest.fn(),
       },
+      outboxEvent: { create: jest.fn().mockResolvedValue({}) },
+      $transaction: jest
+        .fn()
+        .mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockPrisma)),
     };
 
-    service = new WorkoutsService(mockPrisma as unknown as PrismaService, mockIdentity);
+    mockEventBus = {
+      emit: jest.fn().mockResolvedValue(undefined),
+      buildEvent: jest.fn().mockReturnValue({
+        eventId: 'mock-evt-id',
+        type: EVENT_TYPES.WORKOUT_LOGGED,
+        aggregateId: 'w1',
+        orgId: 'o1',
+        payload: {},
+        occurredAt: new Date(),
+      }),
+    };
+
+    service = new WorkoutsService(
+      mockPrisma as unknown as PrismaService,
+      mockIdentity,
+      mockEventBus as unknown as EventBusService,
+    );
   });
 
   describe('getWeeklyStats', () => {
@@ -186,6 +211,23 @@ describe('WorkoutsService', () => {
         }),
       );
       expect(result.in_progress).toBe(true);
+      // No event emitted for in_progress
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
+    });
+
+    it('emits WORKOUT_LOGGED when created with status=completed', async () => {
+      const created = makeWorkout({ status: 'completed', completedAt: new Date() });
+      mockPrisma.workoutSession.create.mockResolvedValue(created);
+
+      await service.create('c1', 'o1', { name: 'Completed Run', status: 'completed' });
+
+      expect(mockEventBus.buildEvent).toHaveBeenCalledWith(
+        EVENT_TYPES.WORKOUT_LOGGED,
+        'w1',
+        expect.objectContaining({ userId: 'u1', workoutId: 'w1' }),
+        'o1',
+      );
+      expect(mockEventBus.emit).toHaveBeenCalledTimes(1);
     });
   });
 });

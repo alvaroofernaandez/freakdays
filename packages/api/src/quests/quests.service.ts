@@ -6,7 +6,6 @@ import type {
   QuestNotification,
   QuestNotificationType,
 } from '@prisma/client';
-import { computeLevel } from '@freakdays/domain';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -286,6 +285,9 @@ export class QuestsService {
       1,
     );
 
+    // EXP is now eventually-consistent — ProgressionHandler is the sole writer of
+    // profile.totalExp/level. We keep the QuestCompletion row + event emit, and drop
+    // the inline profile.update. The HTTP response still returns the correct expEarned.
     await this.prisma.$transaction(async (tx) => {
       await tx.questCompletion.create({
         data: {
@@ -297,44 +299,19 @@ export class QuestsService {
         },
       });
 
-      const profile = await tx.profile.findUnique({
-        where: {
+      const event = this.eventBus.buildEvent(
+        EVENT_TYPES.QUEST_COMPLETED,
+        quest.id,
+        {
+          questId: quest.id,
           userId: currentUser.id,
+          expAwarded: expEarned,
+          level: 0, // level is computed by ProgressionHandler asynchronously
         },
-        select: {
-          id: true,
-          totalExp: true,
-        },
-      });
+        organization.id,
+      );
 
-      if (profile) {
-        const newTotal = profile.totalExp + expEarned;
-        const newLevel = computeLevel(newTotal);
-
-        await tx.profile.update({
-          where: {
-            id: profile.id,
-          },
-          data: {
-            totalExp: newTotal,
-            level: newLevel,
-          },
-        });
-
-        const event = this.eventBus.buildEvent(
-          EVENT_TYPES.QUEST_COMPLETED,
-          quest.id,
-          {
-            questId: quest.id,
-            userId: currentUser.id,
-            expAwarded: expEarned,
-            level: newLevel,
-          },
-          organization.id,
-        );
-
-        await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
-      }
+      await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
     });
 
     return { expEarned };

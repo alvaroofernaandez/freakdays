@@ -6,7 +6,7 @@ import { CommonModule } from '../common/common.module';
 import { EventBusService } from './event-bus.service';
 import { OutboxRelayService } from './outbox-relay.service';
 import { DomainEventsProcessor } from './domain-events.processor';
-import { QuestCompletedHandler } from './handlers/quest-completed.handler';
+import { DOMAIN_EVENT_HANDLERS } from './events.constants';
 import { parseRedisUrl } from './redis.util';
 
 @Module({
@@ -39,7 +39,7 @@ import { parseRedisUrl } from './redis.util';
     }),
     BullModule.registerQueue({ name: 'domain-events' }),
   ],
-  providers: [EventBusService, OutboxRelayService, DomainEventsProcessor, QuestCompletedHandler],
+  providers: [EventBusService, OutboxRelayService, DomainEventsProcessor],
   exports: [EventBusService],
 })
 export class EventsModule {}

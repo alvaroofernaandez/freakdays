@@ -26,12 +26,11 @@ export const DIFFICULTY_EXP: Record<QuestDifficulty, number> = {
   legendary: 100,
 };
 
-export function calculateStreakBonus(streak: number): number {
-  return Math.floor(streak / 7) * 5;
-}
+// Re-exported from @freakdays/domain — kept here for backwards-compatible web imports
+export { computeStreakBonusPct as calculateStreakBonus } from '@freakdays/domain';
 
 export function calculateTotalExp(difficulty: QuestDifficulty, streak: number): number {
   const baseExp = DIFFICULTY_EXP[difficulty];
-  const bonus = calculateStreakBonus(streak);
+  const bonus = Math.floor(streak / 7) * 5;
   return baseExp + bonus;
 }
