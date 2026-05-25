@@ -113,7 +113,7 @@ export const useModulesStore = defineStore('modules', {
       });
     },
 
-    async syncToDatabase() {
+    async syncToDatabase(headers: Record<string, string> = {}) {
       const payload = {
         modules: ALL_MODULES.map((module) => ({
           moduleId: module.id,
@@ -121,9 +121,13 @@ export const useModulesStore = defineStore('modules', {
         })),
       };
 
+      // Headers (Authorization + x-org-id) are supplied by the caller, which
+      // has the live Clerk session/org context — the proxy forwards them to the
+      // NestJS API, which rejects the request without them.
       await $fetch('/api/modules', {
         method: 'PUT',
         body: payload,
+        headers,
       });
 
       this.synced = true;
