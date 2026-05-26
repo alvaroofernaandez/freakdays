@@ -1,131 +1,156 @@
-# Configuración de Prisma con Supabase
+# Configuración de Prisma
 
-Este proyecto utiliza Prisma como ORM intermediario entre la aplicación y Supabase PostgreSQL.
+FreakDays usa **Prisma ORM** como única capa de acceso a la base de datos en el backend NestJS (`packages/api`). Este documento describe la instalación, configuración y uso de Prisma en el proyecto.
 
-## Instalación
+> **Migración histórica**: Las versiones anteriores del proyecto conectaban directamente a Supabase desde el frontend y/o usaban Supabase Auth y Storage directamente en los composables Vue. Esa arquitectura ya no aplica. Hoy toda la lógica de base de datos corre en NestJS, y la autenticación usa Clerk.
 
-1. Instalar las dependencias:
-
-```bash
-pnpm install
-# o
-npm install
-```
-
-2. Configurar la variable de entorno `DATABASE_URL` en tu archivo `.env`:
-
-```env
-DATABASE_URL=postgresql://user:password@host:port/database?schema=public&pgbouncer=true&connection_limit=1
-```
-
-Para obtener la URL de conexión de Supabase:
-
-- Ve a tu proyecto en Supabase Dashboard
-- Settings → Database
-- Copia la "Connection string" bajo "Connection pooling"
-- Usa el formato "Transaction" o "Session" mode
-
-**Importante**: Usa el modo "Transaction" para Prisma, que es compatible con PgBouncer.
-
-3. Generar el cliente de Prisma:
-
-```bash
-pnpm prisma:generate
-# o
-npm run prisma:generate
-```
-
-## Uso
-
-### API Routes (Recomendado)
-
-Las operaciones de base de datos se ejecutan a través de API routes en el servidor:
-
-```typescript
-// app/composables/useAnime.ts
-const data = await $fetch(`/api/anime?userId=${userId}`);
-
-// server/api/anime/index.get.ts
-import { getPrisma } from '../../utils/prisma';
-
-export default defineEventHandler(async (event) => {
-  const prisma = await getPrisma();
-  const data = await prisma.animeEntry.findMany({
-    where: { userId },
-  });
-  return data;
-});
-```
-
-### Helper getPrisma
-
-Para usar Prisma en API routes, usa el helper `getPrisma()`:
-
-```typescript
-// server/api/example.ts
-import { getPrisma } from '../utils/prisma';
-
-export default defineEventHandler(async (event) => {
-  const prisma = await getPrisma();
-  // Usar prisma aquí
-});
-```
-
-**Nota**: `usePrisma()` composable está deprecado. Usa API routes en su lugar.
-
-### Migraciones
-
-Prisma puede sincronizar el schema con la base de datos:
-
-```bash
-# Sincronizar schema sin crear migraciones (desarrollo)
-pnpm prisma:push
-
-# Crear y aplicar migraciones (producción)
-pnpm prisma:migrate
-
-# Abrir Prisma Studio (GUI para la base de datos)
-pnpm prisma:studio
-```
-
-**Nota**: Como ya tienes un schema SQL existente en Supabase, usa `prisma db push` para sincronizar el schema de Prisma con la base de datos existente, o crea migraciones si prefieres un control más granular.
+---
 
 ## Estructura
 
-- `prisma/schema.prisma`: Schema de Prisma que define los modelos
-- `server/utils/prisma.ts`: Helper para obtener el cliente de Prisma en el servidor
-- `server/api/`: API routes que usan Prisma para operaciones de base de datos
-- Los composables (`useAnime`, `useManga`, `useQuests`, etc.) usan `$fetch` para llamar a API routes
+```
+packages/api/
+├── prisma/
+│   ├── schema.prisma          # Modelos y configuración
+│   └── migrations/            # Historial de migraciones
+└── src/
+    └── prisma/
+        └── prisma.service.ts  # PrismaClient como servicio NestJS
+```
 
-## Funciones RPC
+El cliente Prisma se inyecta como dependencia de NestJS en todos los módulos que lo necesitan.
 
-Algunas funciones RPC de Supabase (como `check_overdue_quests`, `check_quests_due_soon`) aún se llaman directamente desde Supabase ya que Prisma no soporta funciones RPC directamente. Estas se mantienen usando `useSupabase()`.
+---
 
-## Ventajas de usar Prisma
+## Instalación y generación del cliente
 
-1. **Type Safety**: TypeScript completo con autocompletado
-2. **Validación**: Validación automática de tipos y relaciones
-3. **Migrations**: Sistema de migraciones robusto
-4. **Developer Experience**: Mejor DX con Prisma Studio y herramientas
-5. **Abstracción**: Independencia del proveedor de base de datos
-6. **Security**: Prisma solo se ejecuta en el servidor, nunca en el cliente
-7. **Bundle Size**: Prisma no se incluye en el bundle del cliente
-8. **Connection Pooling**: Mejor gestión de conexiones con PgBouncer
+Las dependencias ya están declaradas en `packages/api/package.json`. Tras clonar el repositorio:
+
+```bash
+make install
+make prisma-generate
+```
+
+O con `make dev`, que lo hace automáticamente.
+
+---
+
+## Variable de entorno
+
+```env
+# packages/api/.env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5433/freakdays
+```
+
+El puerto es **5433** (Postgres en Docker). No uses 5432 en desarrollo local.
+
+---
+
+## Targets de Makefile
+
+| Target                 | Equivalente                  | Descripción                             |
+| ---------------------- | ---------------------------- | --------------------------------------- |
+| `make prisma-generate` | `pnpm prisma generate`       | Regenera el cliente TypeScript          |
+| `make prisma-migrate`  | `pnpm prisma migrate dev`    | Crea y aplica una nueva migración       |
+| `make prisma-deploy`   | `pnpm prisma migrate deploy` | Aplica migraciones pendientes (CI/prod) |
+| `make prisma-studio`   | `pnpm prisma studio`         | Abre la GUI de Prisma en :5555          |
+
+---
+
+## Uso en módulos NestJS
+
+El cliente Prisma se usa a través del `PrismaService`:
+
+```typescript
+// src/modules/anime/anime.service.ts
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class AnimeService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll(userId: string) {
+    return this.prisma.animeEntry.findMany({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+}
+```
+
+---
+
+## Patrón Outbox (F0)
+
+La arquitectura de gamificación escribe eventos de dominio en la misma transacción que el estado de negocio usando el patrón Outbox. Prisma es la capa que garantiza la atomicidad:
+
+```typescript
+await this.prisma.$transaction([
+  this.prisma.questCompletion.create({ data: completionData }),
+  this.prisma.domainEvent.create({ data: eventData }),
+]);
+```
+
+Esto garantiza que si el procesamiento del evento falla, el estado no queda corrupto.
+
+---
+
+## Migraciones
+
+### Crear una nueva migración
+
+1. Modifica `packages/api/prisma/schema.prisma`.
+2. Ejecuta:
+   ```bash
+   make prisma-migrate
+   ```
+   Se te pedirá un nombre para la migración.
+
+### Aplicar migraciones existentes (CI / producción)
+
+```bash
+make prisma-deploy
+```
+
+---
+
+## Ventajas de esta arquitectura
+
+1. **Type Safety**: TypeScript completo con autocompletado generado desde el schema.
+2. **Migraciones versionadas**: Historial completo en `prisma/migrations/`.
+3. **Separación cliente/servidor**: Prisma corre exclusivamente en NestJS, nunca en el navegador.
+4. **Independencia de proveedor**: Cambiar a otro Postgres o incluso otro motor es posible sin tocar el código de negocio.
+5. **Prisma Studio**: GUI integrada para inspección y depuración.
+
+---
 
 ## Troubleshooting
 
 ### Error: "Can't reach database server"
 
-- Verifica que `DATABASE_URL` esté correctamente configurada
-- Asegúrate de usar el connection string con pooling habilitado
-- Verifica que tu IP esté en la whitelist de Supabase
+Los servicios Docker no están corriendo. Ejecuta:
+
+```bash
+make services-up
+```
+
+Y verifica que `DATABASE_URL` apunte a **localhost:5433**.
 
 ### Error: "Schema validation failed"
 
-- Ejecuta `pnpm prisma:generate` para regenerar el cliente
-- Verifica que el schema de Prisma coincida con tu base de datos
+```bash
+make prisma-generate
+```
 
-### Error: "Connection limit exceeded"
+### Error: "Migration not applied" / "drift detected"
 
-- Usa connection pooling en Supabase
-- Asegúrate de que `DATABASE_URL` incluya `pgbouncer=true`
+```bash
+make prisma-deploy
+```
+
+Si hay drift severo, revisa el historial de migraciones en `packages/api/prisma/migrations/`.
+
+---
+
+**Última actualización**: Mayo 2026

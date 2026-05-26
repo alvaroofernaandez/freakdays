@@ -1,17 +1,84 @@
 # Referencia Rápida - FreakDays
 
-Referencia rápida de patrones comunes, snippets de código y soluciones a problemas frecuentes.
+Referencia rápida de comandos, patrones comunes y soluciones a problemas frecuentes.
 
-## 🚀 Snippets Rápidos
+---
 
-### Verificar Autenticación
+## Comandos de desarrollo
 
-```typescript
-const authStore = useAuthStore();
-if (!authStore.userId) return [];
+```bash
+make dev             # Stack completo (servicios + API :3001 + web :3000)
+make install         # Instalar dependencias
+make dev-setup       # Solo servicios Docker + Prisma (sin servidores)
+make dev-down        # Parar Postgres + Redis
+make services-up     # Solo levantar contenedores Docker
+make services-down   # Solo parar contenedores
+make services-logs   # Ver logs de Docker
+make services-ps     # Estado de los contenedores
 ```
 
-### Cargar Datos con Loading
+## Comandos de testing
+
+```bash
+make test            # Todos los tests (API + domain + web)
+make test-api        # Solo API (Jest, 160 tests)
+make test-web        # Solo web (Vitest, 656 tests)
+make coverage        # Tests con cobertura
+make e2e             # Tests end-to-end
+make typecheck       # Verificación de tipos (0 errores)
+make lint            # Linting
+make format          # Formatea el código
+make ci-local        # Suite completa (lint + typecheck + tests + build)
+```
+
+## Comandos de Prisma
+
+```bash
+make prisma-generate # Regenera el cliente TypeScript
+make prisma-migrate  # Crea y aplica una nueva migración
+make prisma-deploy   # Aplica migraciones pendientes
+make prisma-studio   # Abre GUI en http://localhost:5555
+```
+
+## Build y release
+
+```bash
+make build           # Build de producción
+make changeset       # Crea un changeset
+make release         # Publica un release
+make help            # Lista todos los targets
+```
+
+---
+
+## Puertos en desarrollo
+
+| Servicio            | Puerto   |
+| ------------------- | -------- |
+| Frontend Nuxt       | 3000     |
+| API NestJS          | 3001     |
+| PostgreSQL (Docker) | **5433** |
+| Redis (Docker)      | 6379     |
+| Prisma Studio       | 5555     |
+
+---
+
+## Snippets de código
+
+### Llamada a la API NestJS
+
+```typescript
+// En un composable Nuxt (packages/web)
+async function fetchItems() {
+  return $fetch('/api/items'); // ruta relativa; NUXT_PUBLIC_API_BASE_URL se aplica automáticamente
+}
+
+async function createItem(dto: CreateItemDTO) {
+  return $fetch('/api/items', { method: 'POST', body: dto });
+}
+```
+
+### Cargar datos con loading state
 
 ```typescript
 const items = ref([]);
@@ -34,66 +101,34 @@ async function loadItems() {
 ```typescript
 try {
   await operation();
-  toast.success('Éxito');
+  toast.success('Operación exitosa');
 } catch (error) {
   errorHandler.handleError(error);
 }
 ```
 
-### Query Supabase Básica
+### Escuchar eventos en tiempo real
 
 ```typescript
-const { data, error } = await supabase
-  .from('table_name')
-  .select('*')
-  .eq('user_id', authStore.userId)
-  .order('created_at', { ascending: false });
+// En un componente o composable de página
+const realtime = useRealtime();
+const statsStore = useStatsStore();
 
-if (error) throw error;
-return data ?? [];
+onMounted(() => realtime.connect());
+onUnmounted(() => realtime.disconnect());
+
+// El store se actualiza automáticamente vía useRealtime
+watch(
+  () => statsStore.level,
+  (newLevel) => {
+    // reaccionar al cambio de nivel
+  },
+);
 ```
 
-### Insert en Supabase
+---
 
-```typescript
-const { data, error } = await supabase
-  .from('table_name')
-  .insert({
-    user_id: authStore.userId,
-    field: value,
-  })
-  .select()
-  .single();
-
-if (error) throw error;
-return data;
-```
-
-### Update en Supabase
-
-```typescript
-const { error } = await supabase
-  .from('table_name')
-  .update({ field: newValue })
-  .eq('id', id)
-  .eq('user_id', authStore.userId);
-
-if (error) throw error;
-```
-
-### Delete en Supabase
-
-```typescript
-const { error } = await supabase
-  .from('table_name')
-  .delete()
-  .eq('id', id)
-  .eq('user_id', authStore.userId);
-
-if (error) throw error;
-```
-
-## 🎨 Componentes UI Comunes
+## Componentes UI comunes
 
 ### Botón con Loading
 
@@ -111,28 +146,8 @@ if (error) throw error;
     <CardTitle>Título</CardTitle>
     <CardDescription>Descripción</CardDescription>
   </CardHeader>
-  <CardContent>
-    Contenido
-  </CardContent>
+  <CardContent>Contenido</CardContent>
 </Card>
-```
-
-### Modal de Formulario
-
-```vue
-<Dialog :open="open" @update:open="$emit('update:open', $event)">
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Título</DialogTitle>
-    </DialogHeader>
-    <form @submit.prevent="handleSubmit">
-      <!-- campos -->
-    </form>
-    <DialogFooter>
-      <Button type="submit">Guardar</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
 ```
 
 ### Estado Vacío
@@ -152,7 +167,9 @@ if (error) throw error;
 </div>
 ```
 
-## 🔄 Patrones Reactivos
+---
+
+## Patrones Reactivos
 
 ### Computed Simple
 
@@ -160,25 +177,6 @@ if (error) throw error;
 const filtered = computed(() => {
   return items.value.filter((item) => item.active);
 });
-```
-
-### Computed con Parámetros
-
-```typescript
-const getItem = computed(() => (id: string) => {
-  return items.value.find((item) => item.id === id);
-});
-```
-
-### Watch Simple
-
-```typescript
-watch(
-  () => route.query.filter,
-  (newFilter) => {
-    loadItems(newFilter);
-  },
-);
 ```
 
 ### Watch con Inmediato
@@ -193,78 +191,18 @@ watch(
 );
 ```
 
-## 📱 Responsive Design
+---
 
-### Grid Responsive
-
-```vue
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-  <!-- items -->
-</div>
-```
-
-### Mostrar/Ocultar por Breakpoint
-
-```vue
-<div class="hidden md:block">Desktop</div>
-<div class="block md:hidden">Mobile</div>
-```
-
-## 🎯 Navegación
-
-### Navegación Programática
+## Navegación
 
 ```typescript
 navigateTo('/anime');
 navigateTo({ path: '/anime', query: { filter: 'watching' } });
 ```
 
-### Query Params
+---
 
-```typescript
-const route = useRoute();
-const filter = computed(() => route.query.filter as string);
-
-function updateFilter(newFilter: string) {
-  navigateTo({
-    query: { ...route.query, filter: newFilter },
-  });
-}
-```
-
-## 🔐 Autenticación
-
-### Verificar si está Autenticado
-
-```typescript
-const authStore = useAuthStore();
-if (!authStore.isAuthenticated) {
-  navigateTo('/login');
-}
-```
-
-### Obtener User ID
-
-```typescript
-const authStore = useAuthStore();
-const userId = authStore.userId;
-```
-
-## 📊 Estadísticas
-
-### Calcular Totales
-
-```typescript
-const stats = computed(() => {
-  return {
-    total: items.value.length,
-    active: items.value.filter((i) => i.status === 'active').length,
-    completed: items.value.filter((i) => i.status === 'completed').length,
-  };
-});
-```
-
-## 🎨 Estilos Comunes
+## Estilos Comunes
 
 ### Gradiente de Texto
 
@@ -274,7 +212,7 @@ const stats = computed(() => {
 </span>
 ```
 
-### Glass Morphism
+### Glass Morphism (UI arcade)
 
 ```vue
 <div class="bg-background/80 backdrop-blur-xl border border-border/50">
@@ -282,73 +220,31 @@ const stats = computed(() => {
 </div>
 ```
 
-### Hover Effects
+---
 
-```vue
-<div class="transition-all hover:scale-105 hover:shadow-lg">
-  Contenido
-</div>
-```
+## Checklist antes de commitear
 
-## 🐛 Debugging
-
-### Console Log Condicional
-
-```typescript
-if (import.meta.dev) {
-  console.log('Debug:', data);
-}
-```
-
-### Ver Estado del Store
-
-```typescript
-const store = useModulesStore();
-console.log('Store state:', store.$state);
-```
-
-## 📝 Imports Comunes
-
-### Vue
-
-```typescript
-import { ref, computed, watch, onMounted } from 'vue';
-```
-
-### Composables
-
-```typescript
-import { useSupabase } from '@/composables/useSupabase';
-import { useAuthStore } from '~~/stores/auth';
-import { useToast } from '@/composables/useToast';
-```
-
-### Componentes UI
-
-```typescript
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-```
-
-### Iconos
-
-```typescript
-import { Plus, Trash2, Edit2 } from 'lucide-vue-next';
-```
-
-## ✅ Checklist Rápido
-
-Antes de commitear:
-
-- [ ] TypeScript sin errores
-- [ ] Linter sin errores
-- [ ] Tests pasan
-- [ ] Verificación de autenticación
-- [ ] Manejo de errores
-- [ ] Estados de carga
-- [ ] Estados vacíos
-- [ ] Responsive design
+- [ ] `make typecheck` — sin errores
+- [ ] `make lint` — sin errores
+- [ ] `make test` — todos pasan
+- [ ] Verificación de autenticación en composables nuevos
+- [ ] Manejo de errores implementado
+- [ ] Estados de carga y estados vacíos
+- [ ] Responsive design verificado
 
 ---
 
-**Última actualización**: Enero 2025
+## Troubleshooting rápido
+
+| Síntoma                                  | Solución                                           |
+| ---------------------------------------- | -------------------------------------------------- |
+| `ECONNREFUSED :5433`                     | `make services-up`                                 |
+| `ECONNREFUSED :6379` (Redis)             | `make services-up`                                 |
+| EXP/nivel no se actualiza                | Redis no disponible — verificar `make services-ps` |
+| `Cannot find module '@freakdays/domain'` | `make install && make prisma-generate`             |
+| Errores de tipo                          | `make typecheck` para ver el detalle               |
+| Migración fallida                        | `make prisma-generate && make prisma-deploy`       |
+
+---
+
+**Última actualización**: Mayo 2026

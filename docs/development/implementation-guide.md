@@ -1,312 +1,225 @@
 # Guía de Implementación - FreakDays
 
-Guía paso a paso para implementar nuevas funcionalidades en FreakDays siguiendo las mejores prácticas.
+Guía paso a paso para implementar nuevas funcionalidades en FreakDays siguiendo las mejores prácticas del monorepo actual (NestJS + Nuxt 4 + @freakdays/domain).
 
-## 🎯 Flujo de Implementación
+---
 
-### Paso 1: Definir Tipos
+## Flujo de Implementación
 
-**Ubicación**: `domain/types/[module-name].ts`
+### Paso 1: Definir Tipos en @freakdays/domain
+
+Si la funcionalidad tiene lógica de negocio pura (curvas, cálculos, validaciones), el lugar correcto es el paquete compartido:
+
+**Ubicación**: `packages/domain/src/[module-name]/`
 
 ```typescript
-export interface EntityType {
-  id: string;
-  title: string;
-  description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface CreateEntityDTO {
-  title: string;
-  description?: string;
+// packages/domain/src/gamification/types.ts
+export interface LevelResult {
+  level: number;
+  totalExp: number;
+  expForNextLevel: number;
 }
 ```
 
-### Paso 2: Crear Composable
+Los tipos simples de transferencia pueden vivir directamente en `packages/api` o `packages/web` si no son compartidos.
 
-**Ubicación**: `app/composables/use[ModuleName].ts`
+### Paso 2: Crear el módulo en NestJS (backend)
 
-Usa el template en `templates/composable.ts.template` como base.
+**Ubicación**: `packages/api/src/modules/[module-name]/`
 
-**Checklist:**
+Estructura mínima:
 
-- [ ] Verificar autenticación
-- [ ] Mapear datos de DB a tipos
-- [ ] Manejar errores
-- [ ] Retornar tipos bien definidos
+```
+modules/new-feature/
+├── new-feature.module.ts
+├── new-feature.controller.ts
+├── new-feature.service.ts
+└── dto/
+    ├── create-new-feature.dto.ts
+    └── update-new-feature.dto.ts
+```
 
-### Paso 3: Crear Componentes
+**Checklist del módulo:**
 
-**Ubicación**: `app/components/[module]/`
+- [ ] Controller con guards de autenticación Clerk
+- [ ] Service que inyecta `PrismaService`
+- [ ] DTOs con validación (class-validator)
+- [ ] Módulo registrado en `AppModule`
+
+### Paso 3: Añadir el modelo en Prisma
+
+**Ubicación**: `packages/api/prisma/schema.prisma`
+
+```prisma
+model NewFeature {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+```
+
+Después, crear la migración:
+
+```bash
+make prisma-migrate
+```
+
+### Paso 4: Publicar eventos de dominio (si aplica)
+
+Si la acción debe disparar gamificación (EXP, streaks, logros, feed), escribe el evento de dominio en la **misma transacción** que el estado:
+
+```typescript
+await this.prisma.$transaction([
+  this.prisma.newFeature.create({ data: featureData }),
+  this.prisma.domainEvent.create({
+    data: {
+      type: 'NEW_FEATURE_CREATED',
+      payload: JSON.stringify({ userId, featureId }),
+      processedAt: null,
+    },
+  }),
+]);
+```
+
+El relay de BullMQ recoge automáticamente los eventos no procesados y los distribuye a los handlers registrados (ProgressionHandler, StreakHandler, etc.).
+
+### Paso 5: Crear el composable en Nuxt (frontend)
+
+**Ubicación**: `packages/web/app/composables/use[ModuleName].ts`
+
+Los composables llaman a la API NestJS vía `$fetch`:
+
+```typescript
+// packages/web/app/composables/useNewFeature.ts
+export function useNewFeature() {
+  async function fetchAll() {
+    return $fetch('/api/new-feature');
+  }
+
+  async function create(dto: CreateNewFeatureDTO) {
+    return $fetch('/api/new-feature', { method: 'POST', body: dto });
+  }
+
+  return { fetchAll, create };
+}
+```
+
+**Checklist del composable:**
+
+- [ ] Llama a la API NestJS (no accede a la BD directamente)
+- [ ] Mapea la respuesta a tipos TypeScript
+- [ ] Maneja errores
+
+### Paso 6: Crear Componentes Vue
+
+**Ubicación**: `packages/web/app/components/[module]/`
 
 **Componentes necesarios:**
 
-- `[Module]Card.vue` - Tarjeta individual
-- `[Module]List.vue` - Lista con filtros
-- `[Module]Stats.vue` - Estadísticas
-- `[Module]CardSkeleton.vue` - Skeleton loader
-- `[Module]StatsSkeleton.vue` - Skeleton loader
-- `Add[Module]Modal.vue` - Modal de creación
+- `[Module]Card.vue` — Tarjeta individual
+- `[Module]List.vue` — Lista con filtros
+- `[Module]Stats.vue` — Estadísticas
+- `[Module]CardSkeleton.vue` — Skeleton loader
+- `Add[Module]Modal.vue` — Modal de creación
 
-Usa el template en `templates/component.vue.template` como base.
+### Paso 7: Crear la Página
 
-### Paso 4: Crear Página
+**Ubicación**: `packages/web/app/pages/[module-name].vue`
 
-**Ubicación**: `app/pages/[module-name].vue`
+**Checklist de la página:**
 
-Usa el template en `templates/page.vue.template` como base.
+- [ ] Usa un composable de página (`use[Module]Page.ts`) para aislar la lógica
+- [ ] Carga datos con skeleton loader
+- [ ] Maneja estados vacíos con el componente `Empty`
+- [ ] Maneja errores
 
-**Checklist:**
+### Paso 8: Actualizar Navegación
 
-- [ ] Cargar datos con skeleton
-- [ ] Manejar estados vacíos
-- [ ] Integrar todos los componentes
-- [ ] Manejar eventos
+Si es un módulo principal:
 
-### Paso 5: Migración de Base de Datos
+- `packages/web/app/utils/nav-items.ts` — añadir el ítem de navegación
+- O asegurarse de que esté en `ALL_MODULES` en el dominio compartido
 
-**Ubicación**: `database/migrations/[NNN]_[description].sql`
+### Paso 9: Escribir Tests
 
-```sql
--- Migration: [Description]
--- Execute this in Supabase SQL Editor
--- Date: YYYY-MM-DD
+**API**: `packages/api/src/modules/[module]/*.spec.ts` (Jest)
 
-BEGIN;
+**Domain**: `packages/domain/src/[module]/*.spec.ts` (Vitest)
 
--- Crear tabla
-CREATE TABLE IF NOT EXISTS public.table_name (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Crear índices
-CREATE INDEX IF NOT EXISTS idx_table_name_user ON public.table_name(user_id);
-
--- Habilitar RLS
-ALTER TABLE public.table_name ENABLE ROW LEVEL SECURITY;
-
--- Políticas RLS
-CREATE POLICY "Users can manage own items" ON public.table_name
-    FOR ALL USING (auth.uid() = user_id);
-
-COMMIT;
-```
-
-### Paso 6: Actualizar Navegación
-
-Si es un módulo principal, actualizar:
-
-- `domain/types/modules.ts` - Añadir a `ALL_MODULES`
-- `domain/constants/module-icons.ts` - Añadir icono
-- `app/utils/nav-items.ts` - Se añade automáticamente si está en `ALL_MODULES`
-
-### Paso 7: Escribir Tests
-
-**Ubicación**: `tests/unit/[path]/[module].test.ts`
+**Web**: `packages/web/app/**/*.spec.ts` (Vitest)
 
 ```typescript
+// packages/domain/src/new-feature/new-feature.spec.ts
 import { describe, it, expect } from 'vitest';
-import { functionToTest } from '~~/domain/modules/module';
+import { calculateSomething } from './new-feature';
 
-describe('Module', () => {
-  describe('functionToTest', () => {
-    it('should do something', () => {
-      const result = functionToTest(input);
-      expect(result).toBe(expected);
-    });
+describe('calculateSomething', () => {
+  it('should return expected value', () => {
+    expect(calculateSomething(10)).toBe(20);
   });
 });
 ```
 
-### Paso 8: Documentación
+### Paso 10: Documentación
 
 Actualizar:
 
-- `docs/composables.md` - Documentar nuevo composable
-- `docs/components.md` - Documentar nuevos componentes
-- `docs/pages.md` - Documentar nueva página
-- `docs/database.md` - Documentar nueva tabla
-
-## 🔄 Ejemplo Completo: Nuevo Módulo "Books"
-
-### 1. Tipos
-
-```typescript
-// domain/types/books.ts
-export interface Book {
-  id: string;
-  title: string;
-  author: string;
-  pages: number;
-  readPages: number;
-  status: 'reading' | 'completed' | 'want_to_read';
-  createdAt: Date;
-}
-
-export interface CreateBookDTO {
-  title: string;
-  author: string;
-  pages: number;
-  status?: 'reading' | 'completed' | 'want_to_read';
-}
-```
-
-### 2. Composable
-
-```typescript
-// app/composables/useBooks.ts
-import { useAuthStore } from '~~/stores/auth';
-import { useSupabase } from './useSupabase';
-import type { Book, CreateBookDTO } from '~~/domain/types/books';
-
-export function useBooks() {
-  const supabase = useSupabase();
-  const authStore = useAuthStore();
-
-  async function fetchBooks(): Promise<Book[]> {
-    if (!authStore.userId) return [];
-
-    const { data, error } = await supabase
-      .from('books')
-      .select('*')
-      .eq('user_id', authStore.userId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return (data ?? []).map(mapDbToBook);
-  }
-
-  async function createBook(dto: CreateBookDTO): Promise<Book | null> {
-    if (!authStore.userId) return null;
-
-    const { data, error } = await supabase
-      .from('books')
-      .insert({
-        user_id: authStore.userId,
-        title: dto.title,
-        author: dto.author,
-        pages: dto.pages,
-        read_pages: 0,
-        status: dto.status || 'reading',
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data ? mapDbToBook(data) : null;
-  }
-
-  function mapDbToBook(data: any): Book {
-    return {
-      id: data.id,
-      title: data.title,
-      author: data.author,
-      pages: data.pages,
-      readPages: data.read_pages,
-      status: data.status,
-      createdAt: new Date(data.created_at),
-    };
-  }
-
-  return {
-    fetchBooks,
-    createBook,
-  };
-}
-```
-
-### 3. Componente Card
-
-```vue
-<!-- app/components/books/BookCard.vue -->
-<script setup lang="ts">
-import type { Book } from '~~/domain/types/books';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-
-interface Props {
-  book: Book;
-}
-
-defineProps<Props>();
-</script>
-
-<template>
-  <Card>
-    <CardHeader>
-      <CardTitle>{{ book.title }}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p>Autor: {{ book.author }}</p>
-      <p>Páginas: {{ book.readPages }} / {{ book.pages }}</p>
-    </CardContent>
-  </Card>
-</template>
-```
-
-### 4. Página
-
-```vue
-<!-- app/pages/books.vue -->
-<script setup lang="ts">
-import { useBooks } from '@/composables/useBooks';
-import BookCard from '@/components/books/BookCard.vue';
-
-const booksApi = useBooks();
-const books = ref([]);
-
-onMounted(async () => {
-  books.value = await booksApi.fetchBooks();
-});
-</script>
-
-<template>
-  <div class="container mx-auto py-6">
-    <h1 class="text-3xl font-bold mb-6">Libros</h1>
-    <div class="grid grid-cols-3 gap-4">
-      <BookCard v-for="book in books" :key="book.id" :book="book" />
-    </div>
-  </div>
-</template>
-```
-
-## ✅ Checklist Final
-
-Antes de considerar una implementación completa:
-
-- [ ] Tipos definidos en `domain/types/`
-- [ ] Composable creado y funcionando
-- [ ] Componentes creados con skeleton loaders
-- [ ] Página creada con manejo de estados
-- [ ] Migración SQL aplicada
-- [ ] RLS configurado
-- [ ] Tests escritos y pasando
-- [ ] Documentación actualizada
-- [ ] Sin errores de TypeScript
-- [ ] Sin errores de linter
-- [ ] Responsive design verificado
-- [ ] Accesibilidad básica verificada
-
-## 🚨 Errores Comunes
-
-### Error: "Cannot find module"
-
-**Solución**: Verificar que el alias `~~/` apunta a la raíz del proyecto. Para archivos en `app/`, usar `@/`.
-
-### Error: "Property does not exist"
-
-**Solución**: Verificar que los tipos estén correctamente importados y definidos.
-
-### Error: "RLS policy violation"
-
-**Solución**: Asegurar que todas las queries filtren por `user_id` y que las políticas RLS estén correctamente configuradas.
+- [`docs/architecture/components.md`](../architecture/components.md) — nuevos componentes
+- [`docs/architecture/composables.md`](../architecture/composables.md) — nuevo composable
+- [`docs/architecture/pages.md`](../architecture/pages.md) — nueva página
+- [`docs/architecture/database.md`](../architecture/database.md) — nuevas tablas
+- [`docs/README.md`](../README.md) — si es un módulo de primer nivel
 
 ---
 
-**Última actualización**: Enero 2025
+## Checklist Final
+
+Antes de considerar una implementación completa:
+
+- [ ] Tipos definidos (en `@freakdays/domain` si son compartidos)
+- [ ] Módulo NestJS con controller, service y DTOs
+- [ ] Migración Prisma aplicada (`make prisma-migrate`)
+- [ ] Evento de dominio publicado en transacción (si aplica)
+- [ ] Composable Vue creado
+- [ ] Componentes con skeleton loaders y estados vacíos
+- [ ] Página con manejo de carga y errores
+- [ ] Tests escritos y pasando (`make test`)
+- [ ] Sin errores de TypeScript (`make typecheck`)
+- [ ] Sin errores de linter (`make lint`)
+- [ ] Responsive design verificado
+- [ ] Accesibilidad básica verificada
+
+---
+
+## Errores Comunes
+
+### Error: "Cannot find module '@freakdays/domain'"
+
+```bash
+make install
+make prisma-generate
+```
+
+### Error: "Property does not exist"
+
+Verifica que los tipos estén correctamente importados. Los tipos del dominio compartido se importan desde `@freakdays/domain`.
+
+### Error: "PrismaClientKnownRequestError: Foreign key constraint failed"
+
+Verifica que los registros padre existan antes de insertar registros hijo. Revisa el schema en `packages/api/prisma/schema.prisma`.
+
+### El evento de dominio no dispara gamificación
+
+Verifica que:
+
+1. El evento se inserte en la misma transacción con `this.prisma.$transaction([...])`.
+2. El relay de BullMQ esté corriendo (se inicia con `make dev`).
+3. El tipo de evento (`type`) esté registrado en el worker correspondiente.
+
+---
+
+**Última actualización**: Mayo 2026
