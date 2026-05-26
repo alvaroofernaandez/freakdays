@@ -67,6 +67,34 @@ describe('nav-items', () => {
       expect(typeof questsItem?.icon).toBe('function');
     });
 
+    it('should include leaderboard after party when party is enabled', () => {
+      const store = useModulesStore();
+      store.setModule('party', true);
+
+      const items = getAllNavItems(store);
+
+      const partyIdx = items.findIndex((item) => item.to === '/party');
+      const leaderboardIdx = items.findIndex((item) => item.to === '/leaderboard/global');
+
+      expect(leaderboardIdx).toBeGreaterThan(-1);
+      expect(leaderboardIdx).toBe(partyIdx + 1);
+
+      const leaderboardItem = items[leaderboardIdx];
+      expect(leaderboardItem?.label).toBe('Leaderboard');
+      expect(leaderboardItem?.icon).toBeDefined();
+    });
+
+    it('should not include leaderboard when party is disabled', () => {
+      const store = useModulesStore();
+      store.setModule('quests', true);
+      store.setModule('anime', true);
+      // party NOT enabled
+
+      const items = getAllNavItems(store);
+
+      expect(items.some((item) => item.to === '/leaderboard/global')).toBe(false);
+    });
+
     it('should handle errors gracefully', () => {
       const store = useModulesStore();
       const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -98,13 +126,15 @@ describe('nav-items', () => {
 
       const items = getAllNavItems(store);
 
-      expect(items.length).toBe(7);
+      // 1 home + 6 modules + 1 leaderboard (injected after party) = 8
+      expect(items.length).toBe(8);
       expect(items.some((item) => item.to === '/workouts')).toBe(true);
       expect(items.some((item) => item.to === '/manga')).toBe(true);
       expect(items.some((item) => item.to === '/anime')).toBe(true);
       expect(items.some((item) => item.to === '/quests')).toBe(true);
       expect(items.some((item) => item.to === '/party')).toBe(true);
       expect(items.some((item) => item.to === '/calendar')).toBe(true);
+      expect(items.some((item) => item.to === '/leaderboard/global')).toBe(true);
     });
   });
 });
