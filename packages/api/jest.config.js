@@ -8,6 +8,11 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
+  // jose v6+ is pure ESM. Include it in ts-jest's transpile pass so the
+  // boot smoke test (which imports the full DI graph) can resolve it.
+  // pnpm hoists packages under .pnpm/<pkg>@<ver>/node_modules/<pkg>, so the
+  // pattern must match that path structure.
+  transformIgnorePatterns: ['/node_modules/(?!(.pnpm/)?jose)'],
   clearMocks: true,
 
   collectCoverageFrom: [

@@ -1,6 +1,7 @@
 import { Module, OnModuleInit, Logger } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 
+import { AuthModule } from '../auth/auth.module';
 import { CommonModule } from '../common/common.module';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EventsModule } from '../events/events.module';
@@ -29,7 +30,7 @@ import { LeaderboardSnapshotService } from './leaderboard/leaderboard-snapshot.s
  * so the processor resolves the token from this module's provider.
  */
 @Module({
-  imports: [CommonModule, EventsModule, RealtimeModule, ScheduleModule.forRoot()],
+  imports: [AuthModule, CommonModule, EventsModule, RealtimeModule, ScheduleModule.forRoot()],
   controllers: [StatsController],
   providers: [
     ProgressionHandler,

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import Redis from 'ioredis';
 
 import { parseRedisUrl } from '../events/redis.util';
@@ -104,7 +104,7 @@ export class PresenceService {
    *   (service builds its own from REDIS_URL). Pass `null` to explicitly
    *   disable Redis (all methods return offline).
    */
-  constructor(redisClient?: Redis | null) {
+  constructor(@Optional() redisClient?: Redis | null) {
     if (redisClient !== undefined) {
       // Accept injected client (including null = disabled)
       this.redis = redisClient ?? null;
