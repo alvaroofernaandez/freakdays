@@ -90,38 +90,52 @@ describe('PresenceService — multi-socket ref-counting', () => {
   // ──────────────────────────────────────────────────────────────────────────
 
   describe('onDisconnect', () => {
-    it('last socket disconnects → SREM conn; SCARD=0 → SREM online; transition=true', async () => {
-      redis.srem.mockResolvedValueOnce(1); // removed from conn set
-      redis.scard.mockResolvedValueOnce(0); // conn set now empty
-      redis.srem.mockResolvedValueOnce(1); // removed from online set
+    it('last socket disconnects → Lua eval returns [0, 1]; transition=true', async () => {
+      // Lua returns [remaining=0, online_removed=1]
+      redis.eval.mockResolvedValueOnce([0, 1]);
 
       const result = await svc.onDisconnect('user-a', 'socket-1');
 
-      expect(redis.srem).toHaveBeenNthCalledWith(1, 'presence:conn:user-a', 'socket-1');
-      expect(redis.scard).toHaveBeenCalledWith('presence:conn:user-a');
-      expect(redis.srem).toHaveBeenNthCalledWith(2, 'presence:online', 'user-a');
+      // Atomic eval called with correct keys/args
+      expect(redis.eval).toHaveBeenCalledWith(
+        expect.any(String), // Lua script
+        2, // numkeys
+        'presence:conn:user-a',
+        'presence:online',
+        'socket-1',
+        'user-a',
+      );
+      // separate srem/scard must NOT be called
+      expect(redis.srem).not.toHaveBeenCalled();
+      expect(redis.scard).not.toHaveBeenCalled();
       expect(result).toEqual({ isOnline: false, transition: true });
     });
 
-    it('first of two sockets disconnects → SREM conn; SCARD=1 → no online SREM; transition=false', async () => {
-      redis.srem.mockResolvedValueOnce(1); // removed from conn set
-      redis.scard.mockResolvedValueOnce(1); // conn set still has 1 socket
+    it('first of two sockets disconnects → Lua eval returns [1, 0]; transition=false', async () => {
+      // remaining=1 → not the last socket
+      redis.eval.mockResolvedValueOnce([1, 0]);
 
       const result = await svc.onDisconnect('user-a', 'socket-1');
 
-      expect(redis.srem).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ isOnline: true, transition: false });
     });
 
-    it('unknown socketId (already removed) → SREM conn returns 0; SCARD=0 → still marks offline; transition=true', async () => {
-      // The socket was not in the set (crashed pod re-delivery)
-      redis.srem.mockResolvedValueOnce(0); // not found in conn set
-      redis.scard.mockResolvedValueOnce(0); // no more sockets for user
-      redis.srem.mockResolvedValueOnce(1); // cleaned up online set
+    it('unknown socketId (crashed pod) → Lua eval returns [0, 1]; still marks offline; transition=true', async () => {
+      // The socket was not in the set but SCARD=0 → user is offline
+      redis.eval.mockResolvedValueOnce([0, 1]);
 
       const result = await svc.onDisconnect('user-a', 'socket-ghost');
 
       expect(result).toEqual({ isOnline: false, transition: true });
+    });
+
+    it('concurrent disconnects: second call gets [0, 0] → isOnline=false, transition=false (already offline)', async () => {
+      // Lua guarantees only ONE call does the SREM on online (online_removed=0 for the second)
+      redis.eval.mockResolvedValueOnce([0, 0]);
+
+      const result = await svc.onDisconnect('user-a', 'socket-2');
+
+      expect(result).toEqual({ isOnline: false, transition: false });
     });
   });
 
@@ -181,8 +195,8 @@ describe('PresenceService — multi-socket ref-counting', () => {
       });
     });
 
-    it('onDisconnect — Redis throws → returns { isOnline: false, transition: false } without throwing', async () => {
-      redis.srem.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+    it('onDisconnect — Redis eval throws → returns { isOnline: false, transition: false } without throwing', async () => {
+      redis.eval.mockRejectedValueOnce(new Error('ECONNREFUSED'));
       await expect(svc.onDisconnect('user-a', 'socket-1')).resolves.toEqual({
         isOnline: false,
         transition: false,
@@ -218,6 +232,61 @@ describe('PresenceService — null Redis client (no REDIS_URL)', () => {
     });
     await expect(svc.isOnline('u')).resolves.toBe(false);
     await expect(svc.whichOnline(['u'])).resolves.toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Atomic disconnect — Lua script (Finding 3)
+// ---------------------------------------------------------------------------
+
+describe('PresenceService — atomic disconnect (Lua eval)', () => {
+  let redis: MockRedisClient;
+  let svc: PresenceService;
+
+  beforeEach(() => {
+    redis = makeMockRedis();
+    svc = new PresenceService(redis as unknown as import('ioredis').Redis);
+    jest.clearAllMocks();
+  });
+
+  it('onDisconnect uses eval (Lua) for the SREM+SCARD step — not separate srem+scard calls', async () => {
+    // The Lua script returns [remaining_conn_count, online_removed] pair.
+    // Here: 0 remaining → offline transition expected.
+    redis.eval.mockResolvedValueOnce([0, 1]);
+
+    const result = await svc.onDisconnect('user-a', 'socket-1');
+
+    // eval must be called (atomic), plain srem/scard must NOT be called separately
+    expect(redis.eval).toHaveBeenCalled();
+    expect(redis.srem).not.toHaveBeenCalled();
+    expect(redis.scard).not.toHaveBeenCalled();
+    expect(result).toEqual({ isOnline: false, transition: true });
+  });
+
+  it('concurrent disconnects: two calls both calling eval each get their own result — offline fires exactly once per call returning remaining=0', async () => {
+    // First call: remaining=0 (offline)
+    // Second call: remaining=0 too (e.g. race — both think last socket)
+    // With Lua, only ONE actually removes from online (returns online_removed=1 vs 0)
+    redis.eval
+      .mockResolvedValueOnce([0, 1]) // first disconnect: was last, removed from online
+      .mockResolvedValueOnce([0, 0]); // second disconnect: remaining=0 but already removed from online
+
+    const [r1, r2] = await Promise.all([
+      svc.onDisconnect('user-a', 'socket-1'),
+      svc.onDisconnect('user-a', 'socket-2'),
+    ]);
+
+    // Only the call where online_removed=1 triggers transition=true
+    expect(r1).toEqual({ isOnline: false, transition: true });
+    expect(r2).toEqual({ isOnline: false, transition: false });
+  });
+
+  it('eval — Redis throws → graceful degradation (offline, no throw)', async () => {
+    redis.eval.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+    await expect(svc.onDisconnect('user-a', 'socket-1')).resolves.toEqual({
+      isOnline: false,
+      transition: false,
+    });
   });
 });
 

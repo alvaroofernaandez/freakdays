@@ -9,6 +9,34 @@ import { parseRedisUrl } from '../events/redis.util';
 
 const PRESENCE_ONLINE_KEY = 'presence:online' as const;
 
+// ---------------------------------------------------------------------------
+// Atomic disconnect Lua script
+//
+// Performs SREM(conn, socketId) + SCARD(conn) + conditional SREM(online, userId)
+// in a single atomic operation so concurrent disconnects cannot both observe
+// remaining===0 and both emit offline.
+//
+// Returns: [remaining_conn_count (number), online_removed (0 or 1)]
+//   - remaining: 0 → no more sockets for this user
+//   - online_removed: 1 → this call was the one that removed from presence:online
+// ---------------------------------------------------------------------------
+const DISCONNECT_LUA = `
+local conn_key    = KEYS[1]
+local online_key  = KEYS[2]
+local socket_id   = ARGV[1]
+local user_id     = ARGV[2]
+
+redis.call('SREM', conn_key, socket_id)
+local remaining = redis.call('SCARD', conn_key)
+
+local online_removed = 0
+if remaining == 0 then
+  online_removed = redis.call('SREM', online_key, user_id)
+end
+
+return {remaining, online_removed}
+` as const;
+
 /**
  * TTL (seconds) for the per-user conn key.
  *
@@ -136,8 +164,13 @@ export class PresenceService {
 
   /**
    * Call on socket disconnect.
-   * Removes the socket from the per-user conn SET. If the SET is now empty,
-   * removes the user from the global online SET and returns transition=true.
+   * Uses an atomic Lua script (eval) to SREM(conn) + SCARD(conn) +
+   * conditional SREM(online) in a single round-trip, eliminating the race
+   * condition where two concurrent disconnects both observe remaining===0 and
+   * both emit offline.
+   *
+   * Returns transition=true only when THIS call was the one that removed the
+   * user from the online set (online_removed === 1).
    */
   async onDisconnect(userId: string, socketId: string): Promise<PresenceTransitionResult> {
     if (!this.redis) {
@@ -146,13 +179,22 @@ export class PresenceService {
 
     try {
       const connKey = buildConnKey(userId);
-      await this.redis.srem(connKey, socketId);
-      const remaining = await this.redis.scard(connKey);
+      // eval returns [remaining, online_removed]
+      const raw = await this.redis.eval(
+        DISCONNECT_LUA,
+        2, // numkeys
+        connKey,
+        PRESENCE_ONLINE_KEY,
+        socketId,
+        userId,
+      );
+
+      const [remaining, onlineRemoved] = raw as [number, number];
 
       if (remaining === 0) {
-        // Last socket gone — remove from global online set
-        await this.redis.srem(PRESENCE_ONLINE_KEY, userId);
-        return { isOnline: false, transition: true };
+        // This call (or a concurrent one) was the last socket.
+        // transition=true only if THIS call did the online SREM.
+        return { isOnline: false, transition: onlineRemoved === 1 };
       }
 
       return { isOnline: true, transition: false };
