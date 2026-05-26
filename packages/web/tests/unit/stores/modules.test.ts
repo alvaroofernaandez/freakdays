@@ -30,33 +30,40 @@ describe('useModulesStore', () => {
   });
 
   describe('toggleModule', () => {
-    it('should enable a disabled module', () => {
+    it('should disable a module that is enabled by default', () => {
       const store = useModulesStore();
 
-      store.toggleModule('quests');
-
-      const module = store.getModuleById('quests');
-      expect(module?.enabled).toBe(true);
-    });
-
-    it('should disable an enabled module', () => {
-      const store = useModulesStore();
-
-      store.toggleModule('quests');
+      // All modules are enabled by default (moduleMap). First toggle disables.
       store.toggleModule('quests');
 
       const module = store.getModuleById('quests');
       expect(module?.enabled).toBe(false);
+      expect(store.isEnabled('quests')).toBe(false);
+    });
+
+    it('should re-enable a module after two toggles', () => {
+      const store = useModulesStore();
+
+      // starts enabled → first toggle disables → second toggle re-enables
+      store.toggleModule('quests');
+      store.toggleModule('quests');
+
+      const module = store.getModuleById('quests');
+      expect(module?.enabled).toBe(true);
+      expect(store.isEnabled('quests')).toBe(true);
     });
 
     it('should not affect other modules when toggling', () => {
       const store = useModulesStore();
 
+      // Disable quests; other modules keep their moduleMap state (enabled by default)
       store.toggleModule('quests');
 
       const otherModules = store.modules.filter((m: AppModule) => m.id !== 'quests');
       otherModules.forEach((module: AppModule) => {
-        expect(module.enabled).toBe(false);
+        // modules array still reflects enabled: false until explicitly updated via setModule
+        // the source of truth for display is moduleMap (checked via isEnabled)
+        expect(store.isEnabled(module.id)).toBe(true);
       });
     });
   });
@@ -117,14 +124,22 @@ describe('useModulesStore', () => {
   });
 
   describe('computed getters', () => {
-    it('should return only enabled modules', () => {
+    it('should return all modules enabled by default', () => {
       const store = useModulesStore();
 
-      store.enableModules(['quests', 'manga']);
+      // All 6 modules are on by default via the pre-seeded moduleMap
+      expect(store.enabledModules).toHaveLength(6);
+    });
 
-      expect(store.enabledModules).toHaveLength(2);
-      expect(store.enabledModules.map((m) => m.id)).toContain('quests');
-      expect(store.enabledModules.map((m) => m.id)).toContain('manga');
+    it('should return fewer modules after explicitly disabling some', () => {
+      const store = useModulesStore();
+
+      store.setModule('quests', false);
+      store.setModule('manga', false);
+
+      expect(store.enabledModules).toHaveLength(4);
+      expect(store.enabledModules.map((m) => m.id)).not.toContain('quests');
+      expect(store.enabledModules.map((m) => m.id)).not.toContain('manga');
     });
 
     it('should correctly report if onboarding is complete', () => {
@@ -155,9 +170,17 @@ describe('useModulesStore', () => {
       expect(store.hasCompletedOnboarding).toBe(false);
     });
 
-    it('isEnabled should return false for disabled module', () => {
+    it('isEnabled should return true for any module by default', () => {
       const store = useModulesStore();
 
+      // All modules are enabled by default via pre-seeded moduleMap
+      expect(store.isEnabled('quests')).toBe(true);
+    });
+
+    it('isEnabled should return false after explicitly disabling a module', () => {
+      const store = useModulesStore();
+
+      store.setModule('quests', false);
       expect(store.isEnabled('quests')).toBe(false);
     });
 
@@ -245,25 +268,30 @@ describe('useModulesStore', () => {
   });
 
   describe('reset', () => {
-    it('should reset all modules to disabled state', () => {
+    it('should reset modules array to disabled state and restore default moduleMap', () => {
       const store = useModulesStore();
 
       store.enableModules(['quests', 'anime', 'manga']);
       store.synced = true;
       store.reset();
 
+      // modules array entries go back to enabled: false (catalog default)
       expect(store.modules.every((m: AppModule) => !m.enabled)).toBe(true);
-      expect(store.moduleMap).toEqual({});
+      // moduleMap is rebuilt with all modules enabled (default behavior)
+      expect(Object.keys(store.moduleMap).length).toBe(6);
+      expect(store.isEnabled('quests')).toBe(true);
       expect(store.synced).toBe(false);
     });
 
-    it('should reset moduleMap to empty object', () => {
+    it('should reset moduleMap to all-enabled default', () => {
       const store = useModulesStore();
 
-      store.setModule('quests', true);
+      store.setModule('quests', false);
       store.reset();
 
-      expect(Object.keys(store.moduleMap).length).toBe(0);
+      // After reset, moduleMap is back to all-on defaults
+      expect(store.isEnabled('quests')).toBe(true);
+      expect(Object.keys(store.moduleMap).length).toBe(6);
     });
   });
 });

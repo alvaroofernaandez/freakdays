@@ -16,6 +16,7 @@
  * - Onboarding redirect once modules are synced and onboarding isn't complete.
  */
 import type { ModuleId } from '../../domain/types/modules';
+import { ALL_MODULES } from '../../domain/types/modules';
 import { useAuthStore } from '../../stores/auth';
 import { useModulesStore } from '../../stores/modules';
 
@@ -105,7 +106,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
         if (data && data.length > 0) {
           modulesStore.setModulesFromDb(data);
         } else {
-          modulesStore.synced = true;
+          // No stored preferences — treat as first-time user with all modules on.
+          modulesStore.setModulesFromDb(
+            ALL_MODULES.map((m) => ({ module_id: m.id, enabled: true })),
+          );
         }
       } catch (error) {
         console.error('Error loading modules:', error);
