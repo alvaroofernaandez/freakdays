@@ -6,6 +6,7 @@ import { Logger } from 'nestjs-pino';
 
 import { AppModule } from './app.module';
 import { PrismaService } from './common/prisma/prisma.service';
+import { RedisIoAdapter } from './realtime/redis-io.adapter';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
@@ -56,6 +57,8 @@ async function bootstrap(): Promise<void> {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
   }
+
+  app.useWebSocketAdapter(new RedisIoAdapter(app));
 
   const prisma = app.get(PrismaService);
   await prisma.enableShutdownHooks(app);

@@ -27,6 +27,7 @@ import { UsersModule } from './users/users.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { AnimeModule } from './anime/anime.module';
 import { GamificationModule } from './gamification/gamification.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 
 @Module({
@@ -61,6 +62,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
     CommonModule,
     EventsModule,
     GamificationModule,
+    RealtimeModule,
     AuthModule,
     CalendarModule,
     AnimeModule,

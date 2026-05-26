@@ -5,6 +5,8 @@ import { CommonModule } from '../common/common.module';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EventsModule } from '../events/events.module';
 import { DOMAIN_EVENT_HANDLERS } from '../events/events.constants';
+import { RealtimeModule } from '../realtime/realtime.module';
+import { RealtimePushHandler } from '../realtime/realtime-push.handler';
 import { AchievementEvaluationHandler } from './achievements/achievement-evaluation.handler';
 import { ACHIEVEMENT_CATALOG } from './achievements/catalog';
 import { ProgressionHandler } from './handlers/progression.handler';
@@ -23,7 +25,7 @@ import { StatsService } from './stats/stats.service';
  * so the processor resolves the token from this module's provider.
  */
 @Module({
-  imports: [CommonModule, EventsModule, ScheduleModule.forRoot()],
+  imports: [CommonModule, EventsModule, RealtimeModule, ScheduleModule.forRoot()],
   controllers: [StatsController],
   providers: [
     ProgressionHandler,
@@ -34,20 +36,25 @@ import { StatsService } from './stats/stats.service';
     StatsRolloverService,
     {
       provide: DOMAIN_EVENT_HANDLERS,
-      // StreakHandler MUST precede ProgressionHandler so the streak is already
-      // committed to the DB when ProgressionHandler reads currentStreak for the
-      // bonus calculation (each handler runs in its own transaction).
+      // Handler order matters:
+      // 1. StreakHandler — updates streak first so ProgressionHandler reads the updated value
+      // 2. ProgressionHandler — reads streak for bonus calculation
+      // 3. AchievementEvaluationHandler — evaluates achievements after progression
+      // 4. StatsProjectorHandler — rebuilds stats read model
+      // 5. RealtimePushHandler (LAST) — emits post-commit; stats are already up to date
       useFactory: (
         streak: StreakHandler,
         progression: ProgressionHandler,
         achievement: AchievementEvaluationHandler,
         statsProjector: StatsProjectorHandler,
-      ) => [streak, progression, achievement, statsProjector],
+        realtimePush: RealtimePushHandler,
+      ) => [streak, progression, achievement, statsProjector, realtimePush],
       inject: [
         StreakHandler,
         ProgressionHandler,
         AchievementEvaluationHandler,
         StatsProjectorHandler,
+        RealtimePushHandler,
       ],
     },
   ],

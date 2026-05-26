@@ -53,6 +53,11 @@ export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
   }
 
   private async runHandler(event: DomainEvent, handler: DomainEventHandler): Promise<void> {
+    const deferred: Array<() => void | Promise<void>> = [];
+    const defer = (fn: () => void | Promise<void>): void => {
+      deferred.push(fn);
+    };
+
     await this.prisma.$transaction(async (tx) => {
       const existing = await tx.eventHandlerLog.findUnique({
         where: { eventId_handler: { eventId: event.eventId, handler: handler.name } },
@@ -65,11 +70,23 @@ export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
         return;
       }
 
-      await handler.handle(event, tx);
+      await handler.handle(event, tx, defer);
 
       await tx.eventHandlerLog.create({
         data: { eventId: event.eventId, handler: handler.name },
       });
     });
+
+    // Flush post-commit deferred effects. Each fn is wrapped in try/catch so a
+    // failed socket emit never fails the BullMQ job (push is best-effort).
+    for (const fn of deferred) {
+      try {
+        await fn();
+      } catch (err: unknown) {
+        this.logger.warn(
+          `DomainEventsProcessor: post-commit deferred fn for handler=${handler.name} threw — ${String(err)}`,
+        );
+      }
+    }
   }
 }

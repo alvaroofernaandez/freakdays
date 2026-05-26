@@ -64,6 +64,7 @@ export default defineNuxtConfig({
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_URL,
       clerkPublishableKey: process.env.NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+      wsUrl: process.env.NUXT_PUBLIC_WS_URL ?? '',
     },
   },
 

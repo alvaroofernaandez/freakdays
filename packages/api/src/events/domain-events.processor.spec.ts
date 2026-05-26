@@ -222,3 +222,141 @@ describe('DomainEventsProcessor — registry + per-handler idempotency', () => {
     });
   });
 });
+
+// Post-commit deferral mechanics (SLICE 2)
+describe('DomainEventsProcessor — post-commit deferral', () => {
+  let mockPrisma: {
+    $transaction: jest.Mock;
+    eventHandlerLog: { findUnique: jest.Mock; create: jest.Mock };
+  };
+
+  beforeEach(() => {
+    mockPrisma = {
+      $transaction: jest.fn().mockImplementation(async (fn: (tx: unknown) => Promise<unknown>) => {
+        return fn(mockPrisma);
+      }),
+      eventHandlerLog: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({}),
+      },
+    };
+  });
+
+  it('Test A: deferred fn is called once after successful $transaction', async () => {
+    const deferred = jest.fn();
+
+    const handler: DomainEventHandler & { handle: jest.Mock } = {
+      name: 'defer-handler',
+      handles: [EVENT_TYPES.QUEST_COMPLETED],
+      handle: jest
+        .fn()
+        .mockImplementation(
+          async (
+            _event: DomainEvent,
+            _tx: unknown,
+            defer?: (fn: () => void | Promise<void>) => void,
+          ) => {
+            defer?.(deferred);
+          },
+        ),
+    };
+
+    const processor = new DomainEventsProcessor(
+      mockPrisma as unknown as PrismaService,
+      [handler] as DomainEventHandler[],
+    );
+    processor.onModuleInit();
+
+    const event: DomainEvent = {
+      eventId: 'evt-defer-a',
+      type: EVENT_TYPES.QUEST_COMPLETED,
+      aggregateId: 'q-1',
+      orgId: null,
+      payload: { questId: 'q-1', userId: 'u1', expAwarded: 10, level: 1 },
+      occurredAt: new Date(),
+    };
+
+    await processor.process(makeJob(event));
+
+    expect(deferred).toHaveBeenCalledTimes(1);
+  });
+
+  it('Test B: deferred fn is NOT called when $transaction throws (rollback guard)', async () => {
+    const deferred = jest.fn();
+
+    mockPrisma.$transaction.mockRejectedValue(new Error('tx rollback'));
+
+    const handler: DomainEventHandler & { handle: jest.Mock } = {
+      name: 'defer-rollback-handler',
+      handles: [EVENT_TYPES.QUEST_COMPLETED],
+      handle: jest
+        .fn()
+        .mockImplementation(
+          async (
+            _event: DomainEvent,
+            _tx: unknown,
+            defer?: (fn: () => void | Promise<void>) => void,
+          ) => {
+            defer?.(deferred);
+          },
+        ),
+    };
+
+    const processor = new DomainEventsProcessor(
+      mockPrisma as unknown as PrismaService,
+      [handler] as DomainEventHandler[],
+    );
+    processor.onModuleInit();
+
+    const event: DomainEvent = {
+      eventId: 'evt-defer-b',
+      type: EVENT_TYPES.QUEST_COMPLETED,
+      aggregateId: 'q-1',
+      orgId: null,
+      payload: { questId: 'q-1', userId: 'u1', expAwarded: 10, level: 1 },
+      occurredAt: new Date(),
+    };
+
+    await expect(processor.process(makeJob(event))).rejects.toThrow('tx rollback');
+    expect(deferred).not.toHaveBeenCalled();
+  });
+
+  it('Test C: deferred fn throwing does NOT fail the job (warn + continue)', async () => {
+    const throwingDeferred = jest.fn().mockRejectedValue(new Error('socket down'));
+
+    const handler: DomainEventHandler & { handle: jest.Mock } = {
+      name: 'defer-throw-handler',
+      handles: [EVENT_TYPES.QUEST_COMPLETED],
+      handle: jest
+        .fn()
+        .mockImplementation(
+          async (
+            _event: DomainEvent,
+            _tx: unknown,
+            defer?: (fn: () => void | Promise<void>) => void,
+          ) => {
+            defer?.(throwingDeferred);
+          },
+        ),
+    };
+
+    const processor = new DomainEventsProcessor(
+      mockPrisma as unknown as PrismaService,
+      [handler] as DomainEventHandler[],
+    );
+    processor.onModuleInit();
+
+    const event: DomainEvent = {
+      eventId: 'evt-defer-c',
+      type: EVENT_TYPES.QUEST_COMPLETED,
+      aggregateId: 'q-1',
+      orgId: null,
+      payload: { questId: 'q-1', userId: 'u1', expAwarded: 10, level: 1 },
+      occurredAt: new Date(),
+    };
+
+    // Job must NOT reject even though the deferred fn throws
+    await expect(processor.process(makeJob(event))).resolves.not.toThrow();
+    expect(throwingDeferred).toHaveBeenCalledTimes(1);
+  });
+});
