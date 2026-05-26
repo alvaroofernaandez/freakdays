@@ -97,14 +97,19 @@ describe('FriendshipService', () => {
       expect(result).toBe(existing);
     });
 
-    it('(d) existing accepted → idempotent no-op, returns existing', async () => {
+    it('(d) existing accepted → ConflictException (409 — already friends)', async () => {
       const existing = makeRow({ status: FriendshipStatus.accepted });
       prisma.friendship.findUnique.mockResolvedValue(existing);
 
-      const result = await service.sendRequest('user-aaa', 'user-zzz');
-
+      await expect(service.sendRequest('user-aaa', 'user-zzz')).rejects.toThrow(ConflictException);
       expect(prisma.friendship.create).not.toHaveBeenCalled();
-      expect(result).toBe(existing);
+    });
+
+    it('(d2) existing blocked → ForbiddenException (blocked takes precedence over conflict)', async () => {
+      const existing = makeRow({ status: FriendshipStatus.blocked });
+      prisma.friendship.findUnique.mockResolvedValue(existing);
+
+      await expect(service.sendRequest('user-aaa', 'user-zzz')).rejects.toThrow(ForbiddenException);
     });
 
     it('(e) existing blocked → ForbiddenException (blocked re-request)', async () => {

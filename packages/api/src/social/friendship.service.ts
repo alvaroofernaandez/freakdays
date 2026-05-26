@@ -37,7 +37,10 @@ export class FriendshipService {
       if (existing.status === FriendshipStatus.blocked) {
         throw new ForbiddenException('Cannot send a friend request to a blocked user');
       }
-      // pending or accepted → idempotent no-op
+      if (existing.status === FriendshipStatus.accepted) {
+        throw new ConflictException('Ya son amigos.');
+      }
+      // pending → idempotent no-op (re-request on an in-flight request is fine)
       return existing;
     }
 
