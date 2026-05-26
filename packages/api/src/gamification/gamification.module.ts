@@ -17,6 +17,8 @@ import { StatsController } from './stats/stats.controller';
 import { StatsProjectorHandler } from './stats/stats-projector.handler';
 import { StatsRolloverService } from './stats/stats-rollover.service';
 import { StatsService } from './stats/stats.service';
+import { LeaderboardProjectorHandler } from './leaderboard/leaderboard-projector.handler';
+import { LeaderboardSnapshotService } from './leaderboard/leaderboard-snapshot.service';
 
 /**
  * GamificationModule owns all domain-event handlers.
@@ -37,6 +39,8 @@ import { StatsService } from './stats/stats.service';
     StatsProjectorHandler,
     StatsRolloverService,
     FeedProjectorHandler,
+    LeaderboardProjectorHandler,
+    LeaderboardSnapshotService,
     {
       provide: DOMAIN_EVENT_HANDLERS,
       // Handler order matters:
@@ -45,21 +49,32 @@ import { StatsService } from './stats/stats.service';
       // 3. AchievementEvaluationHandler — evaluates achievements after progression
       // 4. StatsProjectorHandler — rebuilds stats read model
       // 5. FeedProjectorHandler — fan-out feed entries after progression data is settled
-      // 6. RealtimePushHandler (LAST) — emits post-commit; stats are already up to date
+      // 6. LeaderboardProjectorHandler — marks dirty after stats are settled
+      // 7. RealtimePushHandler (LAST) — emits post-commit; stats are already up to date
       useFactory: (
         streak: StreakHandler,
         progression: ProgressionHandler,
         achievement: AchievementEvaluationHandler,
         statsProjector: StatsProjectorHandler,
         feedProjector: FeedProjectorHandler,
+        leaderboardProjector: LeaderboardProjectorHandler,
         realtimePush: RealtimePushHandler,
-      ) => [streak, progression, achievement, statsProjector, feedProjector, realtimePush],
+      ) => [
+        streak,
+        progression,
+        achievement,
+        statsProjector,
+        feedProjector,
+        leaderboardProjector,
+        realtimePush,
+      ],
       inject: [
         StreakHandler,
         ProgressionHandler,
         AchievementEvaluationHandler,
         StatsProjectorHandler,
         FeedProjectorHandler,
+        LeaderboardProjectorHandler,
         RealtimePushHandler,
       ],
     },

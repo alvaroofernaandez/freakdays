@@ -115,6 +115,59 @@ export class LeaderboardService {
   ): Promise<LeaderboardPage> {
     const offset = (page - 1) * limit;
 
+    // Determine whether the snapshot is populated (cold-start guard)
+    const snapshotCount = await this.prisma.leaderboardSnapshotEntry.count();
+
+    if (snapshotCount === 0) {
+      // Cold-start fallback: snapshot not yet populated by the cron.
+      // Falls back to the live Profile query once; switches to snapshot on the
+      // next cron tick. Safe to remove after first successful cron run in prod.
+      return this.legacyGlobalLeaderboard(callerUserId, page, limit);
+    }
+
+    // Hot path: read from the materialized snapshot
+    const [snapshotEntries, total] = await Promise.all([
+      this.prisma.leaderboardSnapshotEntry.findMany({
+        orderBy: { rank: 'asc' },
+        skip: offset,
+        take: limit,
+      }),
+      this.prisma.leaderboardSnapshotEntry.count(),
+    ]);
+
+    // yourRank: O(1) PK lookup — eliminates the previous O(N) OR-count
+    const callerEntry = await this.prisma.leaderboardSnapshotEntry.findUnique({
+      where: { userId: callerUserId },
+      select: { rank: true },
+    });
+    const yourRank: number | null = callerEntry?.rank ?? null;
+
+    const items: LeaderboardRow[] = snapshotEntries.map((e) => ({
+      rank: e.rank,
+      userId: e.userId,
+      displayName: e.displayName,
+      avatarUrl: e.avatarUrl,
+      totalExp: e.totalExp,
+      level: e.level,
+      currentStreak: e.currentStreak,
+      isCurrentUser: e.userId === callerUserId,
+    }));
+
+    return { items, yourRank, total, page };
+  }
+
+  /**
+   * Legacy live-query fallback. Used only on cold start (snapshot not yet built).
+   * Preserved as a private method; removed in a future cleanup once the cron has
+   * run at least once on every environment.
+   */
+  private async legacyGlobalLeaderboard(
+    callerUserId: string,
+    page: number,
+    limit: number,
+  ): Promise<LeaderboardPage> {
+    const offset = (page - 1) * limit;
+
     const [profiles, total] = await Promise.all([
       this.prisma.profile.findMany({
         where: { leaderboardOptIn: true },
@@ -138,7 +191,6 @@ export class LeaderboardService {
       this.prisma.profile.count({ where: { leaderboardOptIn: true } }),
     ]);
 
-    // Determine caller's rank
     const callerProfile = await this.prisma.profile.findUnique({
       where: { userId: callerUserId },
       select: { leaderboardOptIn: true, totalExp: true, level: true, currentStreak: true },

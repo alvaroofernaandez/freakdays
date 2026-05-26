@@ -139,6 +139,8 @@ describe('LeaderboardService', () => {
 
       const prisma = {
         partyMember: { findUnique: jest.fn() },
+        // snapshot count = 0 → cold-start fallback to live Profile query
+        leaderboardSnapshotEntry: { count: jest.fn().mockResolvedValue(0) },
         profile: {
           findMany: jest.fn().mockResolvedValue([profileX]),
           findUnique: jest.fn().mockResolvedValue(callerProfile),
@@ -159,6 +161,8 @@ describe('LeaderboardService', () => {
 
       const prisma = {
         partyMember: { findUnique: jest.fn() },
+        // snapshot count = 0 → cold-start fallback to live Profile query
+        leaderboardSnapshotEntry: { count: jest.fn().mockResolvedValue(0) },
         profile: {
           findMany: jest.fn().mockResolvedValue([]),
           findUnique: jest.fn().mockResolvedValue(callerProfile),

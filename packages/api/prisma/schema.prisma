@@ -100,8 +100,10 @@ model User {
   workoutExercises     WorkoutExercise[]
   workoutSets          WorkoutSet[]
   feedEntries          FeedEntry[]
-  friendshipsRequested Friendship[] @relation("FriendshipRequester")
-  friendshipsReceived  Friendship[] @relation("FriendshipAddressee")
+  friendshipsRequested     Friendship[]              @relation("FriendshipRequester")
+  friendshipsReceived      Friendship[]              @relation("FriendshipAddressee")
+  leaderboardSnapshot      LeaderboardSnapshotEntry?
+  dirtyLeaderboardEntry    DirtyLeaderboardUser?
 }
 
 // MIGRATION REQUIRED: bring username from "" to NULL where empty, then apply unique constraint
@@ -487,6 +489,30 @@ model FeedEntry {
   @@index([partyId, createdAt])
   @@index([sourceEventId])
   @@index([actorUserId, createdAt])
+}
+
+// ─── Leaderboard Snapshot ────────────────────────────────────────────────────
+
+model LeaderboardSnapshotEntry {
+  userId        String   @id
+  rank          Int
+  totalExp      Int
+  level         Int
+  currentStreak Int
+  displayName   String?
+  avatarUrl     String?
+  computedAt    DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([rank])
+}
+
+model DirtyLeaderboardUser {
+  userId   String   @id
+  markedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ─── Friendship Graph ─────────────────────────────────────────────────────────
