@@ -61,6 +61,11 @@ const displayValue = computed(() =>
   typeof props.value === 'number' ? String(props.value).padStart(2, '0') : props.value,
 );
 
+const isEmpty = computed(() => {
+  const n = typeof props.value === 'number' ? props.value : Number(props.value) || 0;
+  return n === 0;
+});
+
 // Decorative power meter: fill cells proportionally to the count (capped).
 const CELLS = 10;
 const filledCells = computed(() => {
@@ -76,25 +81,37 @@ const NOTCH =
   <Card
     :class="[
       'crt-scanlines group relative overflow-hidden rounded-none border-2 bg-card/40 transition-all duration-200',
-      colors.border,
-      colors.glow,
+      isEmpty ? 'border-border/30 opacity-80' : colors.border,
+      isEmpty ? '' : colors.glow,
     ]"
   >
-    <!-- HUD targeting brackets -->
+    <!-- HUD targeting brackets — muted when empty -->
     <span
-      :class="['absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2', colors.bracket]"
+      :class="[
+        'absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2',
+        isEmpty ? 'border-border/30' : colors.bracket,
+      ]"
       aria-hidden="true"
     />
     <span
-      :class="['absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2', colors.bracket]"
+      :class="[
+        'absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2',
+        isEmpty ? 'border-border/30' : colors.bracket,
+      ]"
       aria-hidden="true"
     />
     <span
-      :class="['absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2', colors.bracket]"
+      :class="[
+        'absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2',
+        isEmpty ? 'border-border/30' : colors.bracket,
+      ]"
       aria-hidden="true"
     />
     <span
-      :class="['absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2', colors.bracket]"
+      :class="[
+        'absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2',
+        isEmpty ? 'border-border/30' : colors.bracket,
+      ]"
       aria-hidden="true"
     />
 
@@ -102,33 +119,48 @@ const NOTCH =
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 space-y-2">
           <p
-            class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider"
+            :class="[
+              'flex items-center gap-1.5 font-pixel text-[8px] uppercase tracking-wider',
+              isEmpty ? 'text-muted-foreground/40' : 'text-muted-foreground/80',
+            ]"
           >
             <span
-              :class="['inline-block w-1.5 h-1.5 motion-safe:animate-pulse', colors.bar]"
+              :class="[
+                'inline-block w-1.5 h-1.5',
+                isEmpty ? 'bg-muted-foreground/20' : ['motion-safe:animate-pulse', colors.bar],
+              ]"
               aria-hidden="true"
             />
             {{ label }}
           </p>
           <p
             :class="[
-              'font-pixel text-3xl sm:text-4xl leading-none tabular-nums drop-shadow-[0_0_12px_currentColor]',
-              colors.text,
+              'font-pixel text-3xl sm:text-4xl leading-none tabular-nums',
+              isEmpty
+                ? 'text-muted-foreground/30'
+                : ['drop-shadow-[0_0_12px_currentColor]', colors.text],
             ]"
           >
             {{ displayValue }}
+          </p>
+          <!-- Empty-state hint -->
+          <p v-if="isEmpty" class="font-pixel text-[7px] text-muted-foreground/40 uppercase">
+            sin datos
           </p>
         </div>
 
         <div
           :class="[
-            'pixelated grid place-items-center w-11 h-11 shrink-0 transition-transform duration-200 group-hover:scale-110',
-            colors.soft,
+            'pixelated grid place-items-center w-11 h-11 shrink-0 motion-safe:transition-transform motion-safe:duration-200 group-hover:scale-110',
+            isEmpty ? 'bg-muted/20' : colors.soft,
           ]"
           :style="{ clipPath: NOTCH }"
           aria-hidden="true"
         >
-          <component :is="icon" :class="['h-5 w-5', colors.text]" />
+          <component
+            :is="icon"
+            :class="['h-5 w-5', isEmpty ? 'text-muted-foreground/30' : colors.text]"
+          />
         </div>
       </div>
 
@@ -139,7 +171,7 @@ const NOTCH =
           :key="i"
           :class="[
             'h-1.5 flex-1 transition-colors duration-300',
-            i <= filledCells ? colors.bar : 'bg-white/10',
+            i <= filledCells ? (isEmpty ? 'bg-muted-foreground/20' : colors.bar) : 'bg-white/10',
           ]"
         />
       </div>

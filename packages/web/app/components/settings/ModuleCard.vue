@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
+import { Check } from 'lucide-vue-next';
 import { getModuleIcon } from '~~/domain/constants/module-icons';
 import type { AppModule, ModuleId } from '~~/domain/types';
 import { useModulesStore } from '~~/stores/modules';
@@ -18,41 +19,57 @@ const emit = defineEmits<{
 const modulesStore = useModulesStore();
 const { moduleMap, synced } = storeToRefs(modulesStore);
 
-// Directly access moduleMap.value to ensure reactivity
+// Directly access moduleMap.value to ensure reactivity; touch `synced` so the
+// computed re-runs once modules finish loading from the API.
 const isEnabled = computed(() => {
   const moduleId = props.module.id;
-  // Access synced to force reactivity update when modules are loaded
   const _sync = synced.value;
-  // Directly access moduleMap.value to ensure reactivity
-  const enabled = moduleMap.value[moduleId];
-  // Return strict boolean
-  return Boolean(enabled);
+  return Boolean(moduleMap.value[moduleId]);
 });
+
+// Pixel-clipped corners — mirrors the onboarding module icon frame.
+const ICON_CLIP =
+  'polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px))';
 </script>
 
 <template>
-  <Card
-    class="transition-all hover:border-primary/30"
-    :class="isEnabled ? 'border-primary/50 bg-primary/5' : ''"
+  <button
+    type="button"
+    class="group w-full text-left rounded-none border-2 p-4 flex items-center gap-4 transition-colors cursor-pointer active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+    :class="
+      isEnabled
+        ? 'border-primary bg-primary/10 shadow-[0_0_22px_-8px_var(--color-primary)]'
+        : 'border-border/60 bg-card/40 hover:border-primary/50'
+    "
+    role="switch"
+    :aria-checked="isEnabled"
+    :aria-label="`${isEnabled ? 'Desactivar' : 'Activar'} módulo ${module.name}`"
+    @click="emit('toggle', module.id)"
   >
-    <CardHeader class="flex flex-row items-center justify-between py-3 px-4">
-      <div class="flex items-center gap-3 flex-1 min-w-0">
-        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <component :is="getModuleIcon(module.icon)" class="h-5 w-5 text-primary" />
-        </div>
-        <div class="flex-1 min-w-0">
-          <CardTitle class="text-sm font-medium">{{ module.name }}</CardTitle>
-          <CardDescription class="text-xs truncate">{{ module.description }}</CardDescription>
-        </div>
-      </div>
-      <Switch
-        :checked="isEnabled"
-        @update:checked="
-          (checked) => {
-            if (checked !== isEnabled) emit('toggle', module.id);
-          }
-        "
-      />
-    </CardHeader>
-  </Card>
+    <div
+      class="pixelated grid place-items-center w-12 h-12 shrink-0 transition-colors"
+      :class="isEnabled ? 'bg-primary text-primary-foreground' : 'bg-primary/15 text-primary'"
+      :style="{ clipPath: ICON_CLIP }"
+      aria-hidden="true"
+    >
+      <component :is="getModuleIcon(module.icon)" class="h-6 w-6" />
+    </div>
+
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold text-foreground">{{ module.name }}</p>
+      <p class="text-sm text-muted-foreground leading-snug">{{ module.description }}</p>
+    </div>
+
+    <div
+      class="shrink-0 grid place-items-center w-6 h-6 border-2 transition-colors"
+      :class="
+        isEnabled
+          ? 'bg-primary border-primary text-primary-foreground'
+          : 'border-muted-foreground/40 bg-background/40'
+      "
+      aria-hidden="true"
+    >
+      <Check v-if="isEnabled" class="h-4 w-4" />
+    </div>
+  </button>
 </template>

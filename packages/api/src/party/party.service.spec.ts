@@ -43,6 +43,11 @@ const mockPartyWithOwnerAndMembers = (overrides: Record<string, unknown> = {}) =
         email: 'test@example.com',
         firstName: 'Test',
         lastName: 'User',
+        profile: {
+          displayName: 'Test User',
+          avatarUrl: null,
+          username: 'testuser',
+        },
       },
     },
   ],

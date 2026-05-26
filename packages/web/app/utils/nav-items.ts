@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import { Home } from 'lucide-vue-next';
+import { Home, Trophy } from 'lucide-vue-next';
 import { useModulesStore } from '~~/stores/modules';
 import { MODULE_ICONS } from '~~/domain/constants/module-icons';
 import type { ModuleId } from '~~/domain/types';
@@ -36,6 +36,16 @@ export function getAllNavItems(modulesStore: ReturnType<typeof useModulesStore>)
             icon,
             label: route.label,
           });
+
+          // Leaderboard is the competitive surface of the party module —
+          // inject it immediately after the Party entry.
+          if (moduleId === 'party') {
+            items.push({
+              to: '/leaderboard/global',
+              icon: Trophy,
+              label: 'Leaderboard',
+            });
+          }
         }
       }
     });

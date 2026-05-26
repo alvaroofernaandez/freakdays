@@ -54,6 +54,11 @@ export interface AddProfileExpInput {
   amount: number;
 }
 
+export interface SyncClerkProfileInput {
+  displayName: string | null;
+  avatarUrl: string | null;
+}
+
 export interface RequestUploadUrlInput {
   contentType?: string;
   fileName?: string;
@@ -138,6 +143,51 @@ export class ProfileService {
         update: {},
       });
     }
+
+    return this.toProfileView(updated, user.clerkUserId);
+  }
+
+  /**
+   * Backfills Clerk identity data into the caller's Profile using fill-when-null semantics.
+   * Only writes fields that are currently null — never overwrites user-customized values.
+   * Authz: only operates on the caller's own profile (clerkUserId from JWT).
+   */
+  async syncClerkProfile(clerkUserId: string, input: SyncClerkProfileInput): Promise<ProfileView> {
+    const { user, profile } = await this.ensureProfileForCurrentUser(clerkUserId);
+
+    const updateData: Prisma.ProfileUpdateInput = {};
+    let hasChanges = false;
+
+    if (
+      profile.displayName === null &&
+      input.displayName !== null &&
+      input.displayName !== undefined
+    ) {
+      const normalized = input.displayName.trim();
+
+      if (normalized.length > 0) {
+        updateData.displayName = normalized;
+        hasChanges = true;
+      }
+    }
+
+    if (profile.avatarUrl === null && input.avatarUrl !== null && input.avatarUrl !== undefined) {
+      const normalized = input.avatarUrl.trim();
+
+      if (normalized.length > 0) {
+        updateData.avatarUrl = normalized;
+        hasChanges = true;
+      }
+    }
+
+    if (!hasChanges) {
+      return this.toProfileView(profile, user.clerkUserId);
+    }
+
+    const updated = await this.prisma.profile.update({
+      where: { id: profile.id },
+      data: updateData,
+    });
 
     return this.toProfileView(updated, user.clerkUserId);
   }

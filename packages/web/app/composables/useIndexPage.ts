@@ -1,5 +1,6 @@
 import type { UserProfile } from '@/composables/useProfile';
 import { getGreeting } from '@/utils/greeting';
+import { ALL_MODULES } from '~~/domain/types/modules';
 import { useModulesStore } from '~~/stores/modules';
 import { useAuthStore } from '~~/stores/auth';
 
@@ -31,7 +32,10 @@ export function useIndexPage() {
           if (modules.length > 0) {
             modulesStore.setModulesFromDb(modules);
           } else {
-            modulesStore.synced = true;
+            // No stored preferences — treat as first-time user with all modules on.
+            modulesStore.setModulesFromDb(
+              ALL_MODULES.map((m) => ({ module_id: m.id, enabled: true })),
+            );
           }
         } finally {
           modulesPending.value = false;

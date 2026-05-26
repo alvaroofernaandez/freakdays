@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/composables/useProfile';
 import { Hexagon } from 'lucide-vue-next';
+import { useAuthStore } from '~~/stores/auth';
 
 interface Props {
   profile: UserProfile | null;
@@ -10,10 +11,17 @@ interface Props {
   menuOpen?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   loading: false,
   menuOpen: false,
 });
+
+const authStore = useAuthStore();
+
+/** Effective avatar URL: profile upload > Clerk OAuth photo > null (shows initial fallback) */
+const effectiveAvatarUrl = computed(
+  () => props.profile?.avatarUrl || authStore.userImageUrl || null,
+);
 </script>
 
 <template>
@@ -62,8 +70,8 @@ withDefaults(defineProps<Props>(), {
           class="h-7 w-7 rounded-none ring-2 ring-transparent hover:ring-primary/50 transition-all"
         >
           <AvatarImage
-            v-if="profile?.avatarUrl"
-            :src="profile.avatarUrl"
+            v-if="effectiveAvatarUrl"
+            :src="effectiveAvatarUrl"
             :alt="profile?.displayName || profile?.username"
           />
           <AvatarFallback class="rounded-none bg-primary/20 text-primary text-xs">

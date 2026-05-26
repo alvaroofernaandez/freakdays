@@ -8,11 +8,20 @@ interface ModuleState {
   moduleMap: Record<ModuleId, boolean>;
 }
 
+/** Default module map: all modules enabled until the user explicitly disables them. */
+function buildDefaultModuleMap(): Record<ModuleId, boolean> {
+  const map = {} as Record<ModuleId, boolean>;
+  ALL_MODULES.forEach((m) => {
+    map[m.id] = true;
+  });
+  return map;
+}
+
 export const useModulesStore = defineStore('modules', {
   state: (): ModuleState => ({
     modules: ALL_MODULES.map((m) => ({ ...m, enabled: false })),
     synced: false,
-    moduleMap: {} as Record<ModuleId, boolean>,
+    moduleMap: buildDefaultModuleMap(),
   }),
 
   getters: {
@@ -135,7 +144,7 @@ export const useModulesStore = defineStore('modules', {
 
     reset() {
       this.modules = ALL_MODULES.map((m) => ({ ...m, enabled: false }));
-      this.moduleMap = {} as Record<ModuleId, boolean>;
+      this.moduleMap = buildDefaultModuleMap();
       this.synced = false;
     },
   },

@@ -17,6 +17,7 @@ import {
   type AddProfileExpInput,
   type ConfirmProfileMediaInput,
   type RequestUploadUrlInput,
+  type SyncClerkProfileInput,
   type UpdateProfileInput,
   ProfileService,
 } from './profile.service';
@@ -46,6 +47,19 @@ export class ProfileController {
     const user = this.getRequestUser(request);
 
     return this.profileService.updateMyProfile(user.sub, body);
+  }
+
+  /**
+   * Client-assist backfill: fills Profile.displayName / Profile.avatarUrl from Clerk
+   * identity data when those fields are currently null. Only the caller's own profile
+   * is affected (authz via JWT). Already-set values are never overwritten.
+   */
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('me/sync-clerk')
+  syncClerkProfile(@Req() request: Request, @Body() body: SyncClerkProfileInput) {
+    const user = this.getRequestUser(request);
+
+    return this.profileService.syncClerkProfile(user.sub, body);
   }
 
   @Throttle({ default: { limit: 20, ttl: 60_000 } })

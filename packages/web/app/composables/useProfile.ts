@@ -115,7 +115,43 @@ export function useProfile() {
 
     try {
       const data = await apiClient.get<UserProfile>('/v1/profile/me');
-      return mapApiToProfile(data);
+      const profile = mapApiToProfile(data);
+
+      // Client-assist backfill: if the profile is missing displayName or avatarUrl,
+      // push the Clerk identity data to the API. The API fills only when the field
+      // is currently null — never overwrites user-customized values.
+      if (profile.displayName === null || profile.avatarUrl === null) {
+        const clerkDisplayName = authStore.userFullName;
+        const clerkAvatarUrl = authStore.userImageUrl;
+
+        if (clerkDisplayName !== null || clerkAvatarUrl !== null) {
+          try {
+            const syncedRaw = await apiClient.post<{
+              id: string;
+              username: string | null;
+              displayName: string | null;
+              avatarUrl: string | null;
+              bannerUrl: string | null;
+              totalExp: number;
+              level: number;
+              bio: string | null;
+              favoriteAnimeId: string | null;
+              favoriteMangaId: string | null;
+              location: string | null;
+              website: string | null;
+              socialLinks: unknown;
+            }>('/v1/profile/me/sync-clerk', {
+              displayName: clerkDisplayName,
+              avatarUrl: clerkAvatarUrl,
+            });
+            return mapApiToProfile(syncedRaw);
+          } catch {
+            // Best-effort — return the original profile if sync fails
+          }
+        }
+      }
+
+      return profile;
     } catch {
       return null;
     }

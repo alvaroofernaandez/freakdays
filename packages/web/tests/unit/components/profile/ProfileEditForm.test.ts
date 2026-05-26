@@ -26,11 +26,7 @@ describe('ProfileEditForm.vue', () => {
           Input: true,
           Label: true,
           Textarea: true,
-          Select: true,
-          SelectTrigger: true,
-          SelectContent: true,
-          SelectItem: true,
-          SelectValue: true,
+          AppSelect: true,
         },
       },
     });

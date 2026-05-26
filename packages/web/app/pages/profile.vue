@@ -346,7 +346,7 @@ onMounted(() => {
           />
 
           <div v-else class="mt-6 space-y-6">
-            <div v-if="profile.bio" class="p-5 bg-muted/30 rounded-xl border border-primary/10">
+            <div v-if="profile.bio" class="p-5 bg-muted/30 rounded-none border border-primary/10">
               <p class="text-sm leading-relaxed text-foreground">{{ profile.bio }}</p>
             </div>
 
