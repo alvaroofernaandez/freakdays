@@ -23,7 +23,6 @@ const mockServer = {
 // Mock the IoAdapter from @nestjs/platform-socket.io
 jest.mock('@nestjs/platform-socket.io', () => ({
   IoAdapter: class MockIoAdapter {
-     
     createIOServer(_port: number, _options?: unknown): any {
       return mockServer;
     }
@@ -63,7 +62,7 @@ describe('RedisIoAdapter', () => {
 
     const app = makeApp();
     const adapter = new RedisIoAdapter(app);
-     
+
     const server = adapter.createIOServer(3000) as any;
 
     expect(server).toBe(mockServer);
@@ -79,7 +78,7 @@ describe('RedisIoAdapter', () => {
 
     const app = makeApp();
     const adapter = new RedisIoAdapter(app);
-     
+
     adapter.createIOServer(3000) as any;
 
     expect(mockServer.adapter).toHaveBeenCalledWith('mocked-redis-adapter');

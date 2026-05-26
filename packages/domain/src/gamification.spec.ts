@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  ACTIVITY_EXP,
-  computeStreakBonusPct,
-  effectiveExp,
-} from './gamification';
+import { ACTIVITY_EXP, computeStreakBonusPct, effectiveExp } from './gamification';
 
 describe('ACTIVITY_EXP', () => {
   it('workout is 30', () => {

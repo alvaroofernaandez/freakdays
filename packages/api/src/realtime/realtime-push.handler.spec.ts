@@ -84,18 +84,16 @@ const makeTx = (
   } | null,
 ) => ({
   achievement: {
-    findUnique: jest
-      .fn()
-      .mockResolvedValue(
-        achievementRow !== undefined
-          ? achievementRow
-          : {
-              code: 'FIRST_GOAL',
-              name: 'First Goal',
-              description: 'Complete your first quest',
-              iconKey: null,
-            },
-      ),
+    findUnique: jest.fn().mockResolvedValue(
+      achievementRow !== undefined
+        ? achievementRow
+        : {
+            code: 'FIRST_GOAL',
+            name: 'First Goal',
+            description: 'Complete your first quest',
+            iconKey: null,
+          },
+    ),
   },
 });
 
@@ -106,7 +104,7 @@ describe('RealtimePushHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     gateway = makeMockGateway();
-     
+
     handler = new RealtimePushHandler(gateway as any);
   });
 

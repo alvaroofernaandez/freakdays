@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { WIRE_EVENTS } from './realtime';
-import type { LevelUpPayload, AchievementUnlockedPayload, StatsUpdatedPayload, FeedEntryAddedPayload, WireEventPayloadMap } from './realtime';
+import type {
+  LevelUpPayload,
+  AchievementUnlockedPayload,
+  StatsUpdatedPayload,
+  FeedEntryAddedPayload,
+  WireEventPayloadMap,
+} from './realtime';
 
 describe('WIRE_EVENTS', () => {
   it('has level_up key with value "level_up"', () => {
@@ -25,7 +31,13 @@ describe('WIRE_EVENTS', () => {
   });
 
   it('values are string literals (const-as-const)', () => {
-    const keys: (keyof typeof WIRE_EVENTS)[] = ['LEVEL_UP', 'ACHIEVEMENT_UNLOCKED', 'STATS_UPDATED', 'FEED_ENTRY_ADDED', 'PRESENCE_CHANGED'];
+    const keys: (keyof typeof WIRE_EVENTS)[] = [
+      'LEVEL_UP',
+      'ACHIEVEMENT_UNLOCKED',
+      'STATS_UPDATED',
+      'FEED_ENTRY_ADDED',
+      'PRESENCE_CHANGED',
+    ];
     for (const key of keys) {
       expect(typeof WIRE_EVENTS[key]).toBe('string');
     }
