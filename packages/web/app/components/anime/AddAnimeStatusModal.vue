@@ -94,11 +94,11 @@ watch(
 <template>
   <div
     v-if="open"
-    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
+    class="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
     @click.self="handleCancel"
   >
     <Card
-      class="w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden shadow-xl rounded-none border-2"
+      class="w-full max-w-md sm:max-w-2xl flex flex-col max-h-[90dvh] overflow-hidden shadow-xl rounded-none border-2"
     >
       <CardHeader class="shrink-0 flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
         <div class="flex items-center gap-2">
@@ -152,7 +152,7 @@ watch(
           <Label class="font-pixel text-[9px] text-muted-foreground uppercase">
             <span class="text-primary">▸</span> ESTADO INICIAL
           </Label>
-          <div class="grid grid-cols-1 gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
               v-for="option in statusOptions"
               :key="option.value"
