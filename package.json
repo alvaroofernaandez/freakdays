@@ -16,6 +16,7 @@
     "changeset": "changeset",
     "changeset:version": "changeset version",
     "changeset:status": "changeset status",
+    "postinstall": "pnpm --filter @freakdays/domain build",
     "prepare": "husky"
   },
   "pnpm": {
