@@ -125,15 +125,14 @@ export class LeaderboardService {
       return this.legacyGlobalLeaderboard(callerUserId, page, limit);
     }
 
-    // Hot path: read from the materialized snapshot
-    const [snapshotEntries, total] = await Promise.all([
-      this.prisma.leaderboardSnapshotEntry.findMany({
-        orderBy: { rank: 'asc' },
-        skip: offset,
-        take: limit,
-      }),
-      this.prisma.leaderboardSnapshotEntry.count(),
-    ]);
+    // Hot path: read from the materialized snapshot.
+    // Reuse snapshotCount from the cold-start guard above — no second count() call.
+    const total = snapshotCount;
+    const snapshotEntries = await this.prisma.leaderboardSnapshotEntry.findMany({
+      orderBy: { rank: 'asc' },
+      skip: offset,
+      take: limit,
+    });
 
     // yourRank: O(1) PK lookup — eliminates the previous O(N) OR-count
     const callerEntry = await this.prisma.leaderboardSnapshotEntry.findUnique({

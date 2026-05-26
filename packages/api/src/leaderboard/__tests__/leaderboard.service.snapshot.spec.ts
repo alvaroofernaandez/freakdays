@@ -161,4 +161,23 @@ describe('LeaderboardService.getGlobalLeaderboard — snapshot read switch', () 
       expect.objectContaining({ skip: 10, take: 10 }),
     );
   });
+
+  it('count() is called exactly once per hot-path request and total equals that count', async () => {
+    const mockPrisma = {
+      partyMember: { findUnique: jest.fn() },
+      leaderboardSnapshotEntry: {
+        count: jest.fn().mockResolvedValue(42),
+        findMany: jest.fn().mockResolvedValue([makeSnapshotEntry('u1', 1)]),
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
+      profile: { findMany: jest.fn(), findUnique: jest.fn(), count: jest.fn() },
+    };
+
+    const service = new LeaderboardService(mockPrisma as never);
+    const result = await service.getGlobalLeaderboard('caller', 1, 10);
+
+    // The guard count (line 119) is reused as `total` — no second count() call
+    expect(mockPrisma.leaderboardSnapshotEntry.count).toHaveBeenCalledTimes(1);
+    expect(result.total).toBe(42);
+  });
 });
