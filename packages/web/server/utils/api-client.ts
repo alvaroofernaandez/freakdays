@@ -18,12 +18,14 @@
  */
 import type { H3Event } from 'h3';
 import { createError, getRequestHeader } from 'h3';
+import type { FetchOptions } from 'ofetch';
 
-// Loose return type. Nuxt's `$fetch.create()` returns a slightly different
-// signature than ofetch's `$Fetch` (it omits the `native` helper) and inferring
-// the exact branded shape gets stuck in route-aware overloads. Callers use it
-// as a plain HTTP function.
-type ApiClient = ReturnType<typeof $fetch.create>;
+// Plain HTTP function type. We deliberately avoid Nuxt's route-aware `$Fetch`
+// signature: matching arbitrary backend paths (e.g. `/v1/anime`) against the
+// generated internal route registry forces TS to evaluate the recursive
+// template-literal route matcher, which blows the type-instantiation budget
+// ("Excessive stack depth comparing types"). Callers use it as a plain client.
+type ApiClient = <T = unknown>(request: string, options?: FetchOptions) => Promise<T>;
 
 export function createApiClient(event: H3Event): ApiClient {
   const config = useRuntimeConfig();
@@ -56,5 +58,5 @@ export function createApiClient(event: H3Event): ApiClient {
       authorization,
       ...(orgId ? { 'x-org-id': orgId } : {}),
     },
-  });
+  }) as unknown as ApiClient;
 }
