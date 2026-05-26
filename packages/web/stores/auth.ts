@@ -20,6 +20,7 @@ interface MinimalSession {
 interface ClerkUserLike {
   id?: string;
   primaryEmailAddress?: { emailAddress?: string } | null;
+  imageUrl?: string | null;
 }
 
 interface AuthState {
@@ -48,6 +49,10 @@ export const useAuthStore = defineStore('auth', {
 
     userEmail: (state): string | null => {
       return state.user?.primaryEmailAddress?.emailAddress ?? state.session?.user?.email ?? null;
+    },
+
+    userImageUrl: (state): string | null => {
+      return state.user?.imageUrl ?? null;
     },
   },
 

@@ -7,6 +7,7 @@ import type { UserProfile } from '@/composables/useProfile';
 import { Hexagon, Volume2, VolumeX, Menu } from 'lucide-vue-next';
 import { useSoundStore } from '~~/stores/useSound';
 import { useArcadeMenuStore } from '~~/stores/useArcadeMenu';
+import { useAuthStore } from '~~/stores/auth';
 
 interface Props {
   profile: UserProfile | null;
@@ -38,6 +39,12 @@ const _emit = defineEmits<{
 const soundStore = useSoundStore();
 const arcadeMenuStore = useArcadeMenuStore();
 const arcadeMenuTriggerRef = ref<HTMLElement | null>(null);
+const authStore = useAuthStore();
+
+/** Effective avatar URL: profile upload > Clerk OAuth photo > null (shows initial fallback) */
+const effectiveAvatarUrl = computed(
+  () => props.profile?.avatarUrl || authStore.userImageUrl || null,
+);
 </script>
 
 <template>
@@ -160,8 +167,8 @@ const arcadeMenuTriggerRef = ref<HTMLElement | null>(null);
               class="relative h-8 w-8 rounded-none ring-2 ring-transparent group-hover/profile:ring-primary/60 transition-all"
             >
               <AvatarImage
-                v-if="profile?.avatarUrl"
-                :src="profile.avatarUrl"
+                v-if="effectiveAvatarUrl"
+                :src="effectiveAvatarUrl"
                 :alt="profile?.displayName || profile?.username"
                 class="object-cover"
               />

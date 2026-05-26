@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { TrendingUp, Calendar, Award, Zap, Target, Hexagon } from 'lucide-vue-next';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import LoadingSpinner from '@/components/index/LoadingSpinner.vue';
 import WelcomeSection from '@/components/index/WelcomeSection.vue';
 import ProfileCard from '@/components/index/ProfileCard.vue';
@@ -16,6 +17,9 @@ const authStore = useAuthStore();
 
 const { profile, isLoading, greeting, expProgress, quickStats, loadingStats, modulesStore } =
   useIndexPage();
+
+/** Effective avatar: profile upload > Clerk OAuth photo > null (shows initial fallback) */
+const heroAvatarUrl = computed(() => profile.value?.avatarUrl || authStore.userImageUrl || null);
 
 /**
  * Returns a display name that never leaks a raw Clerk user id (starts with "user_").
@@ -44,27 +48,64 @@ const displayName = computed(() => {
         <section v-else-if="authStore.isAuthenticated" class="space-y-5">
           <!-- Greeting header -->
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="space-y-1.5 flex-1 min-w-0">
+            <!-- Left: avatar + text -->
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+              <!-- Hero avatar -->
               <template v-if="isLoading || !profile">
-                <Skeleton class="h-8 w-56 sm:w-72 rounded-none mb-1.5" />
-                <Skeleton class="h-4 w-40 rounded-none" />
+                <Skeleton class="h-16 w-16 rounded-none shrink-0" />
               </template>
-              <template v-else>
-                <p class="font-pixel text-[9px] text-primary uppercase tracking-wide">
-                  ▸ {{ greeting.toUpperCase() }}
-                </p>
-                <h1
-                  class="text-3xl sm:text-4xl font-bold bg-linear-to-r from-primary via-accent to-primary bg-clip-text text-transparent leading-tight"
+              <NuxtLink
+                v-else
+                to="/profile"
+                class="relative shrink-0 group/hero-avatar focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Ver perfil"
+              >
+                <Avatar
+                  class="h-16 w-16 rounded-none ring-2 ring-primary/40 group-hover/hero-avatar:ring-primary/80 motion-safe:transition-all motion-safe:duration-200"
                 >
-                  {{ displayName }}
-                </h1>
-                <p class="font-pixel text-[9px] text-muted-foreground/80 uppercase tracking-wide">
-                  ¿QUÉ QUIERES HACER HOY?
-                </p>
-              </template>
+                  <AvatarImage
+                    v-if="heroAvatarUrl"
+                    :src="heroAvatarUrl"
+                    :alt="profile?.displayName || profile?.username"
+                    class="object-cover"
+                  />
+                  <AvatarFallback
+                    class="rounded-none bg-linear-to-br from-primary to-accent text-lg text-white font-bold"
+                  >
+                    {{ profile?.username?.charAt(0)?.toUpperCase() ?? '?' }}
+                  </AvatarFallback>
+                </Avatar>
+                <!-- Neon status dot -->
+                <span
+                  class="pixelated absolute bottom-0 right-0 h-3 w-3 bg-accent border-2 border-background motion-safe:animate-pulse"
+                  aria-hidden="true"
+                />
+              </NuxtLink>
+
+              <!-- Greeting text -->
+              <div class="space-y-1 min-w-0">
+                <template v-if="isLoading || !profile">
+                  <Skeleton class="h-3 w-28 rounded-none mb-2" />
+                  <Skeleton class="h-8 w-56 sm:w-72 rounded-none mb-1.5" />
+                  <Skeleton class="h-3 w-40 rounded-none" />
+                </template>
+                <template v-else>
+                  <p class="font-pixel text-[9px] text-primary uppercase tracking-wide">
+                    ▸ {{ greeting.toUpperCase() }}
+                  </p>
+                  <h1
+                    class="text-3xl sm:text-4xl font-bold bg-linear-to-r from-primary via-accent to-primary bg-clip-text text-transparent leading-tight truncate"
+                  >
+                    {{ displayName }}
+                  </h1>
+                  <p class="font-pixel text-[9px] text-muted-foreground/80 uppercase tracking-wide">
+                    ¿QUÉ QUIERES HACER HOY?
+                  </p>
+                </template>
+              </div>
             </div>
 
-            <!-- Level badge -->
+            <!-- Right: Level badge -->
             <template v-if="isLoading || !profile">
               <div class="border-2 border-border/50 p-4">
                 <div class="flex items-center gap-3">
@@ -78,7 +119,7 @@ const displayName = computed(() => {
             </template>
             <div
               v-else-if="profile"
-              class="relative border-2 border-primary/30 bg-primary/5 hover:border-primary/50 hover:shadow-[0_0_22px_-8px_var(--color-primary)] transition-all duration-200 p-4 group"
+              class="relative border-2 border-primary/30 bg-primary/5 hover:border-primary/50 hover:shadow-[0_0_22px_-8px_var(--color-primary)] motion-safe:transition-all motion-safe:duration-200 p-4 group shrink-0"
             >
               <div class="flex items-center gap-3">
                 <!-- Notched level hexagon -->
