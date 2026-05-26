@@ -129,6 +129,16 @@ export class ProfileService {
       data: updateData,
     });
 
+    // If the caller toggled leaderboard opt-in/out, mark the user dirty so the
+    // next cron tick includes them in (or excludes them from) the snapshot.
+    if (Object.prototype.hasOwnProperty.call(input, 'leaderboardOptIn')) {
+      await this.prisma.dirtyLeaderboardUser.upsert({
+        where: { userId: profile.userId },
+        create: { userId: profile.userId },
+        update: {},
+      });
+    }
+
     return this.toProfileView(updated, user.clerkUserId);
   }
 

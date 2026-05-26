@@ -43,6 +43,7 @@ describe('ProfileService', () => {
   let mockPrisma: {
     profile: { findUnique: jest.Mock; create: jest.Mock; update: jest.Mock };
     outboxEvent: { create: jest.Mock };
+    dirtyLeaderboardUser: { upsert: jest.Mock };
     $transaction: jest.Mock;
   };
   let mockEventBus: { emit: jest.Mock; buildEvent: jest.Mock };
@@ -57,6 +58,7 @@ describe('ProfileService', () => {
         update: jest.fn().mockResolvedValue(mockProfile),
       },
       outboxEvent: { create: jest.fn().mockResolvedValue({}) },
+      dirtyLeaderboardUser: { upsert: jest.fn().mockResolvedValue({}) },
       $transaction: jest
         .fn()
         .mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockPrisma)),
@@ -193,6 +195,46 @@ describe('ProfileService', () => {
 
       const result = await service.getMyProfile('clerk-u1');
       expect(Object.prototype.hasOwnProperty.call(result, 'leaderboardOptIn')).toBe(true);
+    });
+  });
+
+  describe('updateMyProfile — leaderboardOptIn dirty-mark', () => {
+    it('(a) changing leaderboardOptIn=true upserts DirtyLeaderboardUser for profile.userId', async () => {
+      const updated = { ...mockProfile, leaderboardOptIn: true };
+      mockPrisma.profile.update.mockResolvedValue(updated);
+
+      await service.updateMyProfile('clerk-u1', { leaderboardOptIn: true });
+
+      expect(mockPrisma.dirtyLeaderboardUser.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: mockProfile.userId },
+          create: { userId: mockProfile.userId },
+          update: {},
+        }),
+      );
+    });
+
+    it('(b) changing leaderboardOptIn=false also upserts DirtyLeaderboardUser (opt-out removes from snapshot)', async () => {
+      const updated = { ...mockProfile, leaderboardOptIn: false };
+      mockPrisma.profile.update.mockResolvedValue(updated);
+
+      await service.updateMyProfile('clerk-u1', { leaderboardOptIn: false });
+
+      expect(mockPrisma.dirtyLeaderboardUser.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: mockProfile.userId },
+          create: { userId: mockProfile.userId },
+          update: {},
+        }),
+      );
+    });
+
+    it('(c) omitting leaderboardOptIn does NOT upsert DirtyLeaderboardUser', async () => {
+      mockPrisma.profile.update.mockResolvedValue(mockProfile);
+
+      await service.updateMyProfile('clerk-u1', { username: 'newname' });
+
+      expect(mockPrisma.dirtyLeaderboardUser.upsert).not.toHaveBeenCalled();
     });
   });
 
