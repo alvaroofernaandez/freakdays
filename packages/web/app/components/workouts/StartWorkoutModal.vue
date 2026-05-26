@@ -49,8 +49,8 @@ function handleStart() {
     v-if="open"
     class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
   >
-    <Card class="w-full max-w-md my-auto shadow-xl border-2">
-      <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
+    <Card class="w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden shadow-xl border-2">
+      <CardHeader class="shrink-0 flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
         <CardTitle class="text-lg sm:text-xl">Nuevo Entrenamiento</CardTitle>
         <Button
           variant="ghost"
@@ -61,7 +61,7 @@ function handleStart() {
           <X class="h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent class="space-y-4 pt-4 sm:pt-6">
+      <CardContent class="flex-1 min-h-0 overflow-y-auto space-y-4 pt-4 sm:pt-6">
         <div class="space-y-2">
           <Label for="name" class="text-sm font-medium">Nombre del entrenamiento</Label>
           <Input

@@ -20,8 +20,8 @@ const emit = defineEmits<{
     v-if="open"
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur-sm"
   >
-    <Card class="w-full max-w-md shadow-xl border-2">
-      <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
+    <Card class="w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden shadow-xl border-2">
+      <CardHeader class="shrink-0 flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
         <CardTitle class="text-lg sm:text-xl flex items-center gap-2">
           <AlertTriangle class="h-5 w-5 text-exp-hard" />
           Confirmar desactivación
@@ -35,7 +35,7 @@ const emit = defineEmits<{
           <X class="h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent class="pt-4 sm:pt-6 space-y-4">
+      <CardContent class="flex-1 min-h-0 overflow-y-auto pt-4 sm:pt-6 space-y-4">
         <p class="text-sm sm:text-base text-muted-foreground">
           ¿Estás seguro que quieres desactivar el módulo
           <span class="font-semibold text-foreground">{{ moduleName }}</span
@@ -45,7 +45,7 @@ const emit = defineEmits<{
           Podrás reactivarlo en cualquier momento desde esta página.
         </p>
       </CardContent>
-      <CardFooter class="flex gap-2 pt-4 border-t">
+      <CardFooter class="shrink-0 bg-card flex gap-2 pt-4 border-t">
         <Button variant="outline" class="flex-1" :disabled="saving" @click="emit('cancel')">
           Cancelar
         </Button>

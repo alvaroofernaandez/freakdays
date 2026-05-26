@@ -65,8 +65,13 @@ function handleSubmit() {
           @click.self="emit('close')"
           @keydown.esc="emit('close')"
         >
-          <Card class="w-full max-w-md my-auto shadow-xl rounded-none border-2" @click.stop>
-            <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
+          <Card
+            class="w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden shadow-xl rounded-none border-2"
+            @click.stop
+          >
+            <CardHeader
+              class="shrink-0 flex flex-row items-center justify-between pb-3 sm:pb-4 border-b"
+            >
               <CardTitle class="flex items-center gap-2 text-lg sm:text-xl">
                 <Swords class="h-5 w-5 text-primary" aria-hidden="true" />
                 <span>Nueva Quest</span>
@@ -81,7 +86,7 @@ function handleSubmit() {
                 <X class="h-4 w-4" aria-hidden="true" />
               </Button>
             </CardHeader>
-            <CardContent class="space-y-4 pt-4 sm:pt-6">
+            <CardContent class="flex-1 min-h-0 overflow-y-auto space-y-4 pt-4 sm:pt-6">
               <div class="space-y-2">
                 <Label for="title" class="font-pixel text-[9px] text-muted-foreground uppercase">
                   <span class="text-primary">▸</span> TÍTULO

@@ -97,8 +97,10 @@ watch(
     class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
     @click.self="handleCancel"
   >
-    <Card class="w-full max-w-md my-auto shadow-xl rounded-none border-2">
-      <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
+    <Card
+      class="w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden shadow-xl rounded-none border-2"
+    >
+      <CardHeader class="shrink-0 flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
         <div class="flex items-center gap-2">
           <Tv class="h-5 w-5 text-accent" aria-hidden="true" />
           <CardTitle class="text-lg sm:text-xl">Añadir Anime</CardTitle>
@@ -114,7 +116,7 @@ watch(
         </Button>
       </CardHeader>
 
-      <CardContent class="space-y-4 pt-4 sm:pt-6">
+      <CardContent class="flex-1 min-h-0 overflow-y-auto space-y-4 pt-4 sm:pt-6">
         <p class="font-pixel text-[9px] text-muted-foreground/80 uppercase">
           <span class="text-accent">▸</span> SELECCIONA EL ESTADO INICIAL
         </p>
@@ -186,7 +188,7 @@ watch(
         </div>
       </CardContent>
 
-      <CardFooter class="flex justify-end gap-2 pt-4 border-t">
+      <CardFooter class="shrink-0 flex justify-end gap-2 pt-4 border-t bg-card">
         <Button
           variant="outline"
           class="rounded-none border-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"

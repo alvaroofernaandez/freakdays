@@ -55,8 +55,10 @@ function handleClose() {
     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur-sm"
     @click.self="handleClose"
   >
-    <Card class="w-full max-w-md rounded-none border-2 shadow-xl">
-      <CardHeader class="flex flex-row items-center justify-between pb-3 border-b">
+    <Card
+      class="w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden rounded-none border-2 shadow-xl"
+    >
+      <CardHeader class="shrink-0 flex flex-row items-center justify-between pb-3 border-b">
         <CardTitle class="flex items-center gap-2 text-lg sm:text-xl">
           <BookOpen class="h-5 w-5 text-secondary" aria-hidden="true" />
           Añadir Manga
@@ -71,7 +73,7 @@ function handleClose() {
           <X class="h-4 w-4" aria-hidden="true" />
         </Button>
       </CardHeader>
-      <CardContent class="space-y-4 pt-4">
+      <CardContent class="flex-1 min-h-0 overflow-y-auto space-y-4 pt-4">
         <div class="space-y-2">
           <Label for="title" class="font-pixel text-[9px] text-muted-foreground uppercase">
             <span class="text-secondary">▸</span> TÍTULO *
