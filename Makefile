@@ -2,7 +2,8 @@
 
 .PHONY: help \
         install approve-builds \
-        dev dev-web dev-api dev-down \
+        dev dev-web dev-api dev-down dev-setup \
+        services-up services-down services-logs services-ps \
         build build-web build-api \
         test test-web test-api test-watch \
         coverage coverage-web coverage-api \
@@ -40,7 +41,7 @@ approve-builds: ## Approve build scripts (run once after a fresh install)
 	pnpm approve-builds
 
 # ── Dev ─────────────────────────────────────────────────────────────────────
-dev: ## Start the full stack (API + web, coordinated)
+dev: ## Start the full stack: Postgres + Redis + API (port 3001) + web (port 3000)
 	pnpm dev
 
 dev-web: ## Start the web (Nuxt) dev server only
@@ -49,8 +50,24 @@ dev-web: ## Start the web (Nuxt) dev server only
 dev-api: ## Start the API (NestJS) dev server only
 	pnpm dev:api
 
-dev-down: ## Stop local Docker services (PostgreSQL)
+dev-down: ## Stop local Docker services (PostgreSQL + Redis)
 	pnpm dev:down
+
+dev-setup: ## Prepare DB + Prisma (docker up, migrations, generate) without starting servers
+	pnpm --filter freak-days-api dev:bootstrap:setup
+
+# ── Services ────────────────────────────────────────────────────────────────
+services-up: ## Start Docker services only (Postgres + Redis), no app servers
+	cd packages/api && docker compose up -d
+
+services-down: ## Stop Docker services (Postgres + Redis)
+	cd packages/api && docker compose down
+
+services-logs: ## Follow Docker service logs (Postgres + Redis)
+	cd packages/api && docker compose logs -f
+
+services-ps: ## Show Docker service status (Postgres + Redis)
+	cd packages/api && docker compose ps
 
 # ── Build ───────────────────────────────────────────────────────────────────
 build: ## Build all packages

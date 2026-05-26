@@ -29,7 +29,7 @@ function waitForPostgres(containerName, attempts = 30, intervalMs = 1000) {
   }
 
   throw new Error(
-    `PostgreSQL no llegó a estado healthy tras ${attempts}s. Revisá: docker compose logs postgres`,
+    `PostgreSQL no llegó a estado healthy tras ${attempts}s. Revisa: docker compose logs postgres`,
   );
 }
 
@@ -42,8 +42,6 @@ function main() {
   run('pnpm prisma:generate');
   run('pnpm prisma:migrate:deploy');
   run('pnpm prisma:migrations:check');
-  run('pnpm lint');
-  run('pnpm test');
 
   if (noStart) {
     console.log('\n✅ Bootstrap completo (sin levantar API).');
