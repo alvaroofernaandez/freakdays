@@ -39,7 +39,19 @@ import { parseRedisUrl } from './redis.util';
     }),
     BullModule.registerQueue({ name: 'domain-events' }),
   ],
-  providers: [EventBusService, OutboxRelayService, DomainEventsProcessor],
+  providers: [
+    EventBusService,
+    OutboxRelayService,
+    DomainEventsProcessor,
+    // Default fallback: resolves DOMAIN_EVENT_HANDLERS to [] so DomainEventsProcessor
+    // boots even when GamificationModule (which overrides this token) is absent.
+    // GamificationModule's own useFactory replaces this value at runtime via NestJS
+    // last-provider-wins resolution within the combined module graph.
+    {
+      provide: DOMAIN_EVENT_HANDLERS,
+      useValue: [],
+    },
+  ],
   exports: [EventBusService],
 })
 export class EventsModule {}

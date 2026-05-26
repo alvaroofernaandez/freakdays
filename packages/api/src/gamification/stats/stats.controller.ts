@@ -1,12 +1,21 @@
-import { Controller, Get, NotFoundException, Req, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Req,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 
+import { ClerkJwtGuard } from '../../auth/guards/clerk-jwt.guard';
 import { CurrentOrg } from '../../common/decorators/current-org.decorator';
 import { StatsService } from './stats.service';
 
 @ApiTags('stats')
 @ApiBearerAuth()
+@UseGuards(ClerkJwtGuard)
 @Controller('v1/stats')
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}

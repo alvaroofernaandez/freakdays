@@ -34,15 +34,18 @@ import { StatsService } from './stats/stats.service';
     StatsRolloverService,
     {
       provide: DOMAIN_EVENT_HANDLERS,
+      // StreakHandler MUST precede ProgressionHandler so the streak is already
+      // committed to the DB when ProgressionHandler reads currentStreak for the
+      // bonus calculation (each handler runs in its own transaction).
       useFactory: (
-        progression: ProgressionHandler,
         streak: StreakHandler,
+        progression: ProgressionHandler,
         achievement: AchievementEvaluationHandler,
         statsProjector: StatsProjectorHandler,
-      ) => [progression, streak, achievement, statsProjector],
+      ) => [streak, progression, achievement, statsProjector],
       inject: [
-        ProgressionHandler,
         StreakHandler,
+        ProgressionHandler,
         AchievementEvaluationHandler,
         StatsProjectorHandler,
       ],

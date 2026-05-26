@@ -3,6 +3,7 @@ import { EventBusService } from '../../events/event-bus.service';
 import { EVENT_TYPES } from '../../events/event-types';
 import type {
   DomainEvent,
+  MangaProgressedPayload,
   QuestCompletedPayload,
   WorkoutLoggedPayload,
 } from '../../events/event.types';
@@ -34,6 +35,26 @@ const makeWorkoutEvent = (
   occurredAt: new Date(),
 });
 
+const makeMangaProgressedEvent = (
+  eventId: string,
+  chaptersRead: number,
+  userId = 'u1',
+  orgId = 'org-1',
+): DomainEvent<MangaProgressedPayload> => ({
+  eventId,
+  type: EVENT_TYPES.MANGA_PROGRESSED,
+  aggregateId: 'manga-1',
+  orgId,
+  payload: {
+    userId,
+    orgId,
+    mangaId: 'manga-1',
+    chaptersRead,
+    progressedAt: new Date(),
+  },
+  occurredAt: new Date(),
+});
+
 const makeProfile = (overrides: Record<string, unknown> = {}) => ({
   id: 'p1',
   userId: 'u1',
@@ -53,7 +74,7 @@ describe('AchievementEvaluationHandler', () => {
     questCompletion: { count: jest.Mock };
     workoutSession: { count: jest.Mock };
     animeEntry: { count: jest.Mock };
-    mangaEntry: { aggregate: jest.Mock };
+    mangaEntry: { findMany: jest.Mock };
     outboxEvent: { create: jest.Mock };
   };
   let mockEventBus: { emit: jest.Mock; buildEvent: jest.Mock };
@@ -93,7 +114,9 @@ describe('AchievementEvaluationHandler', () => {
       questCompletion: { count: jest.fn().mockResolvedValue(1) },
       workoutSession: { count: jest.fn().mockResolvedValue(0) },
       animeEntry: { count: jest.fn().mockResolvedValue(0) },
-      mangaEntry: { aggregate: jest.fn().mockResolvedValue({ _sum: { ownedVolumes: [] } }) },
+      // findMany returns MangaEntry rows; ownedVolumes is Int[] (volume numbers owned).
+      // chaptersRead = sum of ownedVolumes.length across entries (total volumes owned).
+      mangaEntry: { findMany: jest.fn().mockResolvedValue([]) },
       outboxEvent: { create: jest.fn().mockResolvedValue({}) },
     };
 
@@ -205,6 +228,71 @@ describe('AchievementEvaluationHandler', () => {
         expect.objectContaining({ achievementCode: 'nivel-5' }),
         'org-1',
       );
+    });
+  });
+
+  // S1 — Lector achievement: counts real cumulative chapters (total volumes owned),
+  // NOT the number of MangaEntry rows.
+  describe('lector: unlocks at 50 chapters (total ownedVolumes across entries)', () => {
+    const lectorAchievement = {
+      id: 'ach-lector',
+      code: 'lector',
+      name: 'Lector',
+      description: 'Lee 50 capítulos de manga.',
+      triggers: [EVENT_TYPES.MANGA_PROGRESSED],
+      condition: { kind: 'counter', metric: 'chaptersRead', comparator: 'gte', value: 50 },
+      active: true,
+    };
+
+    it('unlocks Lector when total ownedVolumes across entries equals 50', async () => {
+      // 3 manga entries owning a total of 50 volumes (= 50 "chapters" in this domain)
+      mockTx.achievement.findMany.mockResolvedValue([lectorAchievement]);
+      mockTx.userAchievement.findMany.mockResolvedValue([]);
+      mockTx.mangaEntry.findMany.mockResolvedValue([
+        { ownedVolumes: Array.from({ length: 20 }, (_, i) => i + 1) }, // 20 volumes
+        { ownedVolumes: Array.from({ length: 20 }, (_, i) => i + 1) }, // 20 volumes
+        { ownedVolumes: Array.from({ length: 10 }, (_, i) => i + 1) }, // 10 volumes
+      ]);
+
+      const event = makeMangaProgressedEvent('evt-lector-50', 5);
+      await handler.handle(event, mockTx as unknown as Parameters<typeof handler.handle>[1]);
+
+      expect(mockEventBus.buildEvent).toHaveBeenCalledWith(
+        EVENT_TYPES.ACHIEVEMENT_UNLOCKED,
+        'u1',
+        expect.objectContaining({ achievementCode: 'lector' }),
+        'org-1',
+      );
+    });
+
+    it('does NOT unlock Lector when total ownedVolumes is below 50', async () => {
+      mockTx.achievement.findMany.mockResolvedValue([lectorAchievement]);
+      mockTx.userAchievement.findMany.mockResolvedValue([]);
+      // Only 49 volumes total across entries
+      mockTx.mangaEntry.findMany.mockResolvedValue([
+        { ownedVolumes: Array.from({ length: 30 }, (_, i) => i + 1) }, // 30 volumes
+        { ownedVolumes: Array.from({ length: 19 }, (_, i) => i + 1) }, // 19 volumes
+      ]);
+
+      const event = makeMangaProgressedEvent('evt-lector-49', 3);
+      await handler.handle(event, mockTx as unknown as Parameters<typeof handler.handle>[1]);
+
+      expect(mockTx.userAchievement.upsert).not.toHaveBeenCalled();
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
+    });
+
+    it('is idempotent — does NOT emit again when Lector is already unlocked', async () => {
+      mockTx.achievement.findMany.mockResolvedValue([lectorAchievement]);
+      mockTx.userAchievement.findMany.mockResolvedValue([{ achievementId: 'ach-lector' }]);
+      mockTx.mangaEntry.findMany.mockResolvedValue([
+        { ownedVolumes: Array.from({ length: 50 }, (_, i) => i + 1) },
+      ]);
+
+      const event = makeMangaProgressedEvent('evt-lector-replay', 5);
+      await handler.handle(event, mockTx as unknown as Parameters<typeof handler.handle>[1]);
+
+      expect(mockTx.userAchievement.upsert).not.toHaveBeenCalled();
+      expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
   });
 });
