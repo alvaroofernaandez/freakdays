@@ -9,7 +9,7 @@ import type {
   DeferFn,
   DomainEventHandler,
 } from '../../events/interfaces/domain-event-handler.interface';
-import type { RealtimeGateway } from '../../realtime/realtime.gateway';
+import { RealtimeGateway } from '../../realtime/realtime.gateway';
 
 /** Domain event types that project into the activity feed */
 const FEED_EVENTS = new Set<string>([
