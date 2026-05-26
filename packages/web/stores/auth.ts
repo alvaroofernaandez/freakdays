@@ -21,6 +21,9 @@ interface ClerkUserLike {
   id?: string;
   primaryEmailAddress?: { emailAddress?: string } | null;
   imageUrl?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  fullName?: string | null;
 }
 
 interface AuthState {
@@ -53,6 +56,14 @@ export const useAuthStore = defineStore('auth', {
 
     userImageUrl: (state): string | null => {
       return state.user?.imageUrl ?? null;
+    },
+
+    userFullName: (state): string | null => {
+      if (state.user?.fullName) return state.user.fullName;
+      const first = state.user?.firstName ?? '';
+      const last = state.user?.lastName ?? '';
+      const combined = [first, last].filter(Boolean).join(' ');
+      return combined.length > 0 ? combined : null;
     },
   },
 

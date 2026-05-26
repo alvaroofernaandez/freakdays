@@ -114,7 +114,8 @@ export function useProfilePage() {
     if (profile.value) {
       editForm.value = {
         username: profile.value.username ?? '',
-        display_name: profile.value.displayName ?? '',
+        // Pre-fill display name from Clerk identity when the profile field is empty
+        display_name: profile.value.displayName || authStore.userFullName || '',
         bio: profile.value.bio ?? '',
         favorite_anime_id: profile.value.favoriteAnimeId ?? '',
         favorite_manga_id: profile.value.favoriteMangaId ?? '',
