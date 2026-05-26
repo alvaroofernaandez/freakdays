@@ -41,9 +41,57 @@ vi.mock('../../../stores/auth', () => ({
   useAuthStore: () => mockAuthStore,
 }));
 
+// Toast is no longer called for level_up/achievement — replaced by celebrations
 const mockToastSuccess = vi.fn();
 vi.mock('../../../app/composables/useToast', () => ({
   useToast: () => ({ success: mockToastSuccess }),
+}));
+
+vi.mock('../../../app/composables/useAuthContext', () => ({
+  useAuthContext: () => ({
+    refresh: vi.fn().mockResolvedValue(undefined),
+    getAccessToken: vi.fn().mockReturnValue('token'),
+  }),
+}));
+
+vi.mock('../../../app/composables/useProfile', () => ({
+  useProfile: () => ({
+    expForNextLevel: (exp: number) => ({
+      current: exp % 1000,
+      needed: 1000,
+      progress: (exp % 1000) / 10,
+    }),
+  }),
+}));
+
+// Celebrations store mock
+const mockEnqueue = vi.fn();
+const mockAddFloat = vi.fn();
+vi.mock('../../../stores/useCelebrations', () => ({
+  useCelebrationsStore: () => ({
+    enqueue: mockEnqueue,
+    addFloat: mockAddFloat,
+  }),
+}));
+
+// Sound store mock
+const mockPlayLevelUp = vi.fn();
+const mockPlayAchievement = vi.fn();
+const mockPlayXp = vi.fn();
+vi.mock('../../../stores/useSound', () => ({
+  useSoundStore: () => ({
+    playLevelUp: mockPlayLevelUp,
+    playAchievement: mockPlayAchievement,
+    playXp: mockPlayXp,
+  }),
+}));
+
+// Stats store mock
+const mockStatsRefresh = vi.fn().mockResolvedValue(0);
+vi.mock('../../../stores/useStatsStore', () => ({
+  useStatsStore: () => ({
+    refresh: mockStatsRefresh,
+  }),
 }));
 
 const mockFetchStats = vi.fn().mockResolvedValue(null);
@@ -51,14 +99,7 @@ vi.mock('../../../app/composables/useStats', () => ({
   useStats: () => ({ fetchStats: mockFetchStats }),
 }));
 
-vi.mock('../../../app/composables/useAuthContext', () => ({
-  useAuthContext: () => ({
-    refresh: vi.fn().mockResolvedValue(undefined),
-    token: { value: 'mock-token' },
-  }),
-}));
-
-describe('useRealtimeStore — toasts + stats refetch (SLICE 6)', () => {
+describe('useRealtimeStore — celebrations + sound (rewired, no toasts)', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
@@ -67,6 +108,7 @@ describe('useRealtimeStore — toasts + stats refetch (SLICE 6)', () => {
       Reflect.deleteProperty(listenerRegistry, key);
     }
     mockAuthStore.userId = 'user-test-id';
+    mockStatsRefresh.mockResolvedValue(0);
   });
 
   const connectStore = () => {
@@ -75,8 +117,8 @@ describe('useRealtimeStore — toasts + stats refetch (SLICE 6)', () => {
     return store;
   };
 
-  describe('Test A: level_up event shows toast with newLevel', () => {
-    it('calls useToast().success with a string containing the newLevel', () => {
+  describe('Test A: level_up event enqueues celebration (NOT toast)', () => {
+    it('calls useCelebrationsStore().enqueue with kind=level_up and correct level', () => {
       connectStore();
 
       const handler = listenerRegistry[WIRE_EVENTS.LEVEL_UP];
@@ -84,13 +126,16 @@ describe('useRealtimeStore — toasts + stats refetch (SLICE 6)', () => {
 
       handler({ previousLevel: 2, newLevel: 3, totalExp: 450 });
 
-      expect(mockToastSuccess).toHaveBeenCalledTimes(1);
-      expect((mockToastSuccess.mock.calls[0] as string[])[0]).toContain('3');
+      expect(mockEnqueue).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'level_up', level: 3 }),
+      );
+      expect(mockPlayLevelUp).toHaveBeenCalled();
+      expect(mockToastSuccess).not.toHaveBeenCalled();
     });
   });
 
-  describe('Test B: achievement_unlocked event shows toast with name', () => {
-    it('calls useToast().success with a string containing the achievement name', () => {
+  describe('Test B: achievement_unlocked event enqueues celebration (NOT toast)', () => {
+    it('calls useCelebrationsStore().enqueue with kind=achievement and correct name', () => {
       connectStore();
 
       const handler = listenerRegistry[WIRE_EVENTS.ACHIEVEMENT_UNLOCKED];
@@ -98,13 +143,16 @@ describe('useRealtimeStore — toasts + stats refetch (SLICE 6)', () => {
 
       handler({ code: 'FIRST_GOAL', name: 'First Goal', description: 'Complete your first quest' });
 
-      expect(mockToastSuccess).toHaveBeenCalledTimes(1);
-      expect((mockToastSuccess.mock.calls[0] as string[])[0]).toContain('First Goal');
+      expect(mockEnqueue).toHaveBeenCalledWith(
+        expect.objectContaining({ kind: 'achievement', name: 'First Goal' }),
+      );
+      expect(mockPlayAchievement).toHaveBeenCalled();
+      expect(mockToastSuccess).not.toHaveBeenCalled();
     });
   });
 
-  describe('Test C: stats_updated triggers fetchStats, no toast', () => {
-    it('calls useStats().fetchStats() without calling toast', () => {
+  describe('Test C: stats_updated triggers statsStore.refresh(), no toast', () => {
+    it('calls statsStore.refresh() without calling toast', async () => {
       connectStore();
 
       const handler = listenerRegistry[WIRE_EVENTS.STATS_UPDATED];
@@ -112,30 +160,32 @@ describe('useRealtimeStore — toasts + stats refetch (SLICE 6)', () => {
 
       handler({});
 
-      expect(mockFetchStats).toHaveBeenCalled();
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(mockStatsRefresh).toHaveBeenCalled();
       expect(mockToastSuccess).not.toHaveBeenCalled();
     });
   });
 
-  describe('Test D: level_up with missing newLevel → no toast', () => {
-    it('does not call toast when newLevel is missing', () => {
+  describe('Test D: level_up with missing newLevel → no celebration', () => {
+    it('does not enqueue when newLevel is missing', () => {
       connectStore();
 
       const handler = listenerRegistry[WIRE_EVENTS.LEVEL_UP];
       handler({ previousLevel: 2 }); // missing newLevel
 
-      expect(mockToastSuccess).not.toHaveBeenCalled();
+      expect(mockEnqueue).not.toHaveBeenCalled();
     });
   });
 
-  describe('Test E: achievement_unlocked with missing name → no toast', () => {
-    it('does not call toast when name is missing', () => {
+  describe('Test E: achievement_unlocked with missing name → no celebration', () => {
+    it('does not enqueue when name is missing', () => {
       connectStore();
 
       const handler = listenerRegistry[WIRE_EVENTS.ACHIEVEMENT_UNLOCKED];
       handler({ code: 'FIRST_GOAL' }); // missing name
 
-      expect(mockToastSuccess).not.toHaveBeenCalled();
+      expect(mockEnqueue).not.toHaveBeenCalled();
     });
   });
 });

@@ -69,6 +69,7 @@ export default defineNuxtConfig({
   },
 
   app: {
+    pageTransition: { name: 'arcade', mode: 'out-in', css: false },
     head: {
       htmlAttrs: {
         lang: 'es',

@@ -10,11 +10,13 @@ import { getAllNavItems } from '@/utils/nav-items';
 import type { ModuleId } from '~~/domain/types/modules';
 import { useAuthStore } from '~~/stores/auth';
 import { useModulesStore } from '~~/stores/modules';
+import { useStatsStore } from '~~/stores/useStatsStore';
 
 const route = useRoute();
 const modulesStore = useModulesStore();
 const authStore = useAuthStore();
 const profileApi = useProfile();
+const statsStore = useStatsStore();
 const auth = useAuth();
 
 const profile = ref<UserProfile | null>(null);
@@ -53,7 +55,10 @@ watch(
   { immediate: true },
 );
 
+// EXP progress is now driven by statsStore for realtime reactivity.
+// Falls back to local profile on first mount before stats are loaded.
 const expProgress = computed(() => {
+  if (statsStore.expProgress) return statsStore.expProgress;
   if (!profile.value) return { current: 0, needed: 100, progress: 0 };
   return profileApi.expForNextLevel(profile.value.totalExp);
 });
@@ -79,6 +84,10 @@ onMounted(async () => {
     loadingProfile.value = true;
     try {
       profile.value = await profileApi.fetchProfile();
+      // Seed stats store client-side (delta = 0 on first load → no spurious float)
+      statsStore.refresh().catch(() => {
+        // best-effort
+      });
 
       // Ensure modules are loaded if authenticated
       if (authStore.isAuthenticated && authStore.userId) {
@@ -149,6 +158,7 @@ onBeforeUnmount(() => {
         :profile="profile"
         :loading="loadingProfile"
         :exp-progress="expProgress"
+        :level="statsStore.level > 1 ? statsStore.level : undefined"
         :is-active="isActive"
         :menu-open="mobileMenuOpen"
         @logout="handleLogout"

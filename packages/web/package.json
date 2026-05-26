@@ -26,6 +26,7 @@
     "@freakdays/domain": "workspace:*",
     "@pinia/nuxt": "^0.11.3",
     "date-fns": "^3.6.0",
+    "gsap": "^3.15.0",
     "nuxt": "^4.4.6",
     "pinia": "^3.0.4",
     "reka-ui": "^2.6.1",

@@ -4,7 +4,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Skeleton } from '@/components/ui/skeleton';
 import ThemeToggle from '@/components/ui/theme-toggle/ThemeToggle.vue';
 import type { UserProfile } from '@/composables/useProfile';
-import { Hexagon } from 'lucide-vue-next';
+import { Hexagon, Volume2, VolumeX, Menu } from 'lucide-vue-next';
+import { useSoundStore } from '~~/stores/useSound';
+import { useArcadeMenuStore } from '~~/stores/useArcadeMenu';
 
 interface Props {
   profile: UserProfile | null;
@@ -14,25 +16,35 @@ interface Props {
     needed: number;
     progress: number;
   };
+  /** Override level display — used by statsStore for realtime reactivity */
+  level?: number;
   isActive: (to: string) => boolean;
   menuOpen?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   loading: false,
   menuOpen: false,
+  level: undefined,
 });
+
+// Effective level: prefer statsStore-driven prop, fall back to profile
+const effectiveLevel = computed(() => props.level ?? props.profile?.level ?? 1);
 
 const _emit = defineEmits<{
   logout: [];
 }>();
+
+const soundStore = useSoundStore();
+const arcadeMenuStore = useArcadeMenuStore();
+const arcadeMenuTriggerRef = ref<HTMLElement | null>(null);
 </script>
 
 <template>
   <header
     v-if="!menuOpen"
     class="sticky top-0 z-50 w-full border-b-2 border-border/50 bg-background/95 backdrop-blur-xl hidden lg:block"
-    style="position: sticky; z-index: 9999; pointer-events: auto"
+    style="pointer-events: auto"
   >
     <div class="container mx-auto flex h-14 items-center px-3 sm:px-4 md:px-6 gap-3">
       <!-- Logo -->
@@ -58,9 +70,32 @@ const _emit = defineEmits<{
       <!-- Nav slot -->
       <slot name="nav" />
 
-      <!-- Right side: theme + HUD chip + avatar -->
+      <!-- Right side: theme + sound toggle + HUD chip + avatar -->
       <div class="ml-auto flex items-center gap-2 shrink-0">
         <ThemeToggle />
+
+        <!-- Sound mute toggle -->
+        <button
+          class="h-8 w-8 flex items-center justify-center rounded-none text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :aria-pressed="soundStore.enabled"
+          :aria-label="soundStore.enabled ? 'Silenciar sonido' : 'Activar sonido'"
+          @click="soundStore.toggleMute()"
+        >
+          <Volume2 v-if="soundStore.enabled" class="h-4 w-4" aria-hidden="true" />
+          <VolumeX v-else class="h-4 w-4" aria-hidden="true" />
+        </button>
+
+        <!-- Arcade Menu button -->
+        <button
+          ref="arcadeMenuTriggerRef"
+          class="h-8 w-8 flex items-center justify-center rounded-none text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-haspopup="dialog"
+          :aria-expanded="arcadeMenuStore.isOpen"
+          aria-label="Abrir menú"
+          @click="arcadeMenuStore.open(arcadeMenuTriggerRef ?? undefined)"
+        >
+          <Menu class="h-4 w-4" aria-hidden="true" />
+        </button>
 
         <template v-if="loading">
           <div class="flex items-center gap-2 pl-2 border-l-2 border-border/50">
@@ -84,9 +119,7 @@ const _emit = defineEmits<{
           <div class="hidden lg:flex flex-col items-end gap-1">
             <div class="flex items-center gap-1.5">
               <Hexagon class="h-3 w-3 text-primary" aria-hidden="true" />
-              <span class="font-pixel text-[9px] text-foreground"
-                >LV.{{ profile?.level ?? 1 }}</span
-              >
+              <span class="font-pixel text-[9px] text-foreground">LV.{{ effectiveLevel }}</span>
             </div>
             <Tooltip>
               <TooltipTrigger as-child>
@@ -118,7 +151,7 @@ const _emit = defineEmits<{
           <!-- Mobile level chip -->
           <div class="flex lg:hidden items-center gap-1">
             <Hexagon class="h-3 w-3 text-primary" aria-hidden="true" />
-            <span class="font-pixel text-[8px] text-foreground">LV.{{ profile?.level ?? 1 }}</span>
+            <span class="font-pixel text-[8px] text-foreground">LV.{{ effectiveLevel }}</span>
           </div>
 
           <!-- Blocky avatar frame -->

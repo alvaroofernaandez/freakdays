@@ -4,8 +4,9 @@ import { WIRE_EVENTS } from '@freakdays/domain';
 import type { LevelUpPayload, AchievementUnlockedPayload } from '@freakdays/domain';
 
 import { useAuthStore } from './auth';
-import { useToast } from '../app/composables/useToast';
-import { useStats } from '../app/composables/useStats';
+import { useCelebrationsStore } from './useCelebrations';
+import { useSoundStore } from './useSound';
+import { useStatsStore } from './useStatsStore';
 
 interface RealtimeState {
   connected: boolean;
@@ -32,9 +33,9 @@ export const useRealtimeStore = defineStore('realtime', {
 
       const onConnect = () => {
         this.connected = true;
-        // Reconcile any missed events while offline
-        useStats()
-          .fetchStats()
+        // Seed stats store on connect (delta = 0 on first load)
+        useStatsStore()
+          .refresh()
           .catch(() => {
             // best-effort
           });
@@ -47,18 +48,30 @@ export const useRealtimeStore = defineStore('realtime', {
       const onLevelUp = (payload: unknown) => {
         const p = payload as LevelUpPayload;
         if (typeof p?.newLevel !== 'number') return;
-        useToast().success(`Subiste al nivel ${p.newLevel}!`);
+
+        const id = `level-up-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        useCelebrationsStore().enqueue({ id, kind: 'level_up', level: p.newLevel });
+        useSoundStore().playLevelUp();
       };
 
       const onAchievementUnlocked = (payload: unknown) => {
         const p = payload as AchievementUnlockedPayload;
         if (typeof p?.name !== 'string') return;
-        useToast().success(`Logro desbloqueado: ${p.name}`);
+
+        const id = `achievement-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        useCelebrationsStore().enqueue({ id, kind: 'achievement', name: p.name });
+        useSoundStore().playAchievement();
       };
 
       const onStatsUpdated = () => {
-        useStats()
-          .fetchStats()
+        useStatsStore()
+          .refresh()
+          .then((delta) => {
+            if (delta > 0) {
+              useCelebrationsStore().addFloat(delta);
+              useSoundStore().playXp();
+            }
+          })
           .catch(() => {
             // best-effort
           });
