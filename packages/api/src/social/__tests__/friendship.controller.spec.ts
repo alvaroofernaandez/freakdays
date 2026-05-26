@@ -4,6 +4,8 @@ import { FriendshipStatus } from '@prisma/client';
 import type { Request } from 'express';
 import { FriendshipController } from '../friendship.controller';
 import { FriendshipService } from '../friendship.service';
+import { PresenceService } from '../../realtime/presence.service';
+import { PENDING_DIRECTION } from '../social.types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -27,6 +29,7 @@ const makeRow = (overrides: Record<string, unknown> = {}) => ({
 describe('FriendshipController', () => {
   let controller: FriendshipController;
   let service: jest.Mocked<FriendshipService>;
+  let presenceService: jest.Mocked<PresenceService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,6 +45,13 @@ describe('FriendshipController', () => {
             blockUser: jest.fn(),
             listFriends: jest.fn(),
             listIncomingRequests: jest.fn(),
+            listPendingRequests: jest.fn(),
+          },
+        },
+        {
+          provide: PresenceService,
+          useValue: {
+            whichOnline: jest.fn(),
           },
         },
       ],
@@ -49,6 +59,7 @@ describe('FriendshipController', () => {
 
     controller = module.get(FriendshipController);
     service = module.get(FriendshipService);
+    presenceService = module.get(PresenceService);
   });
 
   describe('POST /v1/friends/requests (sendRequest)', () => {
@@ -150,6 +161,77 @@ describe('FriendshipController', () => {
 
       expect(service.listIncomingRequests).toHaveBeenCalledWith('user-aaa');
       expect(result).toBe(rows);
+    });
+  });
+
+  describe('GET /v1/friends/presence', () => {
+    it('(a) returns presence map for accepted friends only', async () => {
+      service.listFriends.mockResolvedValue(['user-bbb', 'user-ccc']);
+      presenceService.whichOnline.mockResolvedValue(['user-bbb']);
+      const req = mockRequest('user-aaa');
+
+      const result = await controller.getFriendsPresence(req as Request);
+
+      expect(service.listFriends).toHaveBeenCalledWith('user-aaa');
+      expect(presenceService.whichOnline).toHaveBeenCalledWith(['user-bbb', 'user-ccc']);
+      expect(result).toEqual({ 'user-bbb': 'online', 'user-ccc': 'offline' });
+    });
+
+    it('(b) returns empty map when caller has no accepted friends', async () => {
+      service.listFriends.mockResolvedValue([]);
+      const req = mockRequest('user-aaa');
+
+      const result = await controller.getFriendsPresence(req as Request);
+
+      expect(presenceService.whichOnline).not.toHaveBeenCalled();
+      expect(result).toEqual({});
+    });
+
+    it('(c) all friends offline → map values are all offline', async () => {
+      service.listFriends.mockResolvedValue(['user-bbb', 'user-ccc']);
+      presenceService.whichOnline.mockResolvedValue([]);
+      const req = mockRequest('user-aaa');
+
+      const result = await controller.getFriendsPresence(req as Request);
+
+      expect(result).toEqual({ 'user-bbb': 'offline', 'user-ccc': 'offline' });
+    });
+  });
+
+  describe('GET /v1/friends/requests/pending', () => {
+    it('(a) returns both directions with direction labels', async () => {
+      const rows = [
+        {
+          ...makeRow({ id: 'fs-out', initiatorId: 'user-aaa' }),
+          direction: PENDING_DIRECTION.outgoing,
+        },
+        {
+          ...makeRow({ id: 'fs-in', initiatorId: 'user-zzz' }),
+          direction: PENDING_DIRECTION.incoming,
+        },
+      ];
+      (
+        service as unknown as { listPendingRequests: jest.Mock }
+      ).listPendingRequests.mockResolvedValue(rows);
+      const req = mockRequest('user-aaa');
+
+      const result = await controller.listPendingRequests(req as Request);
+
+      expect(
+        (service as unknown as { listPendingRequests: jest.Mock }).listPendingRequests,
+      ).toHaveBeenCalledWith('user-aaa');
+      expect(result).toHaveLength(2);
+    });
+
+    it('(b) returns empty array when no pending requests', async () => {
+      (
+        service as unknown as { listPendingRequests: jest.Mock }
+      ).listPendingRequests.mockResolvedValue([]);
+      const req = mockRequest('user-aaa');
+
+      const result = await controller.listPendingRequests(req as Request);
+
+      expect(result).toEqual([]);
     });
   });
 });

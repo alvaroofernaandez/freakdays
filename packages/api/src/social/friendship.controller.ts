@@ -14,6 +14,11 @@ import type { Request } from 'express';
 import { z } from 'zod';
 
 import { FriendshipService } from './friendship.service';
+import { PresenceService } from '../realtime/presence.service';
+
+/** Shape of the presence map returned by GET /v1/friends/presence */
+type PresenceStatus = 'online' | 'offline';
+type FriendsPresenceMap = Record<string, PresenceStatus>;
 
 const sendRequestBodySchema = z.object({
   targetUserId: z.string().min(1),
@@ -25,7 +30,10 @@ type SendRequestBody = z.infer<typeof sendRequestBodySchema>;
 @ApiBearerAuth()
 @Controller('v1/friends')
 export class FriendshipController {
-  constructor(private readonly friendshipService: FriendshipService) {}
+  constructor(
+    private readonly friendshipService: FriendshipService,
+    private readonly presenceService: PresenceService,
+  ) {}
 
   /** POST /v1/friends/requests — send a friend request */
   @Post('requests')
@@ -82,6 +90,34 @@ export class FriendshipController {
   async listIncomingRequests(@Req() request: Request) {
     const callerId = this.getCallerId(request);
     return this.friendshipService.listIncomingRequests(callerId);
+  }
+
+  /** GET /v1/friends/requests/pending — list all pending requests (inbound + outbound) with direction labels */
+  @Get('requests/pending')
+  async listPendingRequests(@Req() request: Request) {
+    const callerId = this.getCallerId(request);
+    return this.friendshipService.listPendingRequests(callerId);
+  }
+
+  /**
+   * GET /v1/friends/presence
+   * Returns a presence map `{ userId: 'online' | 'offline' }` for the caller's
+   * accepted friends. Non-friend user ids are never included (server-side filter).
+   */
+  @Get('presence')
+  async getFriendsPresence(@Req() request: Request): Promise<FriendsPresenceMap> {
+    const callerId = this.getCallerId(request);
+    const friendIds = await this.friendshipService.listFriends(callerId);
+
+    if (friendIds.length === 0) {
+      return {};
+    }
+
+    const onlineIds = new Set(await this.presenceService.whichOnline(friendIds));
+
+    return Object.fromEntries(
+      friendIds.map((id) => [id, onlineIds.has(id) ? 'online' : 'offline'] as const),
+    ) as FriendsPresenceMap;
   }
 
   private getCallerId(request: Request): string {
