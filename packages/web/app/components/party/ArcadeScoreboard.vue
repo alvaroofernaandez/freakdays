@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { LeaderboardRow } from '~~/stores/useLeaderboard';
+import { cn } from '@/lib/utils';
+import { Crown, Flame, Trophy } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -29,20 +31,84 @@ const isOffPage = computed(
   () => props.yourRank !== null && !props.rows.some((r) => r.isCurrentUser),
 );
 
-/** Rank medal classes: gold / silver / bronze for top 3 */
-function rankAccentClass(rank: number): string {
-  if (rank === 1) return 'text-exp-medium';
-  if (rank === 2) return 'text-muted-foreground';
-  if (rank === 3) return 'text-exp-hard';
-  return 'text-muted-foreground';
+/** Top-3 podium rows (only when page === 1) */
+const podiumRows = computed(() => (props.page === 1 ? props.rows.filter((r) => r.rank <= 3) : []));
+
+/** Rows below the podium (rank > 3), or all rows when page > 1 */
+const tableRows = computed(() =>
+  props.page === 1 ? props.rows.filter((r) => r.rank > 3) : [...props.rows],
+);
+
+/**
+ * Display name: prefer displayName, fall back to @username (with @-prefix so a
+ * raw id is clearly intentional and not a rendering artifact).
+ */
+function playerLabel(row: LeaderboardRow): string {
+  if (row.displayName) return row.displayName;
+  return `@${row.userId}`;
 }
 
-/** Rank medal label for a11y */
+/** Initial letter for the avatar fallback */
+function avatarInitial(row: LeaderboardRow): string {
+  return playerLabel(row).replace('@', '').charAt(0).toUpperCase();
+}
+
+/** Rank label for a11y */
 function rankLabel(rank: number): string {
   if (rank === 1) return '1er lugar';
   if (rank === 2) return '2do lugar';
   if (rank === 3) return '3er lugar';
   return `Posición ${rank}`;
+}
+
+interface PodiumStyle {
+  border: string;
+  badge: string;
+  ring: string;
+  shadow: string;
+  label: string;
+  avatarSize: string;
+  order: number;
+}
+
+/** Gold — #1 */
+const PODIUM_GOLD: PodiumStyle = {
+  border: 'border-exp-medium',
+  badge: 'bg-exp-medium text-background',
+  ring: 'ring-2 ring-exp-medium',
+  shadow: 'shadow-[0_0_20px_oklch(0.8_0.18_85_/_0.35)]',
+  label: 'text-exp-medium',
+  avatarSize: 'h-14 w-14',
+  order: 2, // center
+};
+
+/** Silver — #2 */
+const PODIUM_SILVER: PodiumStyle = {
+  border: 'border-muted-foreground/70',
+  badge: 'bg-muted-foreground/70 text-background',
+  ring: 'ring-2 ring-muted-foreground/50',
+  shadow: 'shadow-[0_0_12px_oklch(0.65_0.02_270_/_0.3)]',
+  label: 'text-muted-foreground',
+  avatarSize: 'h-11 w-11',
+  order: 1, // left
+};
+
+/** Bronze — #3 */
+const PODIUM_BRONZE: PodiumStyle = {
+  border: 'border-exp-hard',
+  badge: 'bg-exp-hard text-background',
+  ring: 'ring-2 ring-exp-hard/60',
+  shadow: 'shadow-[0_0_12px_oklch(0.7_0.2_45_/_0.25)]',
+  label: 'text-exp-hard',
+  avatarSize: 'h-10 w-10',
+  order: 3, // right
+};
+
+/** Returns the podium style for rank 1/2/3; falls back to bronze. */
+function podiumStyle(rank: number): PodiumStyle {
+  if (rank === 1) return PODIUM_GOLD;
+  if (rank === 2) return PODIUM_SILVER;
+  return PODIUM_BRONZE;
 }
 </script>
 
@@ -64,12 +130,15 @@ function rankLabel(rank: number): string {
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="rows.length === 0" class="border-2 border-border/50 p-8 text-center space-y-3">
-      <p class="font-pixel text-[9px] text-muted-foreground uppercase tracking-widest">
-        — SIN PARTICIPANTES AÚN —
+    <div v-else-if="rows.length === 0" class="border-2 border-border/50 p-10 text-center space-y-3">
+      <Trophy class="mx-auto h-10 w-10 text-muted-foreground/40" aria-hidden="true" />
+      <p
+        class="font-pixel text-[9px] text-muted-foreground uppercase tracking-widest leading-relaxed"
+      >
+        — AÚN NO HAY SUFICIENTES JUGADORES —
       </p>
-      <p class="text-xs text-muted-foreground/60">
-        Activa tu participación en el leaderboard global desde tu perfil.
+      <p class="text-xs text-muted-foreground/60 max-w-xs mx-auto">
+        Activa tu participación desde tu perfil para aparecer aquí.
       </p>
     </div>
 
@@ -87,12 +156,100 @@ function rankLabel(rank: number): string {
         </span>
       </div>
 
-      <!-- Scoreboard container -->
+      <!-- ── Podium (top 3, first page only) ─────────────────────── -->
       <div
-        class="border-2 border-border/60 overflow-hidden"
+        v-if="podiumRows.length > 0"
+        class="mb-4 flex items-end justify-center gap-3 px-2"
+        role="region"
+        aria-label="Podio top 3"
+      >
+        <div
+          v-for="row in podiumRows"
+          :key="row.userId"
+          :style="{ order: podiumStyle(row.rank).order }"
+          :class="[
+            'flex flex-col items-center gap-1.5 px-3 py-3 border-2 min-w-0 w-[30%] max-w-[140px]',
+            podiumStyle(row.rank).border,
+            podiumStyle(row.rank).shadow,
+            row.isCurrentUser ? 'bg-accent/10' : 'bg-card/60',
+          ]"
+          :aria-label="rankLabel(row.rank)"
+        >
+          <!-- Crown for #1 -->
+          <Crown
+            v-if="row.rank === 1"
+            class="h-4 w-4 text-exp-medium shrink-0"
+            aria-hidden="true"
+          />
+
+          <!-- Rank badge -->
+          <span
+            :class="['font-pixel text-[8px] px-2 py-0.5 shrink-0', podiumStyle(row.rank).badge]"
+            :aria-label="rankLabel(row.rank)"
+          >
+            #{{ row.rank }}
+          </span>
+
+          <!-- Avatar -->
+          <div
+            :class="[
+              'shrink-0 overflow-hidden border rounded-none',
+              podiumStyle(row.rank).avatarSize,
+              podiumStyle(row.rank).ring,
+              podiumStyle(row.rank).border,
+            ]"
+            aria-hidden="true"
+          >
+            <img
+              v-if="row.avatarUrl"
+              :src="row.avatarUrl"
+              :alt="playerLabel(row)"
+              class="h-full w-full object-cover pixelated"
+              loading="lazy"
+            />
+            <div
+              v-else
+              :class="[
+                'h-full w-full flex items-center justify-center text-xs font-bold',
+                row.isCurrentUser ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground',
+              ]"
+            >
+              {{ avatarInitial(row) }}
+            </div>
+          </div>
+
+          <!-- Name -->
+          <span
+            :class="[
+              'font-pixel text-[7px] truncate w-full text-center leading-snug',
+              podiumStyle(row.rank).label,
+            ]"
+          >
+            {{ playerLabel(row) }}
+          </span>
+
+          <!-- You marker -->
+          <span
+            v-if="row.isCurrentUser"
+            class="font-pixel text-[6px] text-accent uppercase tracking-widest"
+            aria-label="Eres tú"
+          >
+            ★ TÚ
+          </span>
+
+          <!-- EXP -->
+          <span class="font-mono tabular-nums text-[10px] text-muted-foreground">
+            {{ row.totalExp.toLocaleString() }} EXP
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Scoreboard table ─────────────────────────────────────── -->
+      <div
+        :class="['border-2 border-border/60 overflow-x-auto']"
         style="box-shadow: 0 0 16px oklch(0.65 0.25 290 / 0.12)"
       >
-        <table class="w-full text-sm" aria-label="Tabla de posiciones">
+        <table class="w-full min-w-[440px] text-sm" aria-label="Tabla de posiciones" role="table">
           <thead>
             <tr class="border-b-2 border-border/60 bg-card/60">
               <th
@@ -108,7 +265,7 @@ function rankLabel(rank: number): string {
                 Jugador
               </th>
               <th
-                class="py-2 px-3 text-right font-pixel text-[8px] uppercase tracking-widest text-muted-foreground"
+                class="py-2 px-3 text-right font-pixel text-[8px] uppercase tracking-widest text-muted-foreground hidden sm:table-cell"
                 scope="col"
               >
                 EXP
@@ -119,19 +276,30 @@ function rankLabel(rank: number): string {
               >
                 LV
               </th>
+              <th
+                class="py-2 px-3 text-right font-pixel text-[8px] uppercase tracking-widest text-muted-foreground hidden sm:table-cell"
+                scope="col"
+                aria-label="Racha"
+              >
+                <Flame class="inline h-3 w-3" aria-hidden="true" />
+              </th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="row in rows"
+              v-for="row in tableRows"
               :key="row.userId"
-              :class="[
-                'border-b border-border/30 transition-colors motion-safe:transition-colors',
-                row.isCurrentUser ? 'bg-accent/10 border-l-2 border-l-accent' : 'hover:bg-muted/20',
-              ]"
+              :class="
+                cn(
+                  'border-b border-border/30 motion-safe:transition-colors duration-150',
+                  row.isCurrentUser
+                    ? 'bg-accent/10 border-l-2 border-l-accent'
+                    : 'hover:bg-muted/20',
+                )
+              "
               :style="
                 row.isCurrentUser
-                  ? 'box-shadow: inset 0 0 12px oklch(0.75 0.18 190 / 0.08)'
+                  ? 'box-shadow: inset 0 0 16px oklch(0.75 0.18 190 / 0.10)'
                   : undefined
               "
               :aria-current="row.isCurrentUser ? 'true' : undefined"
@@ -139,11 +307,15 @@ function rankLabel(rank: number): string {
               <!-- Rank -->
               <td class="py-2.5 px-3">
                 <span
-                  :class="[
-                    'font-pixel font-bold tabular-nums',
-                    row.rank <= 3 ? 'text-base' : 'text-[10px]',
-                    rankAccentClass(row.rank),
-                  ]"
+                  :class="
+                    cn(
+                      'font-pixel font-bold tabular-nums text-[10px]',
+                      row.rank === 1 && 'text-exp-medium',
+                      row.rank === 2 && 'text-muted-foreground',
+                      row.rank === 3 && 'text-exp-hard',
+                      row.rank > 3 && 'text-muted-foreground',
+                    )
+                  "
                   :aria-label="rankLabel(row.rank)"
                 >
                   {{ row.rank }}
@@ -153,33 +325,41 @@ function rankLabel(rank: number): string {
               <!-- Player -->
               <td class="py-2.5">
                 <div class="flex items-center gap-2">
-                  <!-- Avatar -->
+                  <!-- Avatar — rounded-none blocky frame -->
                   <div
-                    class="h-7 w-7 shrink-0 overflow-hidden border border-border/50"
-                    :class="row.isCurrentUser ? 'border-accent/60' : ''"
+                    :class="
+                      cn(
+                        'h-7 w-7 shrink-0 overflow-hidden border rounded-none',
+                        row.isCurrentUser ? 'border-accent/60' : 'border-border/50',
+                      )
+                    "
                     aria-hidden="true"
                   >
                     <img
                       v-if="row.avatarUrl"
                       :src="row.avatarUrl"
-                      :alt="row.displayName ?? row.userId"
+                      :alt="playerLabel(row)"
                       class="h-full w-full object-cover pixelated"
                       loading="lazy"
                     />
                     <div
                       v-else
-                      class="h-full w-full bg-muted flex items-center justify-center text-xs font-bold"
                       :class="
-                        row.isCurrentUser ? 'bg-accent/20 text-accent' : 'text-muted-foreground'
+                        cn(
+                          'h-full w-full flex items-center justify-center text-xs font-bold',
+                          row.isCurrentUser
+                            ? 'bg-accent/20 text-accent'
+                            : 'bg-muted text-muted-foreground',
+                        )
                       "
                     >
-                      {{ (row.displayName ?? row.userId).charAt(0).toUpperCase() }}
+                      {{ avatarInitial(row) }}
                     </div>
                   </div>
 
                   <!-- Name -->
                   <span class="truncate text-sm">
-                    {{ row.displayName ?? row.userId }}
+                    {{ playerLabel(row) }}
                   </span>
 
                   <!-- Current-user marker -->
@@ -193,14 +373,29 @@ function rankLabel(rank: number): string {
                 </div>
               </td>
 
-              <!-- EXP -->
-              <td class="py-2.5 px-3 text-right font-mono tabular-nums text-sm">
+              <!-- EXP — hidden on small screens -->
+              <td
+                class="py-2.5 px-3 text-right font-mono tabular-nums text-sm hidden sm:table-cell"
+              >
                 {{ row.totalExp.toLocaleString() }}
               </td>
 
               <!-- Level -->
               <td class="py-2.5 px-3 text-right font-mono tabular-nums text-sm">
                 {{ row.level }}
+              </td>
+
+              <!-- Streak — hidden on small screens -->
+              <td class="py-2.5 px-3 text-right hidden sm:table-cell">
+                <span
+                  v-if="row.currentStreak > 0"
+                  class="inline-flex items-center gap-0.5 font-mono tabular-nums text-xs text-exp-hard"
+                  :aria-label="`Racha de ${row.currentStreak} días`"
+                >
+                  <Flame class="h-3 w-3 shrink-0" aria-hidden="true" />
+                  {{ row.currentStreak }}
+                </span>
+                <span v-else class="text-muted-foreground/40 text-xs">—</span>
               </td>
             </tr>
           </tbody>
