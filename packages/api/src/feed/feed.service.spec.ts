@@ -31,6 +31,10 @@ const makePrisma = (
   },
 });
 
+const makeStubFriendshipService = () => ({
+  listFriends: jest.fn().mockResolvedValue([]),
+});
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('FeedService', () => {
@@ -44,7 +48,7 @@ describe('FeedService', () => {
       feedEntry: { findMany: jest.fn().mockResolvedValue(entries) },
     });
 
-    const service = new FeedService(prisma as never);
+    const service = new FeedService(prisma as never, makeStubFriendshipService() as never);
     const result = await service.getPartyFeed('p1', 'u1', undefined, 2);
 
     // 3 entries returned (limit+1); service should detect nextCursor
@@ -57,7 +61,7 @@ describe('FeedService', () => {
       partyMember: { findUnique: jest.fn().mockResolvedValue(null) },
     });
 
-    const service = new FeedService(prisma as never);
+    const service = new FeedService(prisma as never, makeStubFriendshipService() as never);
 
     await expect(service.getPartyFeed('p1', 'non-member', undefined, 20)).rejects.toThrow(
       ForbiddenException,
@@ -74,7 +78,7 @@ describe('FeedService', () => {
       feedEntry: { findMany: jest.fn().mockResolvedValue(entries) },
     });
 
-    const service = new FeedService(prisma as never);
+    const service = new FeedService(prisma as never, makeStubFriendshipService() as never);
     const result = await service.getPartyFeed('p1', 'u1', undefined, 2);
 
     expect(result.nextCursor).toBe('fe-c');
@@ -92,7 +96,7 @@ describe('FeedService', () => {
       feedEntry: { findMany: jest.fn().mockResolvedValue(entries) },
     });
 
-    const service = new FeedService(prisma as never);
+    const service = new FeedService(prisma as never, makeStubFriendshipService() as never);
     const result = await service.getPartyFeed('p1', 'u1', undefined, 5);
 
     expect(result.nextCursor).toBeUndefined();

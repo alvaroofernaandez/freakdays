@@ -486,6 +486,7 @@ model FeedEntry {
   @@unique([partyId, sourceEventId])
   @@index([partyId, createdAt])
   @@index([sourceEventId])
+  @@index([actorUserId, createdAt])
 }
 
 // ─── Friendship Graph ─────────────────────────────────────────────────────────
