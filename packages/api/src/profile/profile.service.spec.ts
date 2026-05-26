@@ -299,4 +299,100 @@ describe('ProfileService', () => {
       expect(mockEventBus.emit).not.toHaveBeenCalled();
     });
   });
+
+  describe('syncClerkProfile (client-assist backfill)', () => {
+    it('fills displayName when Profile.displayName is null', async () => {
+      mockPrisma.profile.findUnique.mockResolvedValue({ ...mockProfile, displayName: null });
+      mockPrisma.profile.update.mockResolvedValue({ ...mockProfile, displayName: 'Alice Smith' });
+
+      const result = await service.syncClerkProfile('clerk-u1', {
+        displayName: 'Alice Smith',
+        avatarUrl: null,
+      });
+
+      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ displayName: 'Alice Smith' }),
+        }),
+      );
+      expect(result.displayName).toBe('Alice Smith');
+    });
+
+    it('fills avatarUrl when Profile.avatarUrl is null', async () => {
+      mockPrisma.profile.findUnique.mockResolvedValue({
+        ...mockProfile,
+        displayName: 'Alice',
+        avatarUrl: null,
+      });
+      mockPrisma.profile.update.mockResolvedValue({
+        ...mockProfile,
+        displayName: 'Alice',
+        avatarUrl: 'https://img.clerk.com/alice.jpg',
+      });
+
+      const result = await service.syncClerkProfile('clerk-u1', {
+        displayName: 'Alice',
+        avatarUrl: 'https://img.clerk.com/alice.jpg',
+      });
+
+      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ avatarUrl: 'https://img.clerk.com/alice.jpg' }),
+        }),
+      );
+      expect(result.avatarUrl).toBe('https://img.clerk.com/alice.jpg');
+    });
+
+    it('does NOT overwrite displayName when already set by user', async () => {
+      const existingProfile = {
+        ...mockProfile,
+        displayName: 'My Custom Name',
+        avatarUrl: null,
+      };
+      mockPrisma.profile.findUnique.mockResolvedValue(existingProfile);
+
+      const result = await service.syncClerkProfile('clerk-u1', {
+        displayName: 'Clerk Name',
+        avatarUrl: null,
+      });
+
+      // No DB write — both fields were either null in input or set in profile
+      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
+      expect(result.displayName).toBe('My Custom Name');
+    });
+
+    it('does NOT overwrite avatarUrl when already set (user-uploaded R2 key)', async () => {
+      const existingProfile = {
+        ...mockProfile,
+        displayName: 'Alice',
+        avatarUrl: 'https://r2.example.com/user-photo.jpg',
+        avatarKey: 'profiles/clerk-u1/avatars/photo.jpg',
+      };
+      mockPrisma.profile.findUnique.mockResolvedValue(existingProfile);
+
+      const result = await service.syncClerkProfile('clerk-u1', {
+        displayName: 'Clerk Name',
+        avatarUrl: 'https://img.clerk.com/new-photo.jpg',
+      });
+
+      // No DB write — both fields are already set
+      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
+      expect(result.avatarUrl).toBe('https://r2.example.com/user-photo.jpg');
+    });
+
+    it('is a no-op (no DB write) when both fields are already set', async () => {
+      mockPrisma.profile.findUnique.mockResolvedValue({
+        ...mockProfile,
+        displayName: 'Existing Name',
+        avatarUrl: 'https://r2.example.com/photo.jpg',
+      });
+
+      await service.syncClerkProfile('clerk-u1', {
+        displayName: 'Clerk Name',
+        avatarUrl: 'https://img.clerk.com/photo.jpg',
+      });
+
+      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
+    });
+  });
 });

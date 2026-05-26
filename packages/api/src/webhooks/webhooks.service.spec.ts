@@ -48,6 +48,9 @@ describe('WebhooksService', () => {
       upsert: jest.Mock;
       deleteMany: jest.Mock;
     };
+    profile: {
+      upsert: jest.Mock;
+    };
     $transaction: jest.Mock;
   };
 
@@ -75,6 +78,9 @@ describe('WebhooksService', () => {
       membership: {
         upsert: jest.fn().mockResolvedValue({}),
         deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+      profile: {
+        upsert: jest.fn().mockResolvedValue({}),
       },
       $transaction: jest.fn().mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
         // Run the transaction callback with the mock prisma itself as the tx client.
@@ -157,6 +163,121 @@ describe('WebhooksService', () => {
           }),
         }),
       );
+    });
+
+    it('populates Profile.displayName and Profile.avatarUrl from Clerk on user.created', async () => {
+      const payload = JSON.stringify({
+        type: 'user.created',
+        data: {
+          id: 'clerk_user_1',
+          email_addresses: [{ id: 'em_1', email_address: 'alice@example.com' }],
+          primary_email_address_id: 'em_1',
+          first_name: 'Alice',
+          last_name: 'Smith',
+          image_url: 'https://img.clerk.com/alice.jpg',
+          username: 'alicesmith',
+        },
+      });
+
+      const headers = buildValidHeaders('msg_uc2', payload);
+      await service.processClerkWebhook(payload, headers);
+
+      expect(mockPrisma.profile.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'u1' },
+          create: expect.objectContaining({
+            userId: 'u1',
+            displayName: 'Alice Smith',
+            avatarUrl: 'https://img.clerk.com/alice.jpg',
+          }),
+        }),
+      );
+    });
+
+    it('populates Profile.displayName from Clerk username when first/last name are absent', async () => {
+      const payload = JSON.stringify({
+        type: 'user.created',
+        data: {
+          id: 'clerk_user_2',
+          email_addresses: [],
+          image_url: null,
+          username: 'bobbuilder',
+        },
+      });
+
+      mockPrisma.user.upsert.mockResolvedValue({ id: 'u2', clerkUserId: 'clerk_user_2' });
+
+      const headers = buildValidHeaders('msg_uc3', payload);
+      await service.processClerkWebhook(payload, headers);
+
+      expect(mockPrisma.profile.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'u2' },
+          create: expect.objectContaining({
+            userId: 'u2',
+            displayName: 'bobbuilder',
+            avatarUrl: null,
+          }),
+        }),
+      );
+    });
+
+    it('does NOT overwrite Profile.displayName or avatarUrl on update (fill-when-null)', async () => {
+      const payload = JSON.stringify({
+        type: 'user.updated',
+        data: {
+          id: 'clerk_user_1',
+          email_addresses: [{ id: 'em_1', email_address: 'alice@example.com' }],
+          primary_email_address_id: 'em_1',
+          first_name: 'Alice',
+          last_name: 'Smith',
+          image_url: 'https://img.clerk.com/alice-new.jpg',
+        },
+      });
+
+      const headers = buildValidHeaders('msg_uu', payload);
+      await service.processClerkWebhook(payload, headers);
+
+      expect(mockPrisma.profile.upsert).toHaveBeenCalled();
+
+      // The update clause must use a Prisma raw expression or no-op, NOT a plain string,
+      // so that already-set values are preserved. We verify displayName and avatarUrl
+      // in the update arg are NOT plain string values (they must be conditional SQL expressions).
+      const call = mockPrisma.profile.upsert.mock.calls[0] as [
+        {
+          where: Record<string, unknown>;
+          create: Record<string, unknown>;
+          update: Record<string, unknown>;
+        },
+      ];
+      const { update } = call[0];
+
+      // displayName and avatarUrl must not be raw strings in update — they use
+      // Prisma.sql coalesce to only fill when null.
+      expect(typeof update['displayName']).not.toBe('string');
+      expect(typeof update['avatarUrl']).not.toBe('string');
+    });
+
+    it('is idempotent — calling user.created twice does not throw', async () => {
+      const payload = JSON.stringify({
+        type: 'user.created',
+        data: {
+          id: 'clerk_user_1',
+          email_addresses: [{ id: 'em_1', email_address: 'alice@example.com' }],
+          primary_email_address_id: 'em_1',
+          first_name: 'Alice',
+          last_name: 'Smith',
+          image_url: 'https://img.clerk.com/alice.jpg',
+        },
+      });
+
+      const headers1 = buildValidHeaders('msg_idem1', payload);
+      const headers2 = buildValidHeaders('msg_idem2', payload);
+
+      await expect(service.processClerkWebhook(payload, headers1)).resolves.toBeUndefined();
+      await expect(service.processClerkWebhook(payload, headers2)).resolves.toBeUndefined();
+
+      expect(mockPrisma.profile.upsert).toHaveBeenCalledTimes(2);
     });
   });
 

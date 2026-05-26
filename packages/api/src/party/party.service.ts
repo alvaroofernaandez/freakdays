@@ -53,7 +53,13 @@ type PartyWithRelations = Prisma.PartyGetPayload<{
     owner: true;
     members: {
       include: {
-        user: true;
+        user: {
+          include: {
+            profile: {
+              select: { displayName: true; avatarUrl: true; username: true };
+            };
+          };
+        };
       };
     };
   };
@@ -85,7 +91,13 @@ export class PartyService {
         owner: true,
         members: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: {
+                  select: { displayName: true, avatarUrl: true, username: true },
+                },
+              },
+            },
           },
         },
       },
@@ -134,7 +146,13 @@ export class PartyService {
         owner: true,
         members: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: {
+                  select: { displayName: true, avatarUrl: true, username: true },
+                },
+              },
+            },
           },
         },
       },
@@ -164,7 +182,13 @@ export class PartyService {
         owner: true,
         members: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: {
+                  select: { displayName: true, avatarUrl: true, username: true },
+                },
+              },
+            },
           },
         },
       },
@@ -389,7 +413,13 @@ export class PartyService {
         owner: true,
         members: {
           include: {
-            user: true,
+            user: {
+              include: {
+                profile: {
+                  select: { displayName: true, avatarUrl: true, username: true },
+                },
+              },
+            },
           },
         },
       },
@@ -421,9 +451,9 @@ export class PartyService {
           role: member.role,
           joinedAt: member.joinedAt,
           profile: {
-            username: this.buildUsername(member.user),
-            displayName: this.buildDisplayName(member.user),
-            avatarUrl: null,
+            username: member.user.profile?.username ?? this.buildUsername(member.user),
+            displayName: member.user.profile?.displayName ?? this.buildDisplayName(member.user),
+            avatarUrl: member.user.profile?.avatarUrl ?? null,
           },
         })),
       ),

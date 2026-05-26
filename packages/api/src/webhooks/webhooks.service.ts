@@ -21,6 +21,8 @@ interface UpsertUserInput {
   email?: string;
   firstName?: string;
   lastName?: string;
+  imageUrl?: string | null;
+  username?: string;
   isActive?: boolean;
 }
 
@@ -209,10 +211,12 @@ export class WebhooksService {
   private async handleUserUpsert(data: unknown): Promise<void> {
     const userData = this.extractUserData(data);
 
-    await this.upsertUser(this.prisma, {
+    const user = await this.upsertUser(this.prisma, {
       ...userData,
       isActive: true,
     });
+
+    await this.syncProfileFromClerk(this.prisma, user.id, userData);
   }
 
   private async handleUserDeleted(data: unknown): Promise<void> {
@@ -360,6 +364,60 @@ export class WebhooksService {
     });
   }
 
+  /**
+   * Syncs Clerk identity data into the user's Profile using fill-when-null semantics:
+   * - create: populates displayName and avatarUrl from Clerk (Profile is brand new)
+   * - update: no-op for displayName/avatarUrl — preserves any user-customized values
+   *
+   * This means a user who has uploaded their own avatar or set their own displayName
+   * via the profile API will never have those values overwritten by Clerk data.
+   */
+  private async syncProfileFromClerk(
+    prisma: PrismaService | PrismaTx,
+    userId: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      imageUrl?: string | null;
+      username?: string;
+    },
+  ): Promise<void> {
+    const displayName = this.buildProfileDisplayName(data);
+
+    await prisma.profile.upsert({
+      where: { userId },
+      // create: new Profile — populate Clerk data fully
+      create: {
+        userId,
+        displayName,
+        avatarUrl: data.imageUrl ?? null,
+        username: data.username ?? undefined,
+        level: 1,
+        totalExp: 0,
+        socialLinks: {},
+      },
+      // update: profile already exists — do NOT touch displayName/avatarUrl
+      // (preserves user-customized values; fill-when-null is handled by create path)
+      update: {},
+    });
+  }
+
+  private buildProfileDisplayName(data: {
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+  }): string | null {
+    const firstName = data.firstName?.trim() ?? '';
+    const lastName = data.lastName?.trim() ?? '';
+    const fullName = `${firstName} ${lastName}`.trim();
+
+    if (fullName.length > 0) {
+      return fullName;
+    }
+
+    return data.username?.trim() ?? null;
+  }
+
   private async upsertOrganization(
     prisma: PrismaService | PrismaTx,
     input: UpsertOrganizationInput,
@@ -481,6 +539,8 @@ export class WebhooksService {
     email?: string;
     firstName?: string;
     lastName?: string;
+    imageUrl?: string | null;
+    username?: string;
   } {
     const record = this.assertRecord(data, 'data de user');
     const clerkUserId = this.assertString(record.id, 'data.id');
@@ -490,6 +550,8 @@ export class WebhooksService {
       email: this.extractPrimaryEmail(record),
       firstName: this.normalizeNullableString(record.first_name) ?? undefined,
       lastName: this.normalizeNullableString(record.last_name) ?? undefined,
+      imageUrl: this.normalizeNullableString(record.image_url),
+      username: this.normalizeNullableString(record.username) ?? undefined,
     };
   }
 
