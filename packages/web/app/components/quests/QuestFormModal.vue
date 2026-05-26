@@ -23,6 +23,8 @@ const emit = defineEmits<{
   submit: [form: QuestForm];
 }>();
 
+const titleId = 'quest-form-modal-title';
+
 const form = ref<QuestForm>({
   title: '',
   description: '',
@@ -31,6 +33,21 @@ const form = ref<QuestForm>({
   due_time: '',
   reminder_minutes_before: 15,
 });
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') emit('close');
+}
+
+function lockScroll(lock: boolean) {
+  if (!import.meta.client) return;
+  if (lock) {
+    document.addEventListener('keydown', onKeydown);
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.removeEventListener('keydown', onKeydown);
+    document.body.style.overflow = '';
+  }
+}
 
 watch(
   () => props.open,
@@ -45,8 +62,11 @@ watch(
         reminder_minutes_before: 15,
       };
     }
+    lockScroll(isOpen);
   },
 );
+
+onBeforeUnmount(() => lockScroll(false));
 
 function handleSubmit() {
   if (!form.value.title.trim() || props.submitting) return;
@@ -60,32 +80,49 @@ function handleSubmit() {
       <Transition name="modal">
         <div
           v-if="open"
-          class="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4 bg-background/95 backdrop-blur-sm overflow-y-auto"
+          class="fixed inset-0 z-100 flex items-center justify-center p-3 sm:p-4 bg-background/85 backdrop-blur-md overflow-y-auto"
           style="pointer-events: auto"
+          role="dialog"
+          aria-modal="true"
+          :aria-labelledby="titleId"
           @click.self="emit('close')"
-          @keydown.esc="emit('close')"
         >
           <Card
-            class="w-full max-w-md flex flex-col max-h-[90dvh] overflow-hidden shadow-xl rounded-none border-2"
+            class="relative w-full max-w-md my-auto flex flex-col max-h-[90dvh] overflow-hidden rounded-none border-2 border-accent/40 shadow-[0_0_0_1px_oklch(0.55_0.13_190/0.25),0_0_60px_-14px_oklch(0.65_0.15_190/0.6)] motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-200"
             @click.stop
           >
+            <!-- Arcade neon strip -->
+            <div
+              class="h-1 shrink-0 bg-gradient-to-r from-accent via-primary to-accent"
+              aria-hidden="true"
+            />
+
             <CardHeader
-              class="shrink-0 flex flex-row items-center justify-between pb-3 sm:pb-4 border-b"
+              class="shrink-0 flex flex-row items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-accent/30"
             >
-              <CardTitle class="flex items-center gap-2 text-lg sm:text-xl">
-                <Swords class="h-5 w-5 text-primary" aria-hidden="true" />
-                <span>Nueva Quest</span>
-              </CardTitle>
+              <div class="flex items-center gap-2.5 min-w-0">
+                <Swords
+                  class="h-5 w-5 shrink-0 text-accent drop-shadow-[0_0_6px_oklch(0.7_0.15_190)]"
+                  aria-hidden="true"
+                />
+                <CardTitle
+                  :id="titleId"
+                  class="font-pixel text-xs sm:text-sm uppercase tracking-wider text-foreground [text-shadow:_0_0_12px_oklch(0.7_0.15_190_/_0.45)] truncate"
+                >
+                  Nueva Quest
+                </CardTitle>
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-8 w-8 sm:h-9 sm:w-9 rounded-none hover:bg-muted hover:text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                class="h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-none hover:bg-accent/10 hover:text-accent cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-accent"
                 aria-label="Cerrar formulario"
                 @click="emit('close')"
               >
                 <X class="h-4 w-4" aria-hidden="true" />
               </Button>
             </CardHeader>
+
             <CardContent class="flex-1 min-h-0 overflow-y-auto space-y-4 pt-4 sm:pt-6">
               <div class="space-y-2">
                 <Label for="title" class="font-pixel text-[9px] text-muted-foreground uppercase">
@@ -177,7 +214,7 @@ function handleSubmit() {
               </div>
               <Button
                 size="lg"
-                class="btn-game w-full h-12 rounded-none font-pixel text-[11px] shadow-[0_5px_0_0_oklch(0.42_0.16_290)] hover:shadow-[0_5px_0_0_oklch(0.52_0.2_290)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.42_0.16_290)] transition-[transform,filter,box-shadow,border-color] duration-100 motion-reduce:active:translate-y-0 cursor-pointer"
+                class="btn-game w-full h-12 rounded-none font-pixel text-[11px] shadow-[0_5px_0_0_oklch(0.35_0.15_190)] hover:shadow-[0_5px_0_0_oklch(0.45_0.18_190)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.35_0.15_190)] transition-[transform,filter,box-shadow,border-color] duration-100 motion-reduce:active:translate-y-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-accent"
                 :disabled="!form.title.trim() || submitting"
                 @click="handleSubmit"
               >
