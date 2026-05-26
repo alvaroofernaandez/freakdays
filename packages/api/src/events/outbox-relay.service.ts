@@ -1,8 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import type { Queue } from 'bullmq';
 
 import { PrismaService } from '../common/prisma/prisma.service';
+import { MetricsService } from '../observability/metrics.service';
 
 const BATCH_SIZE = 50;
 const MAX_BACKOFF_MS = 5 * 60 * 1000; // 5 min cap
@@ -18,6 +19,8 @@ export class OutboxRelayService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     @InjectQueue('domain-events') private readonly queue: Queue,
+    @Optional()
+    private readonly metricsService?: MetricsService,
   ) {}
 
   onModuleInit() {
@@ -97,5 +100,18 @@ export class OutboxRelayService implements OnModuleInit {
       durationMs: Date.now() - start,
       success: true,
     });
+
+    // Measure outbox backlog after this drain pass and report to metrics.
+    // Fire-and-forget: a count failure must not affect the relay.
+    if (this.metricsService) {
+      try {
+        const pending = await this.prisma.outboxEvent.count({
+          where: { status: 'pending', availableAt: { lte: new Date() } },
+        });
+        this.metricsService.setOutboxBacklog(pending);
+      } catch (err: unknown) {
+        this.logger.warn(`OutboxRelay: backlog count failed — ${String(err)}`);
+      }
+    }
   }
 }

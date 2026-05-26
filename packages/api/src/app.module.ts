@@ -31,6 +31,7 @@ import { GamificationModule } from './gamification/gamification.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { SocialModule } from './social/social.module';
+import { ObservabilityModule } from './observability/observability.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 
 @Module({
@@ -62,6 +63,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
         },
       },
     }),
+    ObservabilityModule,
     CommonModule,
     EventsModule,
     FeedModule,

@@ -1,9 +1,10 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 
 import { PrismaService } from '../common/prisma/prisma.service';
 import type { HandlerLogContext } from '../observability/handler-log-context.interface';
+import { MetricsService } from '../observability/metrics.service';
 import type { EventType } from './event-types';
 import type { DomainEvent } from './event.types';
 import { DOMAIN_EVENT_HANDLERS } from './events.constants';
@@ -19,6 +20,8 @@ export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
     private readonly prisma: PrismaService,
     @Inject(DOMAIN_EVENT_HANDLERS)
     private readonly handlers: DomainEventHandler[],
+    @Optional()
+    private readonly metricsService?: MetricsService,
   ) {
     super();
   }
@@ -81,6 +84,7 @@ export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
             skipped: true,
           };
           this.logger.log(ctx);
+          this.metricsService?.recordHandler(ctx);
           return;
         }
 
@@ -98,6 +102,7 @@ export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
         error: err instanceof Error ? err.message : String(err),
       };
       this.logger.error(ctx);
+      this.metricsService?.recordHandler(ctx);
       throw err;
     }
 
@@ -107,6 +112,8 @@ export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
       success: true,
     };
     this.logger.log(ctx);
+    this.metricsService?.recordHandler(ctx);
+    this.metricsService?.observeDuration(handler.name, event.type, ctx.durationMs);
 
     // Flush post-commit deferred effects. Each fn is wrapped in try/catch so a
     // failed socket emit never fails the BullMQ job (push is best-effort).
