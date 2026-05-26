@@ -35,12 +35,14 @@ defineProps<Props>();
   >
     <Card
       v-if="favoriteAnime"
-      class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 to-transparent hover:border-primary/40 transition-colors"
+      class="relative overflow-hidden rounded-none border-2 border-primary/20 bg-linear-to-br from-primary/5 to-transparent hover:border-primary/40 motion-safe:transition-colors motion-safe:duration-200"
     >
       <div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-none bg-primary/20 flex items-center justify-center shrink-0"
+          >
             <ImageIcon class="h-6 w-6 text-primary" />
           </div>
           <div class="flex-1 min-w-0">
@@ -52,12 +54,14 @@ defineProps<Props>();
     </Card>
     <Card
       v-if="favoriteManga"
-      class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 to-transparent hover:border-primary/40 transition-colors"
+      class="relative overflow-hidden rounded-none border-2 border-primary/20 bg-linear-to-br from-primary/5 to-transparent hover:border-primary/40 motion-safe:transition-colors motion-safe:duration-200"
     >
       <div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-none bg-primary/20 flex items-center justify-center shrink-0"
+          >
             <ImageIcon class="h-6 w-6 text-primary" />
           </div>
           <div class="flex-1 min-w-0">
@@ -69,12 +73,14 @@ defineProps<Props>();
     </Card>
     <Card
       v-if="profile.location"
-      class="relative overflow-hidden border-accent/20 bg-linear-to-br from-accent/5 to-transparent hover:border-accent/40 transition-colors"
+      class="relative overflow-hidden rounded-none border-2 border-accent/20 bg-linear-to-br from-accent/5 to-transparent hover:border-accent/40 motion-safe:transition-colors motion-safe:duration-200"
     >
       <div class="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-none bg-accent/20 flex items-center justify-center shrink-0"
+          >
             <MapPin class="h-6 w-6 text-accent" />
           </div>
           <div class="flex-1 min-w-0">
@@ -86,12 +92,14 @@ defineProps<Props>();
     </Card>
     <Card
       v-if="profile.website"
-      class="relative overflow-hidden border-accent/20 bg-linear-to-br from-accent/5 to-transparent hover:border-accent/40 transition-colors"
+      class="relative overflow-hidden rounded-none border-2 border-accent/20 bg-linear-to-br from-accent/5 to-transparent hover:border-accent/40 motion-safe:transition-colors motion-safe:duration-200"
     >
       <div class="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-none bg-accent/20 flex items-center justify-center shrink-0"
+          >
             <Globe class="h-6 w-6 text-accent" />
           </div>
           <div class="flex-1 min-w-0">
@@ -111,12 +119,14 @@ defineProps<Props>();
     </Card>
     <Card
       v-if="profile.socialLinks?.twitter"
-      class="relative overflow-hidden border-primary/20 bg-linear-to-br from-primary/5 to-transparent hover:border-primary/40 transition-colors"
+      class="relative overflow-hidden rounded-none border-2 border-primary/20 bg-linear-to-br from-primary/5 to-transparent hover:border-primary/40 motion-safe:transition-colors motion-safe:duration-200"
     >
       <div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-none bg-primary/20 flex items-center justify-center shrink-0"
+          >
             <Twitter class="h-6 w-6 text-primary" />
           </div>
           <div class="flex-1 min-w-0">
@@ -128,13 +138,13 @@ defineProps<Props>();
     </Card>
     <Card
       v-if="profile.socialLinks?.instagram"
-      class="relative overflow-hidden border-secondary/20 bg-linear-to-br from-secondary/5 to-transparent hover:border-secondary/40 transition-colors"
+      class="relative overflow-hidden rounded-none border-2 border-secondary/20 bg-linear-to-br from-secondary/5 to-transparent hover:border-secondary/40 motion-safe:transition-colors motion-safe:duration-200"
     >
       <div class="absolute top-0 right-0 w-24 h-24 bg-secondary/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
           <div
-            class="w-12 h-12 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0"
+            class="w-12 h-12 rounded-none bg-secondary/20 flex items-center justify-center shrink-0"
           >
             <Instagram class="h-6 w-6 text-secondary" />
           </div>
@@ -147,12 +157,14 @@ defineProps<Props>();
     </Card>
     <Card
       v-if="profile.socialLinks?.discord"
-      class="relative overflow-hidden border-accent/20 bg-linear-to-br from-accent/5 to-transparent hover:border-accent/40 transition-colors"
+      class="relative overflow-hidden rounded-none border-2 border-accent/20 bg-linear-to-br from-accent/5 to-transparent hover:border-accent/40 motion-safe:transition-colors motion-safe:duration-200"
     >
       <div class="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
       <CardContent class="relative p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center shrink-0">
+          <div
+            class="w-12 h-12 rounded-none bg-accent/20 flex items-center justify-center shrink-0"
+          >
             <MessageSquare class="h-6 w-6 text-accent" />
           </div>
           <div class="flex-1 min-w-0">
