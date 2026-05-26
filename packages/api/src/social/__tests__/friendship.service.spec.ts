@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { FriendshipStatus } from '@prisma/client';
+import { PENDING_DIRECTION } from '../social.types';
 import { FriendshipService } from '../friendship.service';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -247,6 +248,21 @@ describe('FriendshipService', () => {
         ForbiddenException,
       );
     });
+
+    it('(c) cancelling an accepted friendship → ConflictException (non-pending guard)', async () => {
+      const row = makeRow({
+        requesterId: 'user-aaa',
+        addresseeId: 'user-zzz',
+        initiatorId: 'user-aaa',
+        status: FriendshipStatus.accepted,
+      });
+      prisma.friendship.findUnique.mockResolvedValue(row);
+
+      await expect(service.cancelRequest('user-aaa', 'user-zzz')).rejects.toThrow(
+        ConflictException,
+      );
+      expect(prisma.friendship.delete).not.toHaveBeenCalled();
+    });
   });
 
   // ─── blockUser ────────────────────────────────────────────────────────────
@@ -303,6 +319,77 @@ describe('FriendshipService', () => {
     it('(b) returns empty array when no accepted friends', async () => {
       prisma.friendship.findMany.mockResolvedValue([]);
       const result = await service.listFriends('user-aaa');
+      expect(result).toEqual([]);
+    });
+  });
+
+  // ─── listPendingRequests ──────────────────────────────────────────────────
+
+  describe('listPendingRequests', () => {
+    it('(a) outgoing request: initiatorId === callerId → direction outgoing', async () => {
+      // user-aaa initiated → outgoing for user-aaa
+      const outboundRow = makeRow({
+        requesterId: 'user-aaa',
+        addresseeId: 'user-zzz',
+        initiatorId: 'user-aaa',
+        status: FriendshipStatus.pending,
+      });
+      prisma.friendship.findMany.mockResolvedValue([outboundRow]);
+
+      const result = await service.listPendingRequests('user-aaa');
+
+      expect(result).toHaveLength(1);
+      expect(result.at(0)?.direction).toBe(PENDING_DIRECTION.outgoing);
+      expect(result.at(0)?.id).toBe('fs-1');
+    });
+
+    it('(b) incoming request: initiatorId !== callerId → direction incoming', async () => {
+      // user-zzz initiated → incoming for user-aaa
+      const inboundRow = makeRow({
+        requesterId: 'user-aaa',
+        addresseeId: 'user-zzz',
+        initiatorId: 'user-zzz',
+        status: FriendshipStatus.pending,
+      });
+      prisma.friendship.findMany.mockResolvedValue([inboundRow]);
+
+      const result = await service.listPendingRequests('user-aaa');
+
+      expect(result).toHaveLength(1);
+      expect(result.at(0)?.direction).toBe(PENDING_DIRECTION.incoming);
+    });
+
+    it('(c) both directions returned together with correct labels', async () => {
+      const outboundRow = makeRow({
+        id: 'fs-out',
+        requesterId: 'user-aaa',
+        addresseeId: 'user-eee',
+        initiatorId: 'user-aaa',
+        status: FriendshipStatus.pending,
+      });
+      const inboundRow = makeRow({
+        id: 'fs-in',
+        requesterId: 'user-aaa',
+        addresseeId: 'user-fff',
+        initiatorId: 'user-fff',
+        status: FriendshipStatus.pending,
+      });
+      prisma.friendship.findMany.mockResolvedValue([outboundRow, inboundRow]);
+
+      const result = await service.listPendingRequests('user-aaa');
+
+      expect(result).toHaveLength(2);
+      const out = result.find((r) => r.id === 'fs-out');
+      const inc = result.find((r) => r.id === 'fs-in');
+      expect(out?.direction).toBe(PENDING_DIRECTION.outgoing);
+      expect(inc?.direction).toBe(PENDING_DIRECTION.incoming);
+    });
+
+    it('(d) returns empty array when no pending requests', async () => {
+      prisma.friendship.findMany.mockResolvedValue([]);
+
+      const result = await service.listPendingRequests('user-aaa');
+
       expect(result).toEqual([]);
     });
   });

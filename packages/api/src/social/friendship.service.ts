@@ -10,6 +10,7 @@ import { FriendshipStatus } from '@prisma/client';
 
 import { PrismaService } from '../common/prisma/prisma.service';
 import { normalizeFriendshipPair } from './normalize-friendship-pair';
+import { PENDING_DIRECTION, type PendingRequestWithDirection } from './social.types';
 
 @Injectable()
 export class FriendshipService {
@@ -99,6 +100,10 @@ export class FriendshipService {
       throw new ForbiddenException('Only the initiator can cancel the request');
     }
 
+    if (row.status !== FriendshipStatus.pending) {
+      throw new ConflictException('Only pending friendships can be cancelled');
+    }
+
     await this.prisma.friendship.delete({ where: { id: row.id } });
   }
 
@@ -168,6 +173,27 @@ export class FriendshipService {
         ],
       },
     });
+  }
+
+  /**
+   * Returns all pending requests for userId — both inbound and outbound —
+   * each tagged with a direction label.
+   * - 'outgoing': caller is the initiator
+   * - 'incoming': caller is not the initiator
+   */
+  async listPendingRequests(userId: string): Promise<PendingRequestWithDirection[]> {
+    const rows = await this.prisma.friendship.findMany({
+      where: {
+        status: FriendshipStatus.pending,
+        OR: [{ requesterId: userId }, { addresseeId: userId }],
+      },
+    });
+
+    return rows.map((row) => ({
+      ...row,
+      direction:
+        row.initiatorId === userId ? PENDING_DIRECTION.outgoing : PENDING_DIRECTION.incoming,
+    }));
   }
 
   // ─── Private helpers ──────────────────────────────────────────────────────
