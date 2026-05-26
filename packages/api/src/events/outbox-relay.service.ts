@@ -25,14 +25,26 @@ export class OutboxRelayService implements OnModuleInit {
   }
 
   async drain(): Promise<void> {
-    const rows = await this.prisma.outboxEvent.findMany({
-      where: {
-        status: 'pending',
-        availableAt: { lte: new Date() },
-      },
-      take: BATCH_SIZE,
-      orderBy: { availableAt: 'asc' },
-    });
+    const start = Date.now();
+
+    let rows: Awaited<ReturnType<typeof this.prisma.outboxEvent.findMany>>;
+    try {
+      rows = await this.prisma.outboxEvent.findMany({
+        where: {
+          status: 'pending',
+          availableAt: { lte: new Date() },
+        },
+        take: BATCH_SIZE,
+        orderBy: { availableAt: 'asc' },
+      });
+    } catch (err: unknown) {
+      this.logger.error({
+        durationMs: Date.now() - start,
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
+      throw err;
+    }
 
     if (rows.length === 0) {
       return;
@@ -79,5 +91,11 @@ export class OutboxRelayService implements OnModuleInit {
         });
       }
     }
+
+    this.logger.log({
+      processedCount: rows.length,
+      durationMs: Date.now() - start,
+      success: true,
+    });
   }
 }

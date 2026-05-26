@@ -3,6 +3,7 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 
 import { PrismaService } from '../common/prisma/prisma.service';
+import type { HandlerLogContext } from '../observability/handler-log-context.interface';
 import type { EventType } from './event-types';
 import type { DomainEvent } from './event.types';
 import { DOMAIN_EVENT_HANDLERS } from './events.constants';
@@ -58,24 +59,54 @@ export class DomainEventsProcessor extends WorkerHost implements OnModuleInit {
       deferred.push(fn);
     };
 
-    await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.eventHandlerLog.findUnique({
-        where: { eventId_handler: { eventId: event.eventId, handler: handler.name } },
+    const baseCtx = {
+      handler: handler.name,
+      eventType: event.type,
+      eventId: event.eventId,
+    } as const;
+
+    const start = Date.now();
+
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const existing = await tx.eventHandlerLog.findUnique({
+          where: { eventId_handler: { eventId: event.eventId, handler: handler.name } },
+        });
+
+        if (existing) {
+          const ctx: HandlerLogContext = {
+            ...baseCtx,
+            durationMs: Date.now() - start,
+            success: true,
+            skipped: true,
+          };
+          this.logger.log(ctx);
+          return;
+        }
+
+        await handler.handle(event, tx, defer);
+
+        await tx.eventHandlerLog.create({
+          data: { eventId: event.eventId, handler: handler.name },
+        });
       });
+    } catch (err: unknown) {
+      const ctx: HandlerLogContext = {
+        ...baseCtx,
+        durationMs: Date.now() - start,
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
+      this.logger.error(ctx);
+      throw err;
+    }
 
-      if (existing) {
-        this.logger.log(
-          `DomainEventsProcessor: handler=${handler.name} already processed eventId=${event.eventId} — no-op`,
-        );
-        return;
-      }
-
-      await handler.handle(event, tx, defer);
-
-      await tx.eventHandlerLog.create({
-        data: { eventId: event.eventId, handler: handler.name },
-      });
-    });
+    const ctx: HandlerLogContext = {
+      ...baseCtx,
+      durationMs: Date.now() - start,
+      success: true,
+    };
+    this.logger.log(ctx);
 
     // Flush post-commit deferred effects. Each fn is wrapped in try/catch so a
     // failed socket emit never fails the BullMQ job (push is best-effort).
