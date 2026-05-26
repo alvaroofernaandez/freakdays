@@ -99,35 +99,37 @@ function handleEnterParty(partyId: string) {
       role="banner"
     >
       <div>
+        <p
+          class="flex items-center gap-1 font-pixel text-[8px] text-secondary/80 uppercase tracking-wider mb-1"
+        >
+          <span class="text-secondary">▸</span> PARTY SYSTEM
+        </p>
         <h1 class="text-lg sm:text-xl md:text-2xl font-bold flex items-center gap-2">
-          <Users class="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" aria-hidden="true" />
+          <Users class="h-5 w-5 sm:h-6 sm:w-6 text-secondary shrink-0" aria-hidden="true" />
           <span>Party System</span>
         </h1>
-        <p class="text-muted-foreground text-xs sm:text-sm mt-1">
-          Crea grupos con tus amigos y comparte tus progresos
-        </p>
       </div>
       <div class="flex gap-2 sm:gap-2" role="group" aria-label="Acciones principales">
         <Button
           variant="outline"
           size="sm"
-          class="flex-1 sm:flex-none min-h-[44px] sm:min-h-0"
+          class="btn-game flex-1 sm:flex-none rounded-none font-pixel text-[9px] min-h-[44px] sm:min-h-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Unirse a una party con código de invitación"
           @click="joinModal.open()"
         >
           <UserPlus class="h-4 w-4 sm:mr-2" aria-hidden="true" />
-          <span class="hidden sm:inline">Unirse</span>
-          <span class="sm:hidden">Unirse</span>
+          <span class="hidden sm:inline">UNIRSE</span>
+          <span class="sm:hidden">UNIRSE</span>
         </Button>
         <Button
           size="sm"
-          class="flex-1 sm:flex-none glow-primary min-h-[44px] sm:min-h-0"
+          class="btn-game flex-1 sm:flex-none rounded-none font-pixel text-[9px] min-h-[44px] sm:min-h-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Crear nueva party"
           @click="createModal.open()"
         >
           <Plus class="h-4 w-4 sm:mr-2" aria-hidden="true" />
-          <span class="hidden sm:inline">Crear Party</span>
-          <span class="sm:hidden">Crear</span>
+          <span class="hidden sm:inline">CREAR PARTY</span>
+          <span class="sm:hidden">CREAR</span>
         </Button>
       </div>
     </header>
@@ -139,11 +141,15 @@ function handleEnterParty(partyId: string) {
       aria-live="polite"
       aria-label="Cargando parties"
     >
-      <h2
-        class="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider px-1"
+      <p
+        class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/70 uppercase tracking-wider px-1"
       >
-        Cargando...
-      </h2>
+        <span
+          class="inline-block w-1.5 h-1.5 bg-secondary/60 motion-safe:animate-pulse"
+          aria-hidden="true"
+        />
+        CARGANDO…
+      </p>
       <div class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" role="list">
         <div v-for="i in 3" :key="i" role="listitem">
           <PartyCardSkeleton />
@@ -152,11 +158,15 @@ function handleEnterParty(partyId: string) {
     </section>
 
     <section v-else-if="hasParties" class="space-y-3 sm:space-y-4">
-      <h2
-        class="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider px-1"
+      <p
+        class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider px-1"
       >
-        Tus Parties ({{ parties.length }})
-      </h2>
+        <span
+          class="inline-block w-1.5 h-1.5 bg-secondary motion-safe:animate-pulse"
+          aria-hidden="true"
+        />
+        TUS PARTIES ({{ parties.length }})
+      </p>
 
       <div
         class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"

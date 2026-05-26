@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { DatePicker } from '@/components/ui/date-picker';
-import { Loader2, X } from 'lucide-vue-next';
+import { Loader2, Swords, X } from 'lucide-vue-next';
 import type { QuestDifficulty } from '~~/domain/types';
 import { DIFFICULTY_EXP } from '~~/domain/types';
 
@@ -65,50 +65,64 @@ function handleSubmit() {
           @click.self="emit('close')"
           @keydown.esc="emit('close')"
         >
-          <Card class="w-full max-w-md my-auto shadow-xl border-2" @click.stop>
+          <Card class="w-full max-w-md my-auto shadow-xl rounded-none border-2" @click.stop>
             <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
-              <CardTitle class="text-lg sm:text-xl">Nueva Quest</CardTitle>
+              <CardTitle class="flex items-center gap-2 text-lg sm:text-xl">
+                <Swords class="h-5 w-5 text-primary" aria-hidden="true" />
+                <span>Nueva Quest</span>
+              </CardTitle>
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-8 w-8 sm:h-9 sm:w-9 hover:bg-muted hover:text-foreground cursor-pointer"
+                class="h-8 w-8 sm:h-9 sm:w-9 rounded-none hover:bg-muted hover:text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Cerrar formulario"
                 @click="emit('close')"
               >
-                <X class="h-4 w-4" />
+                <X class="h-4 w-4" aria-hidden="true" />
               </Button>
             </CardHeader>
             <CardContent class="space-y-4 pt-4 sm:pt-6">
               <div class="space-y-2">
-                <Label for="title" class="text-sm font-medium">Título</Label>
+                <Label for="title" class="font-pixel text-[9px] text-muted-foreground uppercase">
+                  <span class="text-primary">▸</span> TÍTULO
+                </Label>
                 <Input
                   id="title"
                   v-model="form.title"
                   placeholder="Ej: Meditar 10 minutos"
-                  class="w-full h-11 text-base"
+                  class="w-full h-11 text-base rounded-none border-2"
                   :disabled="submitting"
                   autofocus
                   @keyup.enter="handleSubmit"
                 />
               </div>
               <div class="space-y-2">
-                <Label for="description" class="text-sm font-medium">Descripción (opcional)</Label>
+                <Label
+                  for="description"
+                  class="font-pixel text-[9px] text-muted-foreground uppercase"
+                >
+                  <span class="text-accent">▸</span> DESCRIPCIÓN
+                  <span class="text-muted-foreground/50">(OPCIONAL)</span>
+                </Label>
                 <Input
                   id="description"
                   v-model="form.description"
                   placeholder="Detalles de la misión..."
-                  class="w-full h-11 text-base"
+                  class="w-full h-11 text-base rounded-none border-2"
                   :disabled="submitting"
                 />
               </div>
               <div class="space-y-2">
-                <Label class="text-sm font-medium">Dificultad</Label>
+                <Label class="font-pixel text-[9px] text-muted-foreground uppercase">
+                  <span class="text-secondary">▸</span> DIFICULTAD
+                </Label>
                 <div class="grid grid-cols-4 gap-2">
                   <Button
                     v-for="(exp, diff) in DIFFICULTY_EXP"
                     :key="diff"
                     :variant="form.difficulty === diff ? 'default' : 'outline'"
                     size="sm"
-                    class="text-xs"
+                    class="rounded-none font-pixel text-[8px] uppercase cursor-pointer"
                     :disabled="submitting"
                     @click="form.difficulty = diff as QuestDifficulty"
                   >
@@ -117,7 +131,10 @@ function handleSubmit() {
                 </div>
               </div>
               <div class="space-y-2">
-                <Label for="due_date" class="text-sm font-medium">Fecha límite (opcional)</Label>
+                <Label for="due_date" class="font-pixel text-[9px] text-muted-foreground uppercase">
+                  <span class="text-exp-medium">▸</span> FECHA LÍMITE
+                  <span class="text-muted-foreground/50">(OPCIONAL)</span>
+                </Label>
                 <DatePicker
                   id="due_date"
                   v-model="form.due_date"
@@ -127,36 +144,41 @@ function handleSubmit() {
                 />
               </div>
               <div v-if="form.due_date" class="space-y-2">
-                <Label for="due_time" class="text-sm font-medium">Hora límite (opcional)</Label>
+                <Label for="due_time" class="font-pixel text-[9px] text-muted-foreground uppercase">
+                  <span class="text-exp-medium">▸</span> HORA LÍMITE
+                  <span class="text-muted-foreground/50">(OPCIONAL)</span>
+                </Label>
                 <Input
                   id="due_time"
                   v-model="form.due_time"
                   type="time"
-                  class="w-full h-11 text-base"
+                  class="w-full h-11 text-base rounded-none border-2"
                   :disabled="submitting"
                 />
               </div>
               <div v-if="form.due_date" class="space-y-2">
-                <Label for="reminder" class="text-sm font-medium"
-                  >Recordatorio (minutos antes)</Label
-                >
+                <Label for="reminder" class="font-pixel text-[9px] text-muted-foreground uppercase">
+                  <span class="text-exp-easy">▸</span> RECORDATORIO
+                  <span class="text-muted-foreground/50">(MIN ANTES)</span>
+                </Label>
                 <Input
                   id="reminder"
                   v-model.number="form.reminder_minutes_before"
                   type="number"
                   min="0"
-                  class="w-full h-11 text-base"
+                  class="w-full h-11 text-base rounded-none border-2"
                   :disabled="submitting"
                 />
               </div>
               <Button
                 size="lg"
-                class="w-full h-12 text-base font-semibold mt-2"
+                class="btn-game w-full h-12 rounded-none font-pixel text-[11px] shadow-[0_5px_0_0_oklch(0.42_0.16_290)] hover:shadow-[0_5px_0_0_oklch(0.52_0.2_290)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.42_0.16_290)] transition-[transform,filter,box-shadow,border-color] duration-100 motion-reduce:active:translate-y-0 cursor-pointer"
                 :disabled="!form.title.trim() || submitting"
                 @click="handleSubmit"
               >
-                <Loader2 v-if="submitting" class="animate-spin h-5 w-5 mr-2" />
-                Crear Quest
+                <Loader2 v-if="submitting" class="animate-spin h-5 w-5 mr-2" aria-hidden="true" />
+                <Swords v-else class="h-4 w-4 mr-2" aria-hidden="true" />
+                CREAR QUEST
               </Button>
             </CardContent>
           </Card>

@@ -148,34 +148,36 @@ function handleKeydown(e: KeyboardEvent) {
         <Button
           variant="ghost"
           size="icon"
-          class="h-10 w-10 sm:h-8 sm:w-8 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-[32px]"
+          class="h-10 w-10 sm:h-8 sm:w-8 rounded-none touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-[32px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Mes anterior"
           @click="previousMonth"
         >
-          <ChevronLeft class="h-4 w-4 sm:h-4 sm:w-4" />
+          <ChevronLeft class="h-4 w-4" aria-hidden="true" />
         </Button>
-        <h2 class="text-sm sm:text-base font-bold capitalize min-w-0 flex-1 text-center px-1">
+        <h2
+          class="font-pixel text-[9px] sm:text-[10px] text-accent uppercase min-w-0 flex-1 text-center px-1 tracking-wider"
+        >
           {{ monthName }}
         </h2>
         <Button
           variant="ghost"
           size="icon"
-          class="h-10 w-10 sm:h-8 sm:w-8 touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-[32px]"
+          class="h-10 w-10 sm:h-8 sm:w-8 rounded-none touch-manipulation min-h-[44px] min-w-[44px] sm:min-h-[32px] sm:min-w-[32px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Mes siguiente"
           @click="nextMonth"
         >
-          <ChevronRight class="h-4 w-4 sm:h-4 sm:w-4" />
+          <ChevronRight class="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
       <Button
         variant="outline"
         size="sm"
-        class="h-10 sm:h-8 px-3 sm:px-3 text-xs touch-manipulation shrink-0 min-h-[44px] sm:min-h-[32px]"
+        class="btn-game h-10 sm:h-8 px-3 sm:px-3 rounded-none font-pixel text-[8px] touch-manipulation shrink-0 min-h-[44px] sm:min-h-[32px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Ir a hoy"
         @click="goToToday"
       >
-        <CalendarIcon class="h-4 w-4 sm:h-3.5 sm:w-3.5 sm:mr-1.5" />
-        <span class="hidden sm:inline">Hoy</span>
+        <CalendarIcon class="h-4 w-4 sm:h-3.5 sm:w-3.5 sm:mr-1.5" aria-hidden="true" />
+        <span class="hidden sm:inline">HOY</span>
       </Button>
     </div>
 
@@ -186,7 +188,7 @@ function handleKeydown(e: KeyboardEvent) {
         <div
           v-for="day in weekDays"
           :key="day"
-          class="text-center text-[10px] sm:text-sm font-semibold text-muted-foreground py-1 sm:py-1.5 px-0.5 sm:px-1"
+          class="text-center font-pixel text-[8px] sm:text-[9px] text-muted-foreground/70 py-1 sm:py-1.5 px-0.5 sm:px-1 uppercase tracking-wider"
           role="columnheader"
         >
           <span class="hidden sm:inline">{{ day }}</span>

@@ -4,6 +4,15 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useProfile } from '../../../app/composables/useProfile';
 import { useAuthStore } from '../../../stores/auth';
 
+vi.mock('@freakdays/domain', () => ({
+  computeLevel: vi.fn((exp: number) => Math.floor(exp / 100) + 1),
+  expForNextLevel: vi.fn((exp: number) => {
+    const level = Math.floor(exp / 100) + 1;
+    const current = exp - (level - 1) * 100;
+    return { current, needed: 100, progress: (current / 100) * 100 };
+  }),
+}));
+
 const mockFetch = vi.fn();
 
 const mockApi = {
@@ -143,6 +152,28 @@ describe('useProfile', () => {
       key: 'profiles/clerk_123/avatars/test.jpg',
     });
     expect(url).toBe('https://assets.example.com/profiles/clerk_123/avatars/test.jpg');
+  });
+
+  it('calculateLevel delegates to computeLevel from @freakdays/domain', async () => {
+    const { computeLevel } = await import('@freakdays/domain');
+    const profileApi = useProfile();
+
+    const result = profileApi.calculateLevel(205);
+
+    expect(computeLevel).toHaveBeenCalledWith(205);
+    expect(result).toBe(3);
+  });
+
+  it('expForNextLevel delegates to expForNextLevel from @freakdays/domain', async () => {
+    const domain = await import('@freakdays/domain');
+    const profileApi = useProfile();
+
+    const result = profileApi.expForNextLevel(150);
+
+    expect(domain.expForNextLevel).toHaveBeenCalledWith(150);
+    expect(result.current).toBe(50);
+    expect(result.needed).toBe(100);
+    expect(result.progress).toBe(50);
   });
 
   it('si upload banner API falla retorna null sin fallback legacy', async () => {

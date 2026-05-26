@@ -36,37 +36,48 @@ const unreadCount = computed(() => props.notifications.filter((n) => !n.read_at)
           @click.self="emit('close')"
           @keydown.esc="emit('close')"
         >
-          <Card class="w-full max-w-md shadow-xl border-2" @click.stop>
+          <Card class="w-full max-w-md shadow-xl rounded-none border-2" @click.stop>
             <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
               <CardTitle class="text-lg sm:text-xl flex items-center gap-2">
-                <Bell class="h-5 w-5" />
-                Notificaciones
-                <Badge v-if="unreadCount > 0" variant="destructive" class="ml-2">
+                <Bell class="h-5 w-5 text-primary" aria-hidden="true" />
+                <span>Notificaciones</span>
+                <Badge
+                  v-if="unreadCount > 0"
+                  variant="destructive"
+                  class="ml-2 font-pixel text-[9px]"
+                >
                   {{ unreadCount }}
                 </Badge>
               </CardTitle>
               <Button
                 variant="ghost"
                 size="icon"
-                class="h-8 w-8 sm:h-9 sm:w-9 hover:bg-muted hover:text-foreground cursor-pointer"
+                class="h-8 w-8 sm:h-9 sm:w-9 rounded-none hover:bg-muted hover:text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Cerrar notificaciones"
                 @click="emit('close')"
               >
-                <X class="h-4 w-4" />
+                <X class="h-4 w-4" aria-hidden="true" />
               </Button>
             </CardHeader>
             <CardContent class="pt-4 sm:pt-6">
-              <div v-if="notifications.length === 0" class="text-center py-8">
-                <p class="text-muted-foreground text-sm">No hay notificaciones</p>
+              <div v-if="notifications.length === 0" class="text-center py-8 space-y-3">
+                <div class="flex justify-center">
+                  <Bell class="h-10 w-10 text-muted-foreground/30" aria-hidden="true" />
+                </div>
+                <p class="font-pixel text-[9px] text-muted-foreground/70 uppercase">
+                  SIN NOTIFICACIONES
+                </p>
               </div>
               <div v-else class="space-y-2 max-h-[60vh] overflow-y-auto">
-                <div
+                <button
                   v-for="notification in notifications"
                   :key="notification.id"
+                  type="button"
                   :class="[
-                    'p-3 rounded-lg border transition-colors cursor-pointer',
+                    'w-full text-left p-3 rounded-none border-2 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     notification.read_at
                       ? 'bg-muted/30 border-border/50'
-                      : 'bg-primary/5 border-primary/20',
+                      : 'bg-primary/5 border-primary/20 hover:border-primary/40',
                   ]"
                   @click="emit('markRead', notification.id)"
                 >
@@ -78,16 +89,17 @@ const unreadCount = computed(() => props.notifications.filter((n) => !n.read_at)
                       >
                         {{ notification.message }}
                       </p>
-                      <p class="text-xs text-muted-foreground mt-1">
+                      <p class="font-pixel text-[8px] text-muted-foreground mt-1">
                         {{ new Date(notification.sent_at).toLocaleString('es-ES') }}
                       </p>
                     </div>
                     <div
                       v-if="!notification.read_at"
-                      class="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5"
+                      class="w-2 h-2 bg-primary shrink-0 mt-1.5 motion-safe:animate-pulse"
+                      aria-hidden="true"
                     />
                   </div>
-                </div>
+                </button>
               </div>
             </CardContent>
           </Card>

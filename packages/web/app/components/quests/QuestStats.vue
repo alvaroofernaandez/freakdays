@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Card, CardContent } from '@/components/ui/card';
 import { Clock, Trophy, Zap } from 'lucide-vue-next';
 
 interface Props {
@@ -9,88 +8,196 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const NOTCH =
+  'polygon(0 4px,4px 4px,4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px))';
+
+const CELLS = 10;
+
+function filledCells(value: number) {
+  return Math.max(0, Math.min(value, CELLS));
+}
+
+function displayValue(value: number) {
+  return String(value).padStart(2, '0');
+}
 </script>
 
 <template>
   <div class="grid grid-cols-3 gap-2 sm:gap-3">
+    <!-- Pending -->
     <Card
-      class="group relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 hover:border-primary/50 hover:shadow-md hover:shadow-primary/10 transition-all duration-300"
+      class="crt-scanlines group relative overflow-hidden rounded-none border-2 border-primary/40 bg-card/40 hover:shadow-[0_0_30px_-6px_var(--color-primary)] transition-all duration-200"
     >
-      <div
-        class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      <span
+        class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary/60"
+        aria-hidden="true"
       />
-      <div
-        class="absolute top-0 right-0 w-20 h-20 bg-primary/10 rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-300"
+      <span
+        class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary/60"
+        aria-hidden="true"
       />
-      <CardContent class="relative text-center py-3 sm:py-4 px-2 sm:px-3">
-        <div class="flex flex-col items-center gap-1.5 sm:gap-2">
-          <div
-            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/30 transition-all duration-300"
-          >
-            <Clock class="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+      <span
+        class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary/60"
+        aria-hidden="true"
+      />
+      <span
+        class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary/60"
+        aria-hidden="true"
+      />
+      <CardContent class="relative p-4 sm:p-5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0 space-y-1.5">
+            <p
+              class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider"
+            >
+              <span
+                class="inline-block w-1.5 h-1.5 bg-primary motion-safe:animate-pulse"
+                aria-hidden="true"
+              />
+              PENDIENTES
+            </p>
+            <p
+              class="font-pixel text-3xl sm:text-4xl leading-none tabular-nums text-primary drop-shadow-[0_0_12px_currentColor]"
+            >
+              {{ displayValue(pending) }}
+            </p>
           </div>
-          <div class="text-xl sm:text-2xl font-bold text-primary leading-none">{{ pending }}</div>
           <div
-            class="text-[10px] sm:text-xs text-muted-foreground/90 font-medium uppercase tracking-wide"
+            class="pixelated grid place-items-center w-11 h-11 shrink-0 bg-primary/15 transition-transform duration-200 group-hover:scale-110"
+            :style="{ clipPath: NOTCH }"
+            aria-hidden="true"
           >
-            Pendientes
+            <Clock class="h-5 w-5 text-primary" />
           </div>
+        </div>
+        <div class="mt-3 flex gap-1" aria-hidden="true">
+          <span
+            v-for="i in CELLS"
+            :key="i"
+            :class="[
+              'h-1.5 flex-1 transition-colors duration-300',
+              i <= filledCells(pending) ? 'bg-primary' : 'bg-white/10',
+            ]"
+          />
         </div>
       </CardContent>
     </Card>
 
+    <!-- Completed -->
     <Card
-      class="group relative overflow-hidden border-exp-easy/30 bg-gradient-to-br from-exp-easy/15 via-exp-easy/10 to-exp-easy/5 hover:border-exp-easy/50 hover:shadow-md hover:shadow-exp-easy/10 transition-all duration-300"
+      class="crt-scanlines group relative overflow-hidden rounded-none border-2 border-exp-easy/40 bg-card/40 hover:shadow-[0_0_30px_-6px_var(--color-exp-easy)] transition-all duration-200"
     >
-      <div
-        class="absolute inset-0 bg-gradient-to-br from-exp-easy/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      <span
+        class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-exp-easy/60"
+        aria-hidden="true"
       />
-      <div
-        class="absolute top-0 right-0 w-20 h-20 bg-exp-easy/10 rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-300"
+      <span
+        class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-exp-easy/60"
+        aria-hidden="true"
       />
-      <CardContent class="relative text-center py-3 sm:py-4 px-2 sm:px-3">
-        <div class="flex flex-col items-center gap-1.5 sm:gap-2">
+      <span
+        class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-exp-easy/60"
+        aria-hidden="true"
+      />
+      <span
+        class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-exp-easy/60"
+        aria-hidden="true"
+      />
+      <CardContent class="relative p-4 sm:p-5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0 space-y-1.5">
+            <p
+              class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider"
+            >
+              <span
+                class="inline-block w-1.5 h-1.5 bg-exp-easy motion-safe:animate-pulse"
+                aria-hidden="true"
+              />
+              COMPLETADAS
+            </p>
+            <p
+              class="font-pixel text-3xl sm:text-4xl leading-none tabular-nums text-exp-easy drop-shadow-[0_0_12px_currentColor]"
+            >
+              {{ displayValue(completed) }}
+            </p>
+          </div>
           <div
-            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-exp-easy/20 backdrop-blur-sm border border-exp-easy/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-exp-easy/30 transition-all duration-300"
+            class="pixelated grid place-items-center w-11 h-11 shrink-0 bg-exp-easy/15 transition-transform duration-200 group-hover:scale-110"
+            :style="{ clipPath: NOTCH }"
+            aria-hidden="true"
           >
-            <Trophy class="h-4 w-4 sm:h-5 sm:w-5 text-exp-easy" />
+            <Trophy class="h-5 w-5 text-exp-easy" />
           </div>
-          <div class="text-xl sm:text-2xl font-bold text-exp-easy leading-none">
-            {{ completed }}
-          </div>
-          <div
-            class="text-[10px] sm:text-xs text-muted-foreground/90 font-medium uppercase tracking-wide"
-          >
-            Completadas
-          </div>
+        </div>
+        <div class="mt-3 flex gap-1" aria-hidden="true">
+          <span
+            v-for="i in CELLS"
+            :key="i"
+            :class="[
+              'h-1.5 flex-1 transition-colors duration-300',
+              i <= filledCells(completed) ? 'bg-exp-easy' : 'bg-white/10',
+            ]"
+          />
         </div>
       </CardContent>
     </Card>
 
+    <!-- EXP Today -->
     <Card
-      class="group relative overflow-hidden border-exp-legendary/30 bg-gradient-to-br from-exp-legendary/15 via-exp-legendary/10 to-exp-legendary/5 hover:border-exp-legendary/50 hover:shadow-md hover:shadow-exp-legendary/10 transition-all duration-300"
+      class="crt-scanlines group relative overflow-hidden rounded-none border-2 border-exp-legendary/40 bg-card/40 hover:shadow-[0_0_30px_-6px_var(--color-exp-legendary)] transition-all duration-200"
     >
-      <div
-        class="absolute inset-0 bg-gradient-to-br from-exp-legendary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      <span
+        class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-exp-legendary/60"
+        aria-hidden="true"
       />
-      <div
-        class="absolute top-0 right-0 w-20 h-20 bg-exp-legendary/10 rounded-full blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-300"
+      <span
+        class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-exp-legendary/60"
+        aria-hidden="true"
       />
-      <CardContent class="relative text-center py-3 sm:py-4 px-2 sm:px-3">
-        <div class="flex flex-col items-center gap-1.5 sm:gap-2">
+      <span
+        class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-exp-legendary/60"
+        aria-hidden="true"
+      />
+      <span
+        class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-exp-legendary/60"
+        aria-hidden="true"
+      />
+      <CardContent class="relative p-4 sm:p-5">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0 space-y-1.5">
+            <p
+              class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider"
+            >
+              <span
+                class="inline-block w-1.5 h-1.5 bg-exp-legendary motion-safe:animate-pulse"
+                aria-hidden="true"
+              />
+              EXP HOY
+            </p>
+            <p
+              class="font-pixel text-3xl sm:text-4xl leading-none tabular-nums text-exp-legendary drop-shadow-[0_0_12px_currentColor]"
+            >
+              {{ displayValue(expToday) }}
+            </p>
+          </div>
           <div
-            class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-exp-legendary/20 backdrop-blur-sm border border-exp-legendary/30 flex items-center justify-center group-hover:scale-110 group-hover:bg-exp-legendary/30 transition-all duration-300"
+            class="pixelated grid place-items-center w-11 h-11 shrink-0 bg-exp-legendary/15 transition-transform duration-200 group-hover:scale-110"
+            :style="{ clipPath: NOTCH }"
+            aria-hidden="true"
           >
-            <Zap class="h-4 w-4 sm:h-5 sm:w-5 text-exp-legendary" />
+            <Zap class="h-5 w-5 text-exp-legendary" />
           </div>
-          <div class="text-xl sm:text-2xl font-bold text-exp-legendary leading-none">
-            {{ expToday }}
-          </div>
-          <div
-            class="text-[10px] sm:text-xs text-muted-foreground/90 font-medium uppercase tracking-wide"
-          >
-            EXP Hoy
-          </div>
+        </div>
+        <div class="mt-3 flex gap-1" aria-hidden="true">
+          <span
+            v-for="i in CELLS"
+            :key="i"
+            :class="[
+              'h-1.5 flex-1 transition-colors duration-300',
+              i <= filledCells(expToday) ? 'bg-exp-legendary' : 'bg-white/10',
+            ]"
+          />
         </div>
       </CardContent>
     </Card>

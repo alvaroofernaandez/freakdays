@@ -40,13 +40,19 @@ const emit = defineEmits<{
       "
     >
       <template #icon>
-        <Trophy v-if="!isCompleted" class="h-12 w-12 text-primary/50" />
-        <Clock v-else class="h-12 w-12 text-muted-foreground/50" />
+        <Trophy v-if="!isCompleted" class="h-12 w-12 text-primary/50" aria-hidden="true" />
+        <Clock v-else class="h-12 w-12 text-muted-foreground/50" aria-hidden="true" />
       </template>
       <template #action>
-        <Button v-if="!isCompleted" variant="outline" size="lg" @click="emit('add')">
-          <Plus class="h-4 w-4 mr-2" />
-          Nueva misión
+        <Button
+          v-if="!isCompleted"
+          variant="outline"
+          size="lg"
+          class="rounded-none border-2 font-pixel text-[9px] uppercase cursor-pointer"
+          @click="emit('add')"
+        >
+          <Plus class="h-4 w-4 mr-2" aria-hidden="true" />
+          NUEVA MISIÓN
         </Button>
       </template>
     </Empty>

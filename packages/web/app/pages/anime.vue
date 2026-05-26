@@ -77,15 +77,23 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }
 
 <template>
   <div class="space-y-4 sm:space-y-6">
+    <!-- Page header -->
     <header
       class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0"
     >
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
-          <Tv class="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+        <p
+          class="flex items-center gap-1.5 font-pixel text-[9px] text-muted-foreground/80 uppercase mb-1"
+        >
+          <span class="text-accent">▸</span> ANIME
+        </p>
+        <h1 class="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+          <Tv class="h-6 w-6 text-accent" aria-hidden="true" />
           Anime
         </h1>
-        <p class="text-muted-foreground text-xs sm:text-sm mt-0.5">Gestiona tu lista de animes</p>
+        <p class="font-pixel text-[9px] text-muted-foreground/70 mt-1 uppercase">
+          GESTIONA TU LISTA · RASTREA EPISODIOS
+        </p>
       </div>
       <div class="flex items-center gap-2 w-full sm:w-auto">
         <Tooltip>
@@ -93,11 +101,15 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }
             <Button
               variant="outline"
               size="lg"
-              class="flex-1 sm:flex-none"
+              class="flex-1 sm:flex-none rounded-none border-2 cursor-pointer"
               @click="setActiveView(activeView === 'list' ? 'marketplace' : 'list')"
             >
-              <Search v-if="activeView === 'list'" class="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-              <BookOpen v-else class="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+              <Search
+                v-if="activeView === 'list'"
+                class="h-4 w-4 sm:h-5 sm:w-5 mr-2"
+                aria-hidden="true"
+              />
+              <BookOpen v-else class="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
               <span class="sm:hidden">{{ activeView === 'list' ? 'Buscar' : 'Mi Lista' }}</span>
               <span class="hidden sm:inline">{{
                 activeView === 'list' ? 'Buscar Animes' : 'Mi Lista'
@@ -116,12 +128,12 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }
           <TooltipTrigger as-child>
             <Button
               size="lg"
-              class="flex-1 sm:flex-none sm:h-10 sm:w-auto rounded-full glow-primary"
+              class="btn-game flex-1 sm:flex-none rounded-none font-pixel text-[10px] shadow-[0_5px_0_0_oklch(0.35_0.15_190)] hover:shadow-[0_5px_0_0_oklch(0.45_0.18_190)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.35_0.15_190)] transition-[transform,filter,box-shadow,border-color] duration-100 motion-reduce:active:translate-y-0 cursor-pointer"
               @click="modal.open()"
             >
-              <Plus class="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-              <span class="sm:hidden">Añadir</span>
-              <span class="hidden sm:inline">Añadir Manual</span>
+              <Plus class="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
+              <span class="sm:hidden">AÑADIR</span>
+              <span class="hidden sm:inline">AÑADIR MANUAL</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
@@ -148,16 +160,17 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }
         :total="stats.total"
       />
 
+      <!-- Filter tabs -->
       <div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
         <Button
           v-for="tab in tabs"
           :key="tab.value"
           :variant="activeTab === tab.value ? 'default' : 'outline'"
           size="sm"
-          class="shrink-0"
+          class="shrink-0 rounded-none border-2 font-pixel text-[8px] uppercase cursor-pointer"
           @click="activeTab = tab.value"
         >
-          <component :is="tab.icon" class="h-4 w-4 mr-1" />
+          <component :is="tab.icon" class="h-4 w-4 mr-1" aria-hidden="true" />
           {{ tab.label }}
         </Button>
       </div>
@@ -173,17 +186,27 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }
           description="Añade animes desde el marketplace o manualmente"
         >
           <template #icon>
-            <Tv class="h-12 w-12 text-primary/50" />
+            <Tv class="h-12 w-12 text-accent/50" aria-hidden="true" />
           </template>
           <template #action>
             <div class="flex gap-2">
-              <Button variant="outline" size="lg" @click="setActiveView('marketplace')">
-                <Search class="h-4 w-4 mr-2" />
-                Buscar Animes
+              <Button
+                variant="outline"
+                size="lg"
+                class="rounded-none border-2 font-pixel text-[9px] uppercase cursor-pointer"
+                @click="setActiveView('marketplace')"
+              >
+                <Search class="h-4 w-4 mr-2" aria-hidden="true" />
+                BUSCAR ANIMES
               </Button>
-              <Button variant="outline" size="lg" @click="modal.open()">
-                <Plus class="h-4 w-4 mr-2" />
-                Añadir Manual
+              <Button
+                variant="outline"
+                size="lg"
+                class="rounded-none border-2 font-pixel text-[9px] uppercase cursor-pointer"
+                @click="modal.open()"
+              >
+                <Plus class="h-4 w-4 mr-2" aria-hidden="true" />
+                AÑADIR MANUAL
               </Button>
             </div>
           </template>
@@ -211,50 +234,62 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }
             style="pointer-events: auto"
             @click.self="modal.close()"
           >
-            <Card class="w-full max-w-md my-auto shadow-xl border-2" @click.stop>
+            <Card class="w-full max-w-md my-auto shadow-xl rounded-none border-2" @click.stop>
               <CardHeader class="flex flex-row items-center justify-between pb-3 sm:pb-4 border-b">
-                <CardTitle class="text-lg sm:text-xl">Añadir Anime Manualmente</CardTitle>
+                <CardTitle class="flex items-center gap-2 text-lg sm:text-xl">
+                  <Tv class="h-5 w-5 text-accent" aria-hidden="true" />
+                  Añadir Anime Manualmente
+                </CardTitle>
                 <Button
                   variant="ghost"
                   size="icon"
-                  class="h-8 w-8 sm:h-9 sm:w-9 hover:bg-muted hover:text-foreground cursor-pointer"
+                  class="h-8 w-8 sm:h-9 sm:w-9 rounded-none hover:bg-muted hover:text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label="Cerrar"
                   @click="modal.close()"
                 >
-                  <CloseIcon class="h-4 w-4" />
+                  <CloseIcon class="h-4 w-4" aria-hidden="true" />
                 </Button>
               </CardHeader>
               <CardContent class="space-y-4 pt-4 sm:pt-6">
                 <div class="space-y-2">
-                  <Label for="title" class="text-sm font-medium">Título</Label>
+                  <Label for="title" class="font-pixel text-[9px] text-muted-foreground uppercase">
+                    <span class="text-accent">▸</span> TÍTULO
+                  </Label>
                   <Input
                     id="title"
                     v-model="newAnime.title"
                     placeholder="Ej: One Piece"
-                    class="w-full h-11 text-base"
+                    class="w-full h-11 text-base rounded-none border-2"
                     autofocus
                   />
                 </div>
                 <div class="space-y-2">
-                  <Label for="episodes" class="text-sm font-medium"
-                    >Episodios totales (opcional)</Label
+                  <Label
+                    for="episodes"
+                    class="font-pixel text-[9px] text-muted-foreground uppercase"
                   >
+                    <span class="text-primary">▸</span> EPISODIOS TOTALES
+                    <span class="text-muted-foreground/50">(OPCIONAL)</span>
+                  </Label>
                   <Input
                     id="episodes"
                     v-model.number="newAnime.total_episodes"
                     type="number"
                     placeholder="24"
-                    class="w-full h-11 text-base"
+                    class="w-full h-11 text-base rounded-none border-2"
                   />
                 </div>
                 <div class="space-y-2">
-                  <Label class="text-sm font-medium">Estado</Label>
+                  <Label class="font-pixel text-[9px] text-muted-foreground uppercase">
+                    <span class="text-secondary">▸</span> ESTADO
+                  </Label>
                   <div class="grid grid-cols-2 gap-2">
                     <Button
                       v-for="(config, status) in statusConfig"
                       :key="status"
                       :variant="newAnime.status === status ? 'default' : 'outline'"
                       size="sm"
-                      class="text-xs"
+                      class="rounded-none border-2 font-pixel text-[8px] uppercase cursor-pointer"
                       @click="newAnime.status = status as AnimeStatus"
                     >
                       {{ config.label }}
@@ -263,12 +298,12 @@ const tabs: Array<{ value: 'all' | AnimeStatus; label: string; icon: Component }
                 </div>
                 <Button
                   size="lg"
-                  class="w-full h-12 text-base font-semibold mt-2"
+                  class="btn-game w-full h-12 rounded-none font-pixel text-[11px] shadow-[0_5px_0_0_oklch(0.35_0.15_190)] hover:shadow-[0_5px_0_0_oklch(0.45_0.18_190)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.35_0.15_190)] transition-[transform,filter,box-shadow,border-color] duration-100 motion-reduce:active:translate-y-0 cursor-pointer"
                   :disabled="!newAnime.title.trim()"
                   @click="addAnime"
                 >
-                  <Plus class="h-5 w-5 mr-2" />
-                  Añadir Anime
+                  <Plus class="h-5 w-5 mr-2" aria-hidden="true" />
+                  AÑADIR ANIME
                 </Button>
               </CardContent>
             </Card>

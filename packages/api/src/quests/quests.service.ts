@@ -9,6 +9,8 @@ import type {
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 
 type NumberInput = number | string | null | undefined;
 type DateInput = string | Date | null | undefined;
@@ -83,6 +85,7 @@ export class QuestsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly identityContext: IdentityContextService,
+    private readonly eventBus: EventBusService,
   ) {}
 
   async list(clerkUserId: string, orgId: string | null): Promise<QuestView[]> {
@@ -282,6 +285,9 @@ export class QuestsService {
       1,
     );
 
+    // EXP is now eventually-consistent — ProgressionHandler is the sole writer of
+    // profile.totalExp/level. We keep the QuestCompletion row + event emit, and drop
+    // the inline profile.update. The HTTP response still returns the correct expEarned.
     await this.prisma.$transaction(async (tx) => {
       await tx.questCompletion.create({
         data: {
@@ -293,27 +299,19 @@ export class QuestsService {
         },
       });
 
-      const profile = await tx.profile.findUnique({
-        where: {
+      const event = this.eventBus.buildEvent(
+        EVENT_TYPES.QUEST_COMPLETED,
+        quest.id,
+        {
+          questId: quest.id,
           userId: currentUser.id,
+          expAwarded: expEarned,
+          level: 0, // level is computed by ProgressionHandler asynchronously
         },
-        select: {
-          id: true,
-        },
-      });
+        organization.id,
+      );
 
-      if (profile) {
-        await tx.profile.update({
-          where: {
-            id: profile.id,
-          },
-          data: {
-            totalExp: {
-              increment: expEarned,
-            },
-          },
-        });
-      }
+      await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
     });
 
     return { expEarned };

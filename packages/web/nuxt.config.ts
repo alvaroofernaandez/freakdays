@@ -25,11 +25,14 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ['@freakdays/domain'],
+    },
   },
 
   nitro: {
     externals: {
-      inline: [],
+      inline: ['@freakdays/domain'],
     },
     experimental: {
       wasm: true,
@@ -61,10 +64,12 @@ export default defineNuxtConfig({
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_URL,
       clerkPublishableKey: process.env.NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+      wsUrl: process.env.NUXT_PUBLIC_WS_URL ?? '',
     },
   },
 
   app: {
+    pageTransition: { name: 'arcade', mode: 'out-in', css: false },
     head: {
       htmlAttrs: {
         lang: 'es',

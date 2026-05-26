@@ -27,7 +27,7 @@ describe('500.vue', () => {
     });
 
     expect(wrapper.text()).toContain('500');
-    expect(wrapper.text()).toContain('Error del servidor');
+    expect(wrapper.text()).toContain('ERROR DEL SERVIDOR');
   });
 
   it('should have retry button', () => {

@@ -469,11 +469,10 @@ Middleware global que protege todas las rutas.
 
 **Funcionalidad:**
 
-- Verifica autenticación en cada navegación
+- Verifica autenticación en cada navegación (sesión Clerk)
 - Redirige a `/login` si no está autenticado
 - Redirige a `/onboarding` si no ha completado la configuración
-- Sincroniza módulos desde la base de datos
-- Gestiona sesiones de Supabase
+- Sincroniza módulos desde la API NestJS
 
 **Rutas públicas:**
 
@@ -571,4 +570,4 @@ const animeId = route.params.id;
 
 ---
 
-**Última actualización**: Enero 2025
+**Última actualización**: Mayo 2026

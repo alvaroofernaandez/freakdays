@@ -1,3 +1,4 @@
+import { computeLevel, expForNextLevel as domainExpForNextLevel } from '@freakdays/domain';
 import { AppError } from '@/utils/error-handling';
 import { useAuthStore } from '~~/stores/auth';
 
@@ -15,6 +16,7 @@ export interface UserProfile {
   location: string | null;
   website: string | null;
   socialLinks: Record<string, string>;
+  leaderboardOptIn?: boolean;
 }
 
 interface SignedUploadUrlResponse {
@@ -243,7 +245,7 @@ export function useProfile() {
   }
 
   function calculateLevel(exp: number): number {
-    return Math.floor(exp / 100) + 1;
+    return computeLevel(exp);
   }
 
   function expForNextLevel(currentExp: number): {
@@ -251,14 +253,7 @@ export function useProfile() {
     needed: number;
     progress: number;
   } {
-    const currentLevel = calculateLevel(currentExp);
-    const expAtCurrentLevel = (currentLevel - 1) * 100;
-    const _expAtNextLevel = currentLevel * 100;
-    const current = currentExp - expAtCurrentLevel;
-    const needed = 100;
-    const progress = (current / needed) * 100;
-
-    return { current, needed, progress };
+    return domainExpForNextLevel(currentExp);
   }
 
   return {

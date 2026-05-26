@@ -1,11 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma, Profile } from '@prisma/client';
+import { computeLevel } from '@freakdays/domain';
 
 import {
   type ActiveIdentityUser,
   IdentityContextService,
 } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 import { normalizeUrl } from '../common/utils/normalizers';
 import { StorageService } from '../storage/storage.service';
 
@@ -26,6 +29,7 @@ export interface ProfileView {
   location: string | null;
   website: string | null;
   socialLinks: Record<string, string>;
+  leaderboardOptIn: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,6 +47,7 @@ export interface UpdateProfileInput {
   website?: string | null;
   socialLinks?: Record<string, string>;
   social_links?: Record<string, string>;
+  leaderboardOptIn?: boolean;
 }
 
 export interface AddProfileExpInput {
@@ -64,11 +69,55 @@ export class ProfileService {
     private readonly prisma: PrismaService,
     private readonly storageService: StorageService,
     private readonly identityContext: IdentityContextService,
+    private readonly eventBus: EventBusService,
   ) {}
 
   async getMyProfile(clerkUserId: string): Promise<ProfileView> {
     const { user, profile } = await this.ensureProfileForCurrentUser(clerkUserId);
+    // Touch daily login on every profile fetch — at-most-once per day guard inside
+    await this.touchDailyLogin(profile.userId, null).catch(() => {
+      // Non-critical — best effort; don't fail the request
+    });
     return this.toProfileView(profile, user.clerkUserId);
+  }
+
+  /**
+   * Emits a DAILY_LOGIN event at most once per calendar day per user.
+   * Returns true if the event was emitted, false if already done today.
+   */
+  async touchDailyLogin(userId: string, orgId: string | null): Promise<boolean> {
+    const today = new Date().toISOString().split('T')[0] as string;
+
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+      select: { id: true, lastLoginDate: true },
+    });
+
+    if (!profile) {
+      return false;
+    }
+
+    if (profile.lastLoginDate === today) {
+      return false;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.profile.update({
+        where: { id: profile.id },
+        data: { lastLoginDate: today },
+      });
+
+      const event = this.eventBus.buildEvent(
+        EVENT_TYPES.DAILY_LOGIN,
+        userId,
+        { userId, orgId: orgId ?? '', loginDate: today },
+        orgId ?? undefined,
+      );
+
+      await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
+    });
+
+    return true;
   }
 
   async updateMyProfile(clerkUserId: string, input: UpdateProfileInput): Promise<ProfileView> {
@@ -79,6 +128,16 @@ export class ProfileService {
       where: { id: profile.id },
       data: updateData,
     });
+
+    // If the caller toggled leaderboard opt-in/out, mark the user dirty so the
+    // next cron tick includes them in (or excludes them from) the snapshot.
+    if (Object.prototype.hasOwnProperty.call(input, 'leaderboardOptIn')) {
+      await this.prisma.dirtyLeaderboardUser.upsert({
+        where: { userId: profile.userId },
+        create: { userId: profile.userId },
+        update: {},
+      });
+    }
 
     return this.toProfileView(updated, user.clerkUserId);
   }
@@ -105,7 +164,7 @@ export class ProfileService {
 
     const { profile } = await this.ensureProfileForCurrentUser(clerkUserId);
     const newTotal = profile.totalExp + Math.floor(input.amount);
-    const newLevel = this.calculateLevel(newTotal);
+    const newLevel = computeLevel(newTotal);
 
     await this.prisma.profile.update({
       where: { id: profile.id },
@@ -310,6 +369,14 @@ export class ProfileService {
       updateData.website = raw !== null ? normalizeUrl(raw, 'website') : null;
     }
 
+    if (Object.prototype.hasOwnProperty.call(input, 'leaderboardOptIn')) {
+      if (typeof input.leaderboardOptIn !== 'boolean') {
+        throw new BadRequestException('leaderboardOptIn debe ser boolean');
+      }
+
+      updateData.leaderboardOptIn = input.leaderboardOptIn;
+    }
+
     if (socialLinks !== undefined) {
       if (typeof socialLinks !== 'object' || socialLinks === null || Array.isArray(socialLinks)) {
         throw new BadRequestException('social_links debe ser un objeto { [key]: string }');
@@ -375,6 +442,7 @@ export class ProfileService {
       location: profile.location,
       website: profile.website,
       socialLinks: this.normalizeSocialLinks(profile.socialLinks),
+      leaderboardOptIn: profile.leaderboardOptIn,
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
     };
@@ -394,10 +462,6 @@ export class ProfileService {
     }
 
     return result;
-  }
-
-  private calculateLevel(exp: number): number {
-    return Math.floor(exp / 100) + 1;
   }
 
   private assertImagePayload(input: RequestUploadUrlInput): void {

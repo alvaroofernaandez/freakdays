@@ -6,8 +6,9 @@ import { useRegisterPage } from '../../../app/composables/useRegisterPage';
 
 vi.mock('../../../app/composables/useAuth', () => ({
   useAuth: () => ({
-    signUp: vi.fn().mockResolvedValue({ success: true }),
+    signUp: vi.fn().mockResolvedValue({ success: true, status: 'needs_verification' }),
     signInWithGoogle: vi.fn().mockResolvedValue({}),
+    verifyEmailCode: vi.fn().mockResolvedValue({ success: true }),
   }),
 }));
 
@@ -20,8 +21,22 @@ describe('useRegisterPage', () => {
     it('should initialize with empty values', () => {
       const component = defineComponent({
         setup() {
-          const { email, password, confirmPassword, showPassword, success } = useRegisterPage();
-          return { email, password, confirmPassword, showPassword, success };
+          const {
+            email,
+            password,
+            confirmPassword,
+            showPassword,
+            pendingVerification,
+            verificationCode,
+          } = useRegisterPage();
+          return {
+            email,
+            password,
+            confirmPassword,
+            showPassword,
+            pendingVerification,
+            verificationCode,
+          };
         },
         template: '<div></div>',
       });
@@ -31,7 +46,8 @@ describe('useRegisterPage', () => {
       expect(wrapper.vm.password).toBe('');
       expect(wrapper.vm.confirmPassword).toBe('');
       expect(wrapper.vm.showPassword).toBe(false);
-      expect(wrapper.vm.success).toBe(false);
+      expect(wrapper.vm.pendingVerification).toBe(false);
+      expect(wrapper.vm.verificationCode).toBe('');
     });
   });
 
@@ -314,11 +330,12 @@ describe('useRegisterPage', () => {
   });
 
   describe('handleSubmit', () => {
-    it('should set success to true on successful signup', async () => {
+    it('should set pendingVerification to true when signup requires email verification', async () => {
       const component = defineComponent({
         setup() {
-          const { email, password, confirmPassword, success, handleSubmit } = useRegisterPage();
-          return { email, password, confirmPassword, success, handleSubmit };
+          const { email, password, confirmPassword, pendingVerification, handleSubmit } =
+            useRegisterPage();
+          return { email, password, confirmPassword, pendingVerification, handleSubmit };
         },
         template: '<div></div>',
       });
@@ -330,7 +347,7 @@ describe('useRegisterPage', () => {
 
       await wrapper.vm.handleSubmit();
 
-      expect(wrapper.vm.success).toBe(true);
+      expect(wrapper.vm.pendingVerification).toBe(true);
     });
   });
 
@@ -338,9 +355,24 @@ describe('useRegisterPage', () => {
     it('should reset all values to initial state', () => {
       const component = defineComponent({
         setup() {
-          const { email, password, confirmPassword, showPassword, success, reset } =
-            useRegisterPage();
-          return { email, password, confirmPassword, showPassword, success, reset };
+          const {
+            email,
+            password,
+            confirmPassword,
+            showPassword,
+            pendingVerification,
+            verificationCode,
+            reset,
+          } = useRegisterPage();
+          return {
+            email,
+            password,
+            confirmPassword,
+            showPassword,
+            pendingVerification,
+            verificationCode,
+            reset,
+          };
         },
         template: '<div></div>',
       });
@@ -350,7 +382,8 @@ describe('useRegisterPage', () => {
       wrapper.vm.password = 'test123';
       wrapper.vm.confirmPassword = 'test123';
       wrapper.vm.showPassword = true;
-      wrapper.vm.success = true;
+      wrapper.vm.pendingVerification = true;
+      wrapper.vm.verificationCode = '123456';
 
       wrapper.vm.reset();
 
@@ -358,7 +391,8 @@ describe('useRegisterPage', () => {
       expect(wrapper.vm.password).toBe('');
       expect(wrapper.vm.confirmPassword).toBe('');
       expect(wrapper.vm.showPassword).toBe(false);
-      expect(wrapper.vm.success).toBe(false);
+      expect(wrapper.vm.pendingVerification).toBe(false);
+      expect(wrapper.vm.verificationCode).toBe('');
     });
   });
 });

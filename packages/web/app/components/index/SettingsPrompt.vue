@@ -1,24 +1,27 @@
 <script setup lang="ts">
-import { ArrowRight } from 'lucide-vue-next';
+import { Settings } from 'lucide-vue-next';
 </script>
 
 <template>
-  <Card class="border-dashed border-2 border-muted hover:border-primary/30 transition-colors group">
-    <NuxtLink to="/profile">
-      <CardHeader class="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle
-            class="text-sm text-muted-foreground group-hover:text-foreground transition-colors"
-          >
-            ¿Quieres más módulos?
-          </CardTitle>
-          <CardDescription class="text-xs"> Activa más funciones en tu perfil </CardDescription>
-        </div>
-        <Button variant="ghost" size="sm" class="group-hover:bg-primary/10">
-          <span class="mr-2">Configurar</span>
-          <ArrowRight class="h-4 w-4" />
-        </Button>
-      </CardHeader>
-    </NuxtLink>
-  </Card>
+  <NuxtLink
+    to="/profile"
+    class="block border-2 border-dashed border-muted hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+  >
+    <div class="flex items-center justify-between px-4 py-3">
+      <div>
+        <p
+          class="font-pixel text-[9px] text-muted-foreground group-hover:text-foreground transition-colors uppercase"
+        >
+          ▸ ¿Quieres más módulos?
+        </p>
+        <p class="text-xs text-muted-foreground/70 mt-0.5">Activa más funciones en tu perfil</p>
+      </div>
+      <div
+        class="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors"
+      >
+        <Settings class="h-4 w-4" aria-hidden="true" />
+        <span class="font-pixel text-[8px] uppercase">Configurar</span>
+      </div>
+    </div>
+  </NuxtLink>
 </template>

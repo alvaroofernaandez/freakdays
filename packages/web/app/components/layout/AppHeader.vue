@@ -4,7 +4,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Skeleton } from '@/components/ui/skeleton';
 import ThemeToggle from '@/components/ui/theme-toggle/ThemeToggle.vue';
 import type { UserProfile } from '@/composables/useProfile';
-import { Trophy } from 'lucide-vue-next';
+import { Hexagon, Volume2, VolumeX, Menu } from 'lucide-vue-next';
+import { useSoundStore } from '~~/stores/useSound';
+import { useArcadeMenuStore } from '~~/stores/useArcadeMenu';
 
 interface Props {
   profile: UserProfile | null;
@@ -14,99 +16,129 @@ interface Props {
     needed: number;
     progress: number;
   };
+  /** Override level display — used by statsStore for realtime reactivity */
+  level?: number;
   isActive: (to: string) => boolean;
   menuOpen?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   loading: false,
   menuOpen: false,
+  level: undefined,
 });
+
+// Effective level: prefer statsStore-driven prop, fall back to profile
+const effectiveLevel = computed(() => props.level ?? props.profile?.level ?? 1);
 
 const _emit = defineEmits<{
   logout: [];
 }>();
+
+const soundStore = useSoundStore();
+const arcadeMenuStore = useArcadeMenuStore();
+const arcadeMenuTriggerRef = ref<HTMLElement | null>(null);
 </script>
 
 <template>
   <header
     v-if="!menuOpen"
-    class="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur-xl hidden lg:block shadow-sm"
-    style="position: sticky; z-index: 9999; pointer-events: auto"
+    class="sticky top-0 z-50 w-full border-b-2 border-border/50 bg-background/95 backdrop-blur-xl hidden lg:block"
+    style="pointer-events: auto"
   >
-    <div class="container mx-auto flex h-14 md:h-16 items-center px-3 sm:px-4 md:px-6">
-      <NuxtLink to="/" class="flex items-center gap-2 md:gap-3 font-bold group shrink-0">
-        <div class="relative flex items-center justify-center">
+    <div class="container mx-auto flex h-14 items-center px-3 sm:px-4 md:px-6 gap-3">
+      <!-- Logo -->
+      <NuxtLink to="/" class="flex items-center gap-2 font-bold group shrink-0">
+        <div
+          class="pixelated relative flex items-center justify-center w-8 h-8 bg-linear-to-br from-primary via-accent to-secondary p-[2px] shadow-[0_0_18px_-6px_var(--color-primary)] [clip-path:polygon(0_4px,4px_4px,4px_0,calc(100%-4px)_0,calc(100%-4px)_4px,100%_4px,100%_calc(100%-4px),calc(100%-4px)_calc(100%-4px),calc(100%-4px)_100%,4px_100%,4px_calc(100%-4px),0_calc(100%-4px))]"
+        >
           <div
-            class="absolute inset-0 bg-primary/20 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          />
-          <div
-            class="relative p-1.5 md:p-2 rounded-lg md:rounded-xl bg-linear-to-br from-primary/10 via-accent/5 to-primary/10 border border-primary/20 group-hover:border-primary/40 group-hover:bg-primary/15 transition-all duration-300 shadow-sm"
+            class="w-full h-full bg-card flex items-center justify-center [clip-path:polygon(0_3px,3px_3px,3px_0,calc(100%-3px)_0,calc(100%-3px)_3px,100%_3px,100%_calc(100%-3px),calc(100%-3px)_calc(100%-3px),calc(100%-3px)_100%,3px_100%,3px_calc(100%-3px),0_calc(100%-3px))]"
           >
             <img
               src="/logo.png"
               alt="FreakDays"
-              class="h-6 w-6 md:h-8 md:w-8 rounded-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+              class="h-5 w-5"
               loading="eager"
               fetchpriority="high"
             />
           </div>
         </div>
-        <span
-          class="text-base md:text-xl font-logo bg-linear-to-r from-primary via-accent to-primary bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300 whitespace-nowrap"
-        >
-          FreakDays
-        </span>
+        <span class="text-base font-logo text-gradient whitespace-nowrap">FreakDays</span>
       </NuxtLink>
 
+      <!-- Nav slot -->
       <slot name="nav" />
 
-      <div class="ml-auto flex items-center gap-2 md:gap-3 shrink-0">
+      <!-- Right side: theme + sound toggle + HUD chip + avatar -->
+      <div class="ml-auto flex items-center gap-2 shrink-0">
         <ThemeToggle />
+
+        <!-- Sound mute toggle -->
+        <button
+          class="h-8 w-8 flex items-center justify-center rounded-none text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :aria-pressed="soundStore.enabled"
+          :aria-label="soundStore.enabled ? 'Silenciar sonido' : 'Activar sonido'"
+          @click="soundStore.toggleMute()"
+        >
+          <Volume2 v-if="soundStore.enabled" class="h-4 w-4" aria-hidden="true" />
+          <VolumeX v-else class="h-4 w-4" aria-hidden="true" />
+        </button>
+
+        <!-- Arcade Menu button -->
+        <button
+          ref="arcadeMenuTriggerRef"
+          class="h-8 w-8 flex items-center justify-center rounded-none text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-haspopup="dialog"
+          :aria-expanded="arcadeMenuStore.isOpen"
+          aria-label="Abrir menú"
+          @click="arcadeMenuStore.open(arcadeMenuTriggerRef ?? undefined)"
+        >
+          <Menu class="h-4 w-4" aria-hidden="true" />
+        </button>
+
         <template v-if="loading">
-          <div class="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border/50">
-            <div class="hidden lg:flex flex-col items-end gap-1.5">
-              <div class="flex items-center gap-2">
-                <Skeleton class="h-4 w-4 rounded" />
-                <Skeleton class="h-4 w-10 rounded" />
+          <div class="flex items-center gap-2 pl-2 border-l-2 border-border/50">
+            <div class="hidden lg:flex flex-col items-end gap-1">
+              <div class="flex items-center gap-1.5">
+                <Skeleton class="h-3 w-3 rounded-none" />
+                <Skeleton class="h-3 w-10 rounded-none" />
               </div>
-              <Skeleton class="h-2 w-20 rounded-full" />
+              <Skeleton class="h-2 w-20 rounded-none" />
             </div>
-            <div class="flex lg:hidden items-center gap-1.5">
-              <Skeleton class="h-4 w-4 rounded" />
-              <Skeleton class="h-4 w-10 rounded" />
-            </div>
-            <Skeleton class="h-8 w-8 md:h-10 md:w-10 rounded-full" />
+            <Skeleton class="h-8 w-8 rounded-none" />
           </div>
         </template>
+
         <NuxtLink
           v-else-if="profile"
           to="/profile"
-          class="flex items-center gap-2 md:gap-3 pl-2 md:pl-4 border-l border-border/50 group/profile"
+          class="flex items-center gap-2 pl-2 border-l-2 border-border/50 group/profile focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <div class="hidden lg:flex flex-col items-end gap-1.5">
-            <div class="flex items-center gap-2">
-              <div class="relative">
-                <div
-                  class="absolute inset-0 bg-exp-legendary/20 blur-md rounded-full opacity-0 group-hover/profile:opacity-100 transition-opacity"
-                />
-                <Trophy class="h-4 w-4 text-exp-legendary relative z-10" />
-              </div>
-              <span class="text-sm font-bold text-foreground">Lv.{{ profile?.level ?? 1 }}</span>
+          <!-- HUD level + XP chip (desktop) -->
+          <div class="hidden lg:flex flex-col items-end gap-1">
+            <div class="flex items-center gap-1.5">
+              <Hexagon class="h-3 w-3 text-primary" aria-hidden="true" />
+              <span class="font-pixel text-[9px] text-foreground">LV.{{ effectiveLevel }}</span>
             </div>
             <Tooltip>
               <TooltipTrigger as-child>
-                <div class="w-20 h-2 bg-muted rounded-full overflow-hidden cursor-pointer">
+                <div
+                  class="relative w-20 h-2 bg-white/10 ring-1 ring-white/10 overflow-hidden cursor-pointer"
+                >
                   <div
-                    class="h-full bg-linear-to-r from-primary via-accent to-primary rounded-full transition-all duration-500"
+                    class="h-full bg-linear-to-r from-primary via-accent to-secondary transition-all duration-500"
                     :style="{ width: `${expProgress.progress}%` }"
+                  />
+                  <div
+                    class="absolute inset-0 bg-[repeating-linear-gradient(90deg,transparent_0_8px,var(--color-background)_8px_11px)] pointer-events-none"
                   />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
                 <div class="space-y-1">
                   <p class="font-semibold">
-                    {{ expProgress.current }} / {{ expProgress.progress }} EXP
+                    {{ expProgress.current }} / {{ expProgress.needed }} EXP
                   </p>
                   <p class="text-xs text-muted-foreground">
                     {{ expProgress.needed - expProgress.current }} para subir
@@ -115,18 +147,17 @@ const _emit = defineEmits<{
               </TooltipContent>
             </Tooltip>
           </div>
-          <div class="flex lg:hidden items-center gap-1.5">
-            <Trophy class="h-4 w-4 text-exp-legendary" />
-            <span class="text-xs md:text-sm font-bold text-foreground"
-              >Lv.{{ profile?.level ?? 1 }}</span
-            >
+
+          <!-- Mobile level chip -->
+          <div class="flex lg:hidden items-center gap-1">
+            <Hexagon class="h-3 w-3 text-primary" aria-hidden="true" />
+            <span class="font-pixel text-[8px] text-foreground">LV.{{ effectiveLevel }}</span>
           </div>
+
+          <!-- Blocky avatar frame -->
           <div class="relative">
-            <div
-              class="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover/profile:opacity-100 transition-opacity"
-            />
             <Avatar
-              class="relative h-8 w-8 md:h-10 md:w-10 ring-2 ring-transparent group-hover/profile:ring-primary/50 transition-all shadow-md"
+              class="relative h-8 w-8 rounded-none ring-2 ring-transparent group-hover/profile:ring-primary/60 transition-all"
             >
               <AvatarImage
                 v-if="profile?.avatarUrl"
@@ -135,7 +166,7 @@ const _emit = defineEmits<{
                 class="object-cover"
               />
               <AvatarFallback
-                class="bg-linear-to-br from-primary to-accent text-xs md:text-sm text-white font-bold"
+                class="rounded-none bg-linear-to-br from-primary to-accent text-xs text-white font-bold"
               >
                 {{ profile?.username?.charAt(0)?.toUpperCase() ?? '?' }}
               </AvatarFallback>

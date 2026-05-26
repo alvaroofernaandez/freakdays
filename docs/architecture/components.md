@@ -1213,4 +1213,56 @@ Se renderiza automáticamente en `app.vue`.
 
 ---
 
-**Última actualización**: Enero 2025
+## Componentes de Gamificación y Realtime (F1–F4)
+
+### CelebrationOverlay
+
+Overlay GSAP que muestra animaciones de celebración cuando el usuario sube de nivel o desbloquea un logro.
+
+**Ubicación**: `app/components/gamification/CelebrationOverlay.vue`
+
+Controlado por el composable `useCelebrations`. Se renderiza sobre toda la UI cuando se recibe un evento `exp.updated` o `achievement.unlocked` vía Socket.IO.
+
+### LevelUpBanner
+
+Banner animado que aparece al subir de nivel.
+
+**Ubicación**: `app/components/gamification/LevelUpBanner.vue`
+
+### AchievementToast
+
+Notificación visual de logro desbloqueado.
+
+**Ubicación**: `app/components/gamification/AchievementToast.vue`
+
+---
+
+## Componentes Sociales (F4)
+
+### PartyLeaderboard
+
+Tabla de clasificación de los miembros de un party, actualizada en tiempo real vía Socket.IO.
+
+**Ubicación**: `app/components/party/PartyLeaderboard.vue`
+
+**Props:**
+
+- `partyId`: `string`
+
+Escucha el evento `leaderboard.updated` del store `useLeaderboardStore`.
+
+### ActivityFeed
+
+Feed de actividad reciente dentro de un party (logros, nivel ups, quests completadas).
+
+**Ubicación**: `app/components/party/ActivityFeed.vue`
+
+**Props:**
+
+- `partyId`: `string`
+
+Escucha el evento `feed.entry.created` del store `useFeedStore`.
+
+---
+
+**Última actualización**: Mayo 2026

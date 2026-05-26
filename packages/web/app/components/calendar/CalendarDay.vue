@@ -120,11 +120,11 @@ function handleDayClick() {
   <Card
     :class="[
       'h-[calc((100vh-180px)/6)] sm:h-[calc((100vh-220px)/6)] md:h-[calc((100vh-240px)/6)] min-h-[80px] sm:min-h-[100px] max-h-[120px] sm:max-h-[160px] md:max-h-[180px] transition-all duration-200',
-      'hover:shadow-md hover:border-primary/30 relative active:scale-[0.98] sm:active:scale-100',
-      isCurrentMonth ? 'bg-background border-border' : 'bg-muted/30 border-muted/50',
-      isToday && 'ring-2 ring-primary/60 bg-primary/10 border-primary/40 shadow-md',
-      isDragOver && 'bg-primary/20 ring-2 ring-primary border-primary scale-[1.02] shadow-lg z-10',
-      isHovered && isDragging && !isDragOver && 'bg-primary/5 border-primary/20',
+      'rounded-none border-2 hover:border-accent/40 relative active:scale-[0.98] sm:active:scale-100',
+      isCurrentMonth ? 'bg-background border-border/60' : 'bg-muted/20 border-muted/30',
+      isToday && 'border-accent/70 bg-accent/8 shadow-[0_0_12px_-4px_var(--color-accent)]',
+      isDragOver && 'bg-accent/15 border-accent scale-[1.02] shadow-lg z-10',
+      isHovered && isDragging && !isDragOver && 'bg-accent/5 border-accent/20',
       isWeekend && isCurrentMonth && 'bg-muted/10',
       events.length > 0 ? 'overflow-visible lg:overflow-visible' : 'overflow-hidden',
       isMobileOrTablet && 'cursor-pointer',
@@ -150,19 +150,20 @@ function handleDayClick() {
       <div class="flex items-start gap-1 sm:gap-2 mb-0.5 sm:mb-1.5 shrink-0 relative z-10">
         <span
           :class="[
-            'text-xs sm:text-sm md:text-base font-bold transition-colors shrink-0 leading-none',
+            'font-pixel text-[9px] sm:text-[10px] transition-colors shrink-0 leading-none tabular-nums',
             isToday
-              ? 'text-primary'
+              ? 'text-accent drop-shadow-[0_0_6px_var(--color-accent)]'
               : isCurrentMonth
-                ? 'text-foreground'
-                : 'text-muted-foreground/60',
+                ? 'text-foreground/80'
+                : 'text-muted-foreground/40',
           ]"
+          :aria-current="isToday ? 'date' : undefined"
         >
           {{ dayNumber }}
         </span>
         <div
           v-if="events.length > 0"
-          class="lg:hidden ml-auto h-2 w-2 rounded-full bg-primary shrink-0 min-h-[8px] min-w-[8px] pointer-events-none"
+          class="lg:hidden ml-auto h-1.5 w-1.5 bg-accent shrink-0 min-h-[6px] min-w-[6px] pointer-events-none motion-safe:animate-pulse"
           :aria-label="`${events.length} ${events.length === 1 ? 'evento' : 'eventos'} el día ${dayNumber}`"
         />
       </div>

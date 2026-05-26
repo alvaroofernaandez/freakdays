@@ -2,10 +2,11 @@
 
 Documentación completa de todos los composables Vue utilizados en FreakDays. Los composables encapsulan lógica reutilizable y abstraen el acceso a datos.
 
+> **Nota**: El acceso a datos ya no usa Supabase directamente desde el frontend. Todos los composables de datos llaman a la API NestJS (`packages/api`, :3001) mediante `$fetch`. La autenticación la gestiona Clerk.
+
 ## 📚 Índice
 
 - [Composables de Datos](#composables-de-datos)
-  - [useSupabase](#usesupabase)
   - [useAuth](#useauth)
   - [useProfile](#useprofile)
   - [useAnime](#useanime)
@@ -31,97 +32,37 @@ Documentación completa de todos los composables Vue utilizados en FreakDays. Lo
   - [useToast](#usetoast)
   - [useErrorHandler](#useerrorhandler)
   - [usePageTransition](#usepagetransition)
-
----
-
-## useSupabase
-
-Proporciona el cliente de Supabase configurado. Se usa principalmente para:
-
-- Autenticación (Supabase Auth)
-- Storage (avatares, banners)
-- Funciones RPC específicas de Supabase
-
-**Nota**: Las operaciones CRUD de base de datos ahora usan Prisma a través de API routes. Ver `useAnime`, `useManga`, `useQuests`, `useProfile` para más detalles.
-
-**Ubicación**: `app/composables/useSupabase.ts`
-
-### Uso
-
-```typescript
-const supabase = useSupabase();
-```
-
-### Retorna
-
-- `SupabaseClient`: Cliente de Supabase configurado
-
-### Ejemplo
-
-```typescript
-// Storage
-const supabase = useSupabase();
-const { data, error } = await supabase.storage.from('avatars').upload('path/to/file', file);
-
-// RPC Functions
-const { data } = await supabase.rpc('check_overdue_quests');
-```
+- [Composables de Tiempo Real (F2–F4)](#composables-de-tiempo-real-f2f4)
+  - [useRealtime](#userealtime)
+  - [useCelebrations](#usecelebrations)
+  - [useSound](#usesound)
 
 ---
 
 ## useAuth
 
-Gestiona la autenticación del usuario.
+Gestiona la autenticación del usuario mediante Clerk.
 
 **Ubicación**: `app/composables/useAuth.ts`
 
 ### Funciones
-
-#### `initialize()`
-
-Inicializa el sistema de autenticación y configura listeners.
-
-```typescript
-const auth = useAuth();
-await auth.initialize();
-```
-
-#### `signUp(email: string, password: string)`
-
-Registra un nuevo usuario.
-
-```typescript
-await auth.signUp('user@example.com', 'password123');
-```
-
-#### `signIn(email: string, password: string)`
-
-Inicia sesión con email y contraseña.
-
-```typescript
-await auth.signIn('user@example.com', 'password123');
-```
 
 #### `signOut()`
 
 Cierra la sesión del usuario.
 
 ```typescript
+const auth = useAuth();
 await auth.signOut();
 ```
 
-### Retorna
-
-- `initialize()`: `Promise<void>`
-- `signUp()`: `Promise<void>`
-- `signIn()`: `Promise<void>`
-- `signOut()`: `Promise<void>`
+La autenticación (registro, login, gestión de sesión) está delegada a Clerk. El token JWT emitido por Clerk se incluye automáticamente en las cabeceras de `$fetch` y en el handshake de Socket.IO.
 
 ---
 
 ## useProfile
 
-Gestiona el perfil del usuario. Las operaciones CRUD se ejecutan a través de API routes en el servidor usando Prisma. Las operaciones de Storage (avatar/banner) usan Supabase directamente.
+Gestiona el perfil del usuario. Todas las operaciones (CRUD + storage) pasan por la API NestJS. El storage de avatar/banner usa Cloudflare R2 gestionado desde el backend.
 
 **Ubicación**: `app/composables/useProfile.ts`
 
@@ -197,7 +138,7 @@ const file = event.target.files[0];
 const bannerUrl = await profileApi.uploadBanner(file);
 ```
 
-**Nota**: La imagen se sube al bucket `banners` de Supabase Storage. Se recomienda usar `BannerCropModal` para recortar la imagen antes de subirla.
+**Nota**: Se recomienda usar `BannerCropModal` para recortar la imagen antes de subirla. La subida se gestiona desde la API NestJS hacia Cloudflare R2.
 
 #### `deleteBanner()`
 
@@ -522,7 +463,7 @@ await mangaApi.deleteManga(mangaId);
 
 ## useQuests
 
-Gestiona las misiones diarias (quests) del usuario. Las operaciones CRUD se ejecutan a través de API routes en el servidor usando Prisma. Las funciones RPC (`check_overdue_quests`, `check_quests_due_soon`) mantienen Supabase directamente.
+Gestiona las misiones diarias (quests) del usuario. Todas las operaciones pasan por la API NestJS.
 
 **Ubicación**: `app/composables/useQuests.ts`
 
@@ -615,7 +556,7 @@ await questsApi.deleteQuest(questId);
 
 - Las operaciones CRUD usan `$fetch` para llamar a API routes
 - `completeQuest` usa transacciones de Prisma en el servidor para incrementar EXP
-- Las funciones RPC (`check_overdue_quests`, `check_quests_due_soon`) mantienen Supabase directamente
+- Todas las operaciones llaman a la API NestJS; no hay acceso directo a la BD desde el frontend
 
 ---
 
@@ -1114,7 +1055,71 @@ const { transition } = usePageTransition();
 
 ---
 
-## 🔄 Patrones Comunes
+## Composables de Tiempo Real (F2–F4)
+
+### useRealtime
+
+Gestiona la conexión Socket.IO con el gateway de la API. Autentica la conexión con el JWT de Clerk, se suscribe a las rooms `user:{id}` y `party:{id}`, y distribuye los eventos entrantes a los stores Pinia correspondientes.
+
+**Ubicación**: `app/composables/useRealtime.ts`
+
+#### Uso
+
+```typescript
+const realtime = useRealtime();
+realtime.connect();
+realtime.disconnect();
+```
+
+#### Eventos que consume
+
+| Evento                 | Acción                                                |
+| ---------------------- | ----------------------------------------------------- |
+| `exp.updated`          | Actualiza `useStatsStore` + dispara `useCelebrations` |
+| `streak.updated`       | Actualiza `useStatsStore`                             |
+| `achievement.unlocked` | Dispara `useCelebrations` con overlay de logro        |
+| `stats.updated`        | Actualiza `useStatsStore`                             |
+| `feed.entry.created`   | Añade entrada a `useFeedStore`                        |
+| `leaderboard.updated`  | Actualiza `useLeaderboardStore`                       |
+
+---
+
+### useCelebrations
+
+Controla las animaciones de celebración GSAP que se muestran cuando el usuario sube de nivel o desbloquea un logro.
+
+**Ubicación**: `app/composables/useCelebrations.ts`
+
+#### Uso
+
+```typescript
+const celebrations = useCelebrations();
+celebrations.triggerLevelUp(newLevel);
+celebrations.triggerAchievement(achievement);
+```
+
+Es llamado automáticamente por `useRealtime` al recibir los eventos correspondientes.
+
+---
+
+### useSound
+
+Gestiona el sistema de sonido del juego usando la Web Audio API. Reproduce efectos de sonido para acciones del usuario y eventos de gamificación.
+
+**Ubicación**: `app/composables/useSound.ts`
+
+#### Uso
+
+```typescript
+const sound = useSound();
+sound.play('level-up');
+sound.play('achievement');
+sound.play('quest-complete');
+```
+
+---
+
+## Patrones Comunes
 
 ### Uso de Stores
 
@@ -1139,10 +1144,10 @@ try {
 
 ### Transformación de Datos
 
-Los composables transforman datos de Supabase a tipos TypeScript:
+Los composables transforman la respuesta de la API NestJS a tipos TypeScript:
 
 ```typescript
-function mapDbToAnime(data: any): AnimeEntry {
+function mapApiToAnime(data: AnimeApiResponse): AnimeEntry {
   return {
     id: data.id,
     title: data.title,
@@ -1153,4 +1158,4 @@ function mapDbToAnime(data: any): AnimeEntry {
 
 ---
 
-**Última actualización**: Enero 2025
+**Última actualización**: Mayo 2026

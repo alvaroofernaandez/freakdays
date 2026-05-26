@@ -26,7 +26,7 @@ describe('404.vue', () => {
     });
 
     expect(wrapper.text()).toContain('404');
-    expect(wrapper.text()).toContain('Página no encontrada');
+    expect(wrapper.text()).toContain('PÁGINA NO ENCONTRADA');
   });
 
   it('should have navigation buttons', () => {

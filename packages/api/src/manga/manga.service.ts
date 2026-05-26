@@ -3,6 +3,8 @@ import { Prisma } from '@prisma/client';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 import {
   normalizeInteger,
   normalizeOptionalInteger,
@@ -69,6 +71,7 @@ export class MangaService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly identityContext: IdentityContextService,
+    private readonly eventBus: EventBusService,
   ) {}
 
   async list(clerkUserId: string, orgId: string | null): Promise<MangaView[]> {
@@ -205,15 +208,43 @@ export class MangaService {
       );
     }
 
-    const updated =
-      Object.keys(data).length === 0
-        ? existing
-        : await this.prisma.mangaEntry.update({
-            where: {
-              id: existing.id,
-            },
-            data,
-          });
+    if (Object.keys(data).length === 0) {
+      return this.toMangaView(existing);
+    }
+
+    // Detect ownedVolumes increase — new volumes added = chapters to process
+    const newVolumes =
+      data.ownedVolumes !== undefined && Array.isArray(data.ownedVolumes)
+        ? (data.ownedVolumes as number[])
+        : existing.ownedVolumes;
+
+    const chaptersAdded = newVolumes.length - existing.ownedVolumes.length;
+    const hasNewVolumes = chaptersAdded > 0;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const entry = await tx.mangaEntry.update({
+        where: { id: existing.id },
+        data,
+      });
+
+      if (hasNewVolumes) {
+        const event = this.eventBus.buildEvent(
+          EVENT_TYPES.MANGA_PROGRESSED,
+          entry.id,
+          {
+            userId: currentUser.id,
+            orgId: organization.id,
+            mangaId: entry.id,
+            chaptersRead: chaptersAdded,
+            progressedAt: new Date(),
+          },
+          organization.id,
+        );
+        await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
+      }
+
+      return entry;
+    });
 
     return this.toMangaView(updated);
   }

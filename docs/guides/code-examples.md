@@ -1,6 +1,6 @@
 # Ejemplos de Código - FreakDays
 
-Ejemplos prácticos y completos de código siguiendo las mejores prácticas de FreakDays.
+Ejemplos prácticos y completos de código siguiendo las mejores prácticas de FreakDays (monorepo NestJS + Nuxt 4).
 
 ## 📚 Índice
 
@@ -16,10 +16,10 @@ Ejemplos prácticos y completos de código siguiendo las mejores prácticas de F
 
 ### Ejemplo Completo: useAnime
 
+Los composables llaman a la API NestJS mediante `$fetch`. No hay acceso directo a la base de datos desde el frontend.
+
 ```typescript
-// app/composables/useAnime.ts
-import { useAuthStore } from '~~/stores/auth';
-import { useSupabase } from './useSupabase';
+// packages/web/app/composables/useAnime.ts
 
 export type AnimeStatus =
   | 'watching'
@@ -46,122 +46,38 @@ export interface AnimeEntry {
 export interface CreateAnimeDTO {
   title: string;
   status: AnimeStatus;
-  total_episodes?: number;
+  totalEpisodes?: number;
   score?: number;
-  cover_url?: string;
+  coverUrl?: string;
   notes?: string;
 }
 
 export function useAnime() {
-  const supabase = useSupabase();
-  const authStore = useAuthStore();
-
   async function fetchAnimeList(): Promise<AnimeEntry[]> {
-    if (!authStore.userId) return [];
-
-    const { data, error } = await supabase
-      .from('anime_list')
-      .select('*')
-      .eq('user_id', authStore.userId)
-      .order('updated_at', { ascending: false });
-
-    if (error) throw error;
-
-    return (data ?? []).map(mapDbToAnime);
+    return $fetch<AnimeEntry[]>('/api/anime');
   }
 
   async function fetchByStatus(status: AnimeStatus): Promise<AnimeEntry[]> {
-    if (!authStore.userId) return [];
-
-    const { data, error } = await supabase
-      .from('anime_list')
-      .select('*')
-      .eq('user_id', authStore.userId)
-      .eq('status', status)
-      .order('title');
-
-    if (error) throw error;
-
-    return (data ?? []).map(mapDbToAnime);
+    return $fetch<AnimeEntry[]>(`/api/anime?status=${status}`);
   }
 
-  async function addAnime(dto: CreateAnimeDTO): Promise<AnimeEntry | null> {
-    if (!authStore.userId) return null;
-
-    if (!dto.title || !dto.title.trim()) {
-      throw new Error('Title is required');
-    }
-
-    const { data, error } = await supabase
-      .from('anime_list')
-      .insert({
-        user_id: authStore.userId,
-        title: dto.title.trim(),
-        status: dto.status,
-        total_episodes: dto.total_episodes || null,
-        score: dto.score || null,
-        cover_url: dto.cover_url || null,
-        notes: dto.notes || null,
-        current_episode: 0,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data ? mapDbToAnime(data) : null;
+  async function addAnime(dto: CreateAnimeDTO): Promise<AnimeEntry> {
+    return $fetch<AnimeEntry>('/api/anime', { method: 'POST', body: dto });
   }
 
   async function updateProgress(id: string, episode: number): Promise<void> {
-    if (!authStore.userId) return;
-
-    const { error } = await supabase
-      .from('anime_list')
-      .update({ current_episode: episode })
-      .eq('id', id)
-      .eq('user_id', authStore.userId);
-
-    if (error) throw error;
+    await $fetch(`/api/anime/${id}`, {
+      method: 'PATCH',
+      body: { currentEpisode: episode },
+    });
   }
 
   async function updateStatus(id: string, status: AnimeStatus): Promise<void> {
-    if (!authStore.userId) return;
-
-    const { error } = await supabase
-      .from('anime_list')
-      .update({ status })
-      .eq('id', id)
-      .eq('user_id', authStore.userId);
-
-    if (error) throw error;
+    await $fetch(`/api/anime/${id}`, { method: 'PATCH', body: { status } });
   }
 
   async function deleteAnime(id: string): Promise<void> {
-    if (!authStore.userId) return;
-
-    const { error } = await supabase
-      .from('anime_list')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', authStore.userId);
-
-    if (error) throw error;
-  }
-
-  function mapDbToAnime(data: any): AnimeEntry {
-    return {
-      id: data.id,
-      title: data.title,
-      status: data.status,
-      currentEpisode: data.current_episode,
-      totalEpisodes: data.total_episodes,
-      score: data.score,
-      notes: data.notes,
-      coverUrl: data.cover_url,
-      startDate: data.start_date ? new Date(data.start_date) : null,
-      endDate: data.end_date ? new Date(data.end_date) : null,
-      rewatchCount: data.rewatch_count || 0,
-    };
+    await $fetch(`/api/anime/${id}`, { method: 'DELETE' });
   }
 
   return {
@@ -649,4 +565,39 @@ export function formatRelativeTime(date: Date | string): string {
 
 ---
 
-**Última actualización**: Enero 2025
+---
+
+## NestJS — Service con Prisma y Outbox (F0)
+
+Ejemplo de un service NestJS que escribe estado + evento de dominio en una sola transacción:
+
+```typescript
+// packages/api/src/modules/quests/quests.service.ts
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class QuestsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async complete(questId: string, userId: string): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.questCompletion.create({
+        data: { questId, userId, completedAt: new Date() },
+      }),
+      this.prisma.domainEvent.create({
+        data: {
+          type: 'QUEST_COMPLETED',
+          payload: JSON.stringify({ questId, userId }),
+          processedAt: null,
+        },
+      }),
+    ]);
+    // El relay BullMQ recoge el evento y lo distribuye a los handlers
+  }
+}
+```
+
+---
+
+**Última actualización**: Mayo 2026

@@ -8,9 +8,7 @@ export function useIndexPage() {
   const profileApi = useProfile();
   const userModulesApi = useUserModules();
   const authStore = useAuthStore();
-  const questsApi = useQuests();
-  const animeApi = useAnime();
-  const workoutsApi = useWorkouts();
+  const statsApi = useStats();
 
   const profile = ref<UserProfile | null>(null);
   const profilePending = ref(true);
@@ -64,33 +62,8 @@ export function useIndexPage() {
 
     loadingStats.value = true;
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const [quests, completions, anime, workouts] = await Promise.all([
-        questsApi.fetchQuests().catch(() => []),
-        questsApi.fetchTodayCompletions().catch(() => []),
-        animeApi.fetchAnimeList().catch(() => []),
-        workoutsApi.fetchWorkouts().catch(() => []),
-      ]);
-
-      const questsToday = completions.length;
-      const completionSet = new Set(completions);
-      const questsPending = quests.filter((q) => !completionSet.has(q.id)).length;
-
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-
-      quickStats.value = {
-        questsToday: questsToday,
-        questsPending: questsPending,
-        animeWatching: anime.filter((a) => a.status === 'watching').length,
-        workoutsThisWeek: workouts.filter((w) => {
-          if (!w.workoutDate) return false;
-          const workoutDate = new Date(w.workoutDate);
-          return workoutDate >= weekAgo && w.status === 'completed';
-        }).length,
-      };
+      const stats = await statsApi.fetchStats();
+      quickStats.value = statsApi.toQuickStats(stats);
     } catch (error) {
       console.error('Error loading quick stats:', error);
     } finally {
@@ -113,6 +86,19 @@ export function useIndexPage() {
     }
   });
 
+  /**
+   * Optimistically bumps profile totalExp by `amount` so the EXP bar
+   * updates immediately on quest complete without waiting for the server
+   * to process the event-driven gamification pipeline.
+   */
+  function bumpExpOptimistic(amount: number): void {
+    if (!profile.value) return;
+    profile.value = {
+      ...profile.value,
+      totalExp: profile.value.totalExp + amount,
+    };
+  }
+
   return {
     profile: computed(() => profile.value),
     isLoading,
@@ -121,5 +107,7 @@ export function useIndexPage() {
     quickStats: readonly(quickStats),
     loadingStats: readonly(loadingStats),
     modulesStore,
+    bumpExpOptimistic,
+    loadQuickStats,
   };
 }

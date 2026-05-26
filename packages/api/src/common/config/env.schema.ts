@@ -13,6 +13,8 @@ const envSchema = z.object({
   CORS_ORIGINS: z.string().optional(),
   PORT: z.coerce.number().default(3000),
   NODE_ENV: z.enum(['dev', 'prod', 'test']).default('dev'),
+  REDIS_URL: z.string().url().optional(),
+  EVENTS_WORKER_INLINE: z.coerce.boolean().default(true),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

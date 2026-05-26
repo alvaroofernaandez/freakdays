@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -216,6 +217,73 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* ── Pixel / retro game UI ──────────────────────────────────── */
+  .font-pixel {
+    font-family: 'Press Start 2P', ui-monospace, 'SFMono-Regular', monospace;
+  }
+
+  .pixelated {
+    image-rendering: pixelated;
+  }
+
+  /* Tactile button: hard offset shadow (no blur) that collapses on press,
+     giving an arcade-style "push" feedback. Stepped timing reads chunkier. */
+  .btn-game {
+    box-shadow: 0 4px 0 0 oklch(0 0 0 / 0.5);
+    transition:
+      transform 0.08s steps(2, end),
+      box-shadow 0.08s steps(2, end),
+      filter 0.15s ease;
+  }
+  .btn-game:hover:not(:disabled) {
+    filter: brightness(1.12) saturate(1.1);
+  }
+  .btn-game:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 0 oklch(0 0 0 / 0.5);
+  }
+  .btn-game:disabled {
+    box-shadow: 0 4px 0 0 oklch(0 0 0 / 0.25);
+  }
+
+  /* 8-bit notched frame (cut corners). Do NOT combine with box-shadow —
+     clip-path clips shadows. Use on decorative, non-shadow elements. */
+  .pixel-frame {
+    clip-path: polygon(
+      0 5px,
+      5px 5px,
+      5px 0,
+      calc(100% - 5px) 0,
+      calc(100% - 5px) 5px,
+      100% 5px,
+      100% calc(100% - 5px),
+      calc(100% - 5px) calc(100% - 5px),
+      calc(100% - 5px) 100%,
+      5px 100%,
+      5px calc(100% - 5px),
+      0 calc(100% - 5px)
+    );
+  }
+
+  /* Subtle CRT scanlines overlay for retro screen feel. */
+  .crt-scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, oklch(0 0 0 / 0.1) 0 1px, transparent 1px 3px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-game {
+      transition: filter 0.15s ease;
+    }
+    .btn-game:active:not(:disabled) {
+      transform: none;
+      box-shadow: 0 4px 0 0 oklch(0 0 0 / 0.5);
+    }
   }
 }
 

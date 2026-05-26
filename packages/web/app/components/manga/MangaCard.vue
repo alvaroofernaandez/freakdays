@@ -45,18 +45,30 @@ const statusConfig = computed(() => {
   switch (props.manga.status) {
     case 'completed':
       return {
-        label: 'Completada',
-        color: 'bg-exp-legendary/20 text-exp-legendary',
+        label: 'COMPLETA',
+        color: 'bg-exp-legendary/20 text-exp-legendary border-exp-legendary/30',
         icon: CheckCircle2,
       };
     case 'wishlist':
-      return { label: 'Wishlist', color: 'bg-accent/20 text-accent', icon: Heart };
+      return { label: 'WISHLIST', color: 'bg-accent/20 text-accent border-accent/30', icon: Heart };
     case 'collecting':
-      return { label: 'En curso', color: 'bg-secondary/20 text-secondary', icon: TrendingUp };
+      return {
+        label: 'EN CURSO',
+        color: 'bg-secondary/20 text-secondary border-secondary/30',
+        icon: TrendingUp,
+      };
     case 'dropped':
-      return { label: 'Abandonada', color: 'bg-muted text-muted-foreground', icon: X };
+      return {
+        label: 'ABANDONADA',
+        color: 'bg-muted text-muted-foreground border-border',
+        icon: X,
+      };
     default:
-      return { label: 'En curso', color: 'bg-secondary/20 text-secondary', icon: TrendingUp };
+      return {
+        label: 'EN CURSO',
+        color: 'bg-secondary/20 text-secondary border-secondary/30',
+        icon: TrendingUp,
+      };
   }
 });
 
@@ -93,10 +105,12 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
 </script>
 
 <template>
-  <Card class="hover:border-primary/30 transition-colors">
+  <Card
+    class="rounded-none border-2 transition-[border-color,box-shadow] duration-100 hover:border-secondary/40 shadow-[0_5px_0_0_oklch(0.30_0.12_145)] hover:shadow-[0_5px_0_0_oklch(0.40_0.15_145)] active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.30_0.12_145)] motion-reduce:active:translate-y-0"
+  >
     <CardHeader class="flex flex-row items-start gap-3 py-3 px-4">
       <div
-        class="w-12 h-16 rounded-lg bg-muted flex items-center justify-center shrink-0 overflow-hidden"
+        class="w-12 h-16 bg-muted flex items-center justify-center shrink-0 overflow-hidden rounded-none border border-border/50"
       >
         <img
           v-if="manga.coverUrl"
@@ -106,7 +120,7 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
           loading="lazy"
           decoding="async"
         />
-        <BookOpen v-else class="h-6 w-6 text-muted-foreground" />
+        <BookOpen v-else class="h-6 w-6 text-muted-foreground" aria-hidden="true" />
       </div>
 
       <div class="flex-1 min-w-0">
@@ -120,47 +134,53 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
           <Button
             variant="ghost"
             size="icon"
-            class="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+            class="h-7 w-7 rounded-none text-muted-foreground hover:text-destructive shrink-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
+            :aria-label="`Eliminar ${manga.title}`"
             @click="handleDelete"
           >
-            <Trash2 class="h-3 w-3" />
+            <Trash2 class="h-3 w-3" aria-hidden="true" />
           </Button>
         </div>
 
         <div class="flex items-center gap-2 mt-2 flex-wrap">
-          <Badge :class="statusConfig.color" class="text-[10px] flex items-center gap-1">
-            <component :is="statusConfig.icon" class="h-3 w-3" />
+          <Badge
+            :class="statusConfig.color"
+            class="font-pixel text-[7px] rounded-none border flex items-center gap-1"
+          >
+            <component :is="statusConfig.icon" class="h-3 w-3" aria-hidden="true" />
             {{ statusConfig.label }}
           </Badge>
 
-          <Badge variant="outline" class="text-[10px]">
+          <Badge variant="outline" class="font-pixel text-[8px] rounded-none">
             {{ manga.ownedVolumes.length }} / {{ manga.totalVolumes ?? '?' }}
           </Badge>
 
-          <span v-if="manga.score" class="text-xs text-exp-medium flex items-center gap-0.5">
-            <Star class="h-3 w-3 fill-current" />
+          <span
+            v-if="manga.score"
+            class="font-pixel text-[8px] text-exp-medium flex items-center gap-0.5"
+          >
+            <Star class="h-3 w-3 fill-current" aria-hidden="true" />
             {{ manga.score }}
           </span>
 
           <span
             v-if="manga.totalCost && manga.totalCost > 0"
-            class="text-xs text-muted-foreground flex items-center gap-0.5"
+            class="font-pixel text-[8px] text-muted-foreground flex items-center gap-0.5"
           >
-            <Euro class="h-3 w-3" />
+            <Euro class="h-3 w-3" aria-hidden="true" />
             {{ manga.totalCost.toFixed(2) }}
           </span>
         </div>
 
         <div v-if="!isWishlist" class="mt-2 space-y-1">
-          <div class="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Progreso</span>
+          <div
+            class="flex items-center justify-between font-pixel text-[8px] text-muted-foreground"
+          >
+            <span>PROGRESO</span>
             <span>{{ progress }}%</span>
           </div>
-          <div class="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-            <div
-              class="h-full bg-primary rounded-full transition-all"
-              :style="{ width: `${progress}%` }"
-            />
+          <div class="w-full h-1.5 bg-muted overflow-hidden">
+            <div class="h-full bg-secondary transition-all" :style="{ width: `${progress}%` }" />
           </div>
         </div>
         <div class="flex items-center gap-2 mt-2 flex-wrap">
@@ -168,28 +188,35 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
             <Button
               variant="ghost"
               size="icon"
-              class="h-7 w-7"
+              class="h-7 w-7 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
               :disabled="manga.ownedVolumes.length === 0"
+              :aria-label="`Quitar último tomo de ${manga.title}`"
               @click="handleRemoveLastVolume"
             >
-              <Minus class="h-3 w-3" />
+              <Minus class="h-3 w-3" aria-hidden="true" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              class="h-7 w-7"
+              class="h-7 w-7 rounded-none cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
               :disabled="
                 manga.totalVolumes ? manga.ownedVolumes.length >= manga.totalVolumes : false
               "
+              :aria-label="`Añadir tomo a ${manga.title}`"
               @click="handleAddVolume"
             >
-              <Plus class="h-3 w-3" />
+              <Plus class="h-3 w-3" aria-hidden="true" />
             </Button>
           </div>
 
-          <Button variant="ghost" size="sm" class="h-7 text-xs" @click="openPriceEdit">
-            <Euro class="h-3 w-3 mr-1" />
-            {{ manga.pricePerVolume ? `${manga.pricePerVolume.toFixed(2)}€/tomo` : 'Precio' }}
+          <Button
+            variant="ghost"
+            size="sm"
+            class="h-7 font-pixel text-[8px] rounded-none cursor-pointer"
+            @click="openPriceEdit"
+          >
+            <Euro class="h-3 w-3 mr-1" aria-hidden="true" />
+            {{ manga.pricePerVolume ? `${manga.pricePerVolume.toFixed(2)}€/T` : 'PRECIO' }}
           </Button>
 
           <div class="flex items-center gap-1">
@@ -197,31 +224,31 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
               v-if="manga.status !== 'collecting'"
               variant="ghost"
               size="sm"
-              class="h-7 text-xs"
+              class="h-7 font-pixel text-[8px] rounded-none cursor-pointer"
               @click="handleStatusChange('collecting')"
             >
-              <TrendingUp class="h-3 w-3 mr-1" />
-              En curso
+              <TrendingUp class="h-3 w-3 mr-1" aria-hidden="true" />
+              EN CURSO
             </Button>
             <Button
               v-if="manga.status !== 'completed'"
               variant="ghost"
               size="sm"
-              class="h-7 text-xs"
+              class="h-7 font-pixel text-[8px] rounded-none cursor-pointer"
               @click="handleStatusChange('completed')"
             >
-              <CheckCircle2 class="h-3 w-3 mr-1" />
-              Completar
+              <CheckCircle2 class="h-3 w-3 mr-1" aria-hidden="true" />
+              COMPLETAR
             </Button>
             <Button
               v-if="manga.status !== 'wishlist'"
               variant="ghost"
               size="sm"
-              class="h-7 text-xs"
+              class="h-7 font-pixel text-[8px] rounded-none cursor-pointer"
               @click="handleStatusChange('wishlist')"
             >
-              <Heart class="h-3 w-3 mr-1" />
-              Wishlist
+              <Heart class="h-3 w-3 mr-1" aria-hidden="true" />
+              WISHLIST
             </Button>
           </div>
         </div>
@@ -236,11 +263,24 @@ function handleStatusChange(newStatus: MangaEntry['status']) {
           step="0.01"
           min="0"
           placeholder="Precio por tomo"
-          class="flex-1 h-8 px-2 text-sm rounded-md border border-input bg-background"
+          class="flex-1 h-8 px-2 text-sm rounded-none border-2 border-input bg-background focus:outline-none focus:border-primary"
           @keyup.enter="savePrice"
         />
-        <Button size="sm" @click="savePrice">Guardar</Button>
-        <Button variant="ghost" size="sm" @click="showPriceEdit = false">Cancelar</Button>
+        <Button
+          size="sm"
+          class="rounded-none font-pixel text-[8px] uppercase cursor-pointer"
+          @click="savePrice"
+        >
+          GUARDAR
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          class="rounded-none font-pixel text-[8px] uppercase cursor-pointer"
+          @click="showPriceEdit = false"
+        >
+          CANCELAR
+        </Button>
       </div>
     </CardContent>
   </Card>

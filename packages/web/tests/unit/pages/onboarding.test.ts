@@ -30,7 +30,7 @@ describe('onboarding.vue', () => {
       },
     });
 
-    expect(wrapper.text()).toContain('Configura tu Aventura');
+    expect(wrapper.text()).toContain('Configura tu aventura');
   });
 
   it('should toggle module selection', async () => {

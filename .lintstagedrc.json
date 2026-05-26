@@ -7,5 +7,6 @@
     "prettier --write",
     "pnpm --filter freak-days-api exec eslint --fix --no-warn-ignored"
   ],
+  "packages/domain/**/*.{js,mjs,cjs,ts}": ["prettier --write"],
   "*.{json,md,yml,yaml,html,css}": ["prettier --write"]
 }

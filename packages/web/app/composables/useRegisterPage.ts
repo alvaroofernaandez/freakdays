@@ -9,7 +9,11 @@ export function useRegisterPage() {
   const password = ref('');
   const confirmPassword = ref('');
   const showPassword = ref(false);
-  const success = ref(false);
+
+  // Clerk email/password sign-up needs an email verification step. Once
+  // `signUp.create` succeeds, we flip into the code-entry stage.
+  const pendingVerification = ref(false);
+  const verificationCode = ref('');
 
   const passwordsMatch = computed(() => password.value === confirmPassword.value);
   const isValidPassword = computed(() => password.value.length >= 6);
@@ -53,8 +57,24 @@ export function useRegisterPage() {
 
     const result = await auth.signUp(email.value, password.value);
 
+    if (!result.success) return;
+
+    // Instance without email verification — the session is already active.
+    if ('status' in result && result.status === 'complete') {
+      await navigateTo('/');
+      return;
+    }
+
+    pendingVerification.value = true;
+  }
+
+  async function handleVerify() {
+    if (!verificationCode.value || authStore.loading) return;
+
+    const result = await auth.verifyEmailCode(verificationCode.value);
+
     if (result.success) {
-      success.value = true;
+      await navigateTo('/');
     }
   }
 
@@ -75,7 +95,8 @@ export function useRegisterPage() {
     password.value = '';
     confirmPassword.value = '';
     showPassword.value = false;
-    success.value = false;
+    pendingVerification.value = false;
+    verificationCode.value = '';
   }
 
   return {
@@ -83,7 +104,8 @@ export function useRegisterPage() {
     password,
     confirmPassword,
     showPassword,
-    success,
+    pendingVerification,
+    verificationCode,
     passwordsMatch,
     isValidPassword,
     passwordStrength,
@@ -91,6 +113,7 @@ export function useRegisterPage() {
     strengthColor,
     canSubmit,
     handleSubmit,
+    handleVerify,
     handleGoogleSignIn,
     handleGitHubSignIn,
     handleDiscordSignIn,

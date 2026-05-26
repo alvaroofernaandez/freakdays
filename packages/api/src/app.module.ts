@@ -6,6 +6,7 @@ import { LoggerModule } from 'nestjs-pino';
 
 import { AuthModule } from './auth/auth.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { EventsModule } from './events/events.module';
 import { ClerkJwtGuard } from './auth/guards/clerk-jwt.guard';
 import { CommonModule } from './common/common.module';
 import { validateEnv } from './common/config/env.schema';
@@ -25,6 +26,12 @@ import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { AnimeModule } from './anime/anime.module';
+import { FeedModule } from './feed/feed.module';
+import { GamificationModule } from './gamification/gamification.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { RealtimeModule } from './realtime/realtime.module';
+import { SocialModule } from './social/social.module';
+import { ObservabilityModule } from './observability/observability.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 
 @Module({
@@ -56,7 +63,14 @@ import { WorkoutsModule } from './workouts/workouts.module';
         },
       },
     }),
+    ObservabilityModule,
     CommonModule,
+    EventsModule,
+    FeedModule,
+    GamificationModule,
+    LeaderboardModule,
+    RealtimeModule,
+    SocialModule,
     AuthModule,
     CalendarModule,
     AnimeModule,

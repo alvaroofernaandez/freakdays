@@ -1,43 +1,58 @@
 # Guías para IA - FreakDays
 
-Este documento proporciona guías específicas para que las IAs (como Cursor AI) implementen código siguiendo las mejores prácticas de FreakDays.
+Este documento proporciona guías específicas para que agentes e IAs implementen código siguiendo las mejores prácticas de FreakDays.
 
-## 🎯 Principios para Implementación por IA
+## Contexto rápido del proyecto
+
+- **Monorepo pnpm**. Paquetes: `packages/api` (NestJS, :3001), `packages/web` (Nuxt 4, :3000), `packages/domain` (`@freakdays/domain`, TypeScript puro).
+- **Entrypoint de desarrollo**: `make dev` (levanta todo).
+- **Base de datos**: PostgreSQL en Docker, puerto **5433** (no 5432). Gestionado con **Prisma**.
+- **Redis**: requerido para BullMQ y Socket.IO. También corre en Docker.
+- **Auth**: Clerk (no Supabase).
+- **Storage**: Cloudflare R2 (no Supabase Storage).
+- **Tests**: API → Jest (160), domain → Vitest (38), web → Vitest (656). `make test` para todos.
+- **Ver**: `make help` para todos los comandos disponibles.
+
+---
+
+## Principios para Implementación por IA
 
 ### 1. Seguir la Arquitectura Existente
 
 **Siempre:**
 
-- Mantener la separación de capas (domain, app, stores)
-- Usar composables para lógica reutilizable
-- Colocar tipos en `domain/types/`
+- Mantener la separación de capas (domain, api, web)
+- Usar composables para lógica reutilizable en el frontend
+- Colocar tipos compartidos en `packages/domain`
 - Usar componentes UI de shadcn-vue
+- Los composables Nuxt llaman a la API NestJS vía `$fetch`, nunca acceden a la BD directamente
 
-**Ejemplo Correcto:**
+**Ejemplo correcto:**
 
 ```typescript
-// ✅ Correcto: Lógica en composable
-// app/composables/useNewFeature.ts
+// ✅ Correcto: composable llama a la API NestJS
+// packages/web/app/composables/useNewFeature.ts
 export function useNewFeature() {
-  const supabase = useSupabase()
-  // lógica aquí
+  async function fetchAll() {
+    return $fetch('/api/new-feature');
+  }
+  return { fetchAll };
 }
 
-// app/components/new-feature/NewFeatureCard.vue
+// packages/web/app/components/new-feature/NewFeatureCard.vue
 <script setup>
 const featureApi = useNewFeature()
 // solo UI aquí
 </script>
 ```
 
-**Ejemplo Incorrecto:**
+**Ejemplo incorrecto:**
 
 ```typescript
-// ❌ Incorrecto: Lógica en componente
+// ❌ Incorrecto: acceso directo a BD desde el frontend
 <script setup>
-const supabase = useSupabase()
-const { data } = await supabase.from('table').select('*')
-// lógica mezclada con UI
+const prisma = usePrisma() // NO existe en el frontend
+const data = await prisma.table.findMany()
 </script>
 ```
 
@@ -100,14 +115,15 @@ if (!authStore.userId) {
 
 ### Al Crear un Nuevo Módulo
 
-- [ ] Crear tipos en `domain/types/module-name.ts`
-- [ ] Crear composable en `app/composables/useModuleName.ts`
-- [ ] Crear componentes en `app/components/module-name/`
-- [ ] Crear página en `app/pages/module-name.vue`
-- [ ] Añadir migración SQL si es necesario
-- [ ] Actualizar `domain/types/modules.ts` si es un módulo principal
-- [ ] Añadir icono en `domain/constants/module-icons.ts`
-- [ ] Escribir tests en `tests/unit/`
+- [ ] Crear tipos compartidos en `packages/domain/src/` (si son cross-package)
+- [ ] Crear módulo NestJS en `packages/api/src/modules/module-name/`
+- [ ] Añadir modelo en `packages/api/prisma/schema.prisma` y ejecutar `make prisma-migrate`
+- [ ] Publicar evento de dominio en la misma transacción si la acción dispara gamificación
+- [ ] Crear composable en `packages/web/app/composables/useModuleName.ts`
+- [ ] Crear componentes en `packages/web/app/components/module-name/`
+- [ ] Crear página en `packages/web/app/pages/module-name.vue`
+- [ ] Actualizar navegación si es un módulo principal
+- [ ] Escribir tests (`packages/api/src/modules/module-name/*.spec.ts` y `packages/web/app/**/*.spec.ts`)
 
 ### Al Crear un Nuevo Componente
 
@@ -121,9 +137,8 @@ if (!authStore.userId) {
 
 ### Al Crear un Nuevo Composable
 
-- [ ] Verificar autenticación al inicio
-- [ ] Usar `useSupabase()` para acceso a datos
-- [ ] Mapear datos de DB a tipos TypeScript
+- [ ] Llamar a la API NestJS con `$fetch` (no acceder a la BD directamente)
+- [ ] Mapear la respuesta a tipos TypeScript
 - [ ] Manejar errores apropiadamente
 - [ ] Retornar tipos bien definidos
 - [ ] Documentar funciones complejas
@@ -324,28 +339,30 @@ const stats = computed(() => {
 </template>
 ```
 
-## 🚫 Errores Comunes a Evitar
+## Errores Comunes a Evitar
 
-### 1. No Verificar Autenticación
+### 1. Acceder a la BD directamente desde el frontend
 
 ```typescript
-// ❌ Incorrecto
-async function fetchData() {
-  const { data } = await supabase.from('table').select('*');
-  return data;
-}
+// ❌ Incorrecto: no hay Prisma en el frontend
+const prisma = new PrismaClient();
+const data = await prisma.table.findMany();
 
-// ✅ Correcto
-async function fetchData() {
-  const authStore = useAuthStore();
-  if (!authStore.userId) return [];
-
-  const { data } = await supabase.from('table').select('*').eq('user_id', authStore.userId);
-  return data ?? [];
-}
+// ✅ Correcto: llamar a la API NestJS
+const data = await $fetch('/api/table');
 ```
 
-### 2. No Manejar Errores
+### 2. Usar puerto 5432 para la BD en desarrollo
+
+```env
+# ❌ Incorrecto
+DATABASE_URL=postgresql://...@localhost:5432/...
+
+# ✅ Correcto
+DATABASE_URL=postgresql://...@localhost:5433/...
+```
+
+### 3. No Manejar Errores
 
 ```typescript
 // ❌ Incorrecto
@@ -364,7 +381,7 @@ async function save() {
 }
 ```
 
-### 3. No Usar Tipos
+### 4. No Usar Tipos
 
 ```typescript
 // ❌ Incorrecto
@@ -385,82 +402,59 @@ function addItem(item: Item) {
 }
 ```
 
-### 4. Lógica en Componentes
+### 5. Lógica en Componentes
 
 ```vue
 <!-- ❌ Incorrecto -->
 <script setup>
-const supabase = useSupabase();
-const { data } = await supabase.from('table').select('*');
+const data = await $fetch('/api/table'); // lógica mezclada con UI
 </script>
 
 <!-- ✅ Correcto -->
 <script setup>
 const api = useItems();
-const items = await api.fetchItems();
+const items = await api.fetchItems(); // la lógica vive en el composable
 </script>
 ```
+
+### 6. Olvidar que Redis es obligatorio
+
+Si los tests de integración o el stack local fallan con errores de conexión a Redis, levanta los servicios:
+
+```bash
+make services-up
+```
+
+Sin Redis, el pipeline BullMQ no funciona y la gamificación no se procesa.
 
 ## 📝 Templates Rápidos
 
 ### Template: Nuevo Composable
 
 ```typescript
-// app/composables/useFeatureName.ts
-import { useAuthStore } from '~~/stores/auth';
-import { useSupabase } from './useSupabase';
-import type { FeatureEntity } from '~~/domain/types';
-
-export interface CreateFeatureDTO {
-  // definir campos
-}
+// packages/web/app/composables/useFeatureName.ts
+import type { FeatureEntity, CreateFeatureDTO } from '@freakdays/domain';
 
 export function useFeatureName() {
-  const supabase = useSupabase();
-  const authStore = useAuthStore();
-
   async function fetchAll(): Promise<FeatureEntity[]> {
-    if (!authStore.userId) return [];
-
-    const { data, error } = await supabase
-      .from('table_name')
-      .select('*')
-      .eq('user_id', authStore.userId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return (data ?? []).map(mapDbToEntity);
+    return $fetch<FeatureEntity[]>('/api/feature-name');
   }
 
-  async function create(dto: CreateFeatureDTO): Promise<FeatureEntity | null> {
-    if (!authStore.userId) return null;
-
-    const { data, error } = await supabase
-      .from('table_name')
-      .insert({
-        user_id: authStore.userId,
-        // campos del DTO
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return data ? mapDbToEntity(data) : null;
+  async function create(dto: CreateFeatureDTO): Promise<FeatureEntity> {
+    return $fetch<FeatureEntity>('/api/feature-name', {
+      method: 'POST',
+      body: dto,
+    });
   }
 
-  function mapDbToEntity(data: any): FeatureEntity {
-    return {
-      id: data.id,
-      // mapear campos
-      createdAt: new Date(data.created_at),
-    };
+  async function remove(id: string): Promise<void> {
+    await $fetch(`/api/feature-name/${id}`, { method: 'DELETE' });
   }
 
   return {
     fetchAll,
     create,
+    remove,
   };
 }
 ```
@@ -544,4 +538,4 @@ Antes de considerar una implementación completa, verificar:
 
 ---
 
-**Última actualización**: Enero 2025
+**Última actualización**: Mayo 2026

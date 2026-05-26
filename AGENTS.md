@@ -1,5 +1,33 @@
 # FreakDays - Agent Guidelines & Project Conventions
 
+## Makefile — Single Entrypoint (MANDATORY for agents and developers)
+
+The **Makefile is the only documented way to run, build, test, and manage the FreakDays stack.**
+Agents and developers MUST use `make` targets. Never invoke `pnpm dev`, `nuxt dev`, `nest start`, or
+`docker compose` directly outside of what the Makefile delegates.
+
+| Task                        | Command                |
+| --------------------------- | ---------------------- |
+| Start full stack            | `make dev`             |
+| Prepare DB only (no server) | `make dev-setup`       |
+| Stop Docker services        | `make dev-down`        |
+| Start Docker only           | `make services-up`     |
+| Run all tests               | `make test`            |
+| Full CI suite               | `make ci-local`        |
+| Lint                        | `make lint`            |
+| Type-check                  | `make typecheck`       |
+| Prisma generate             | `make prisma-generate` |
+| Prisma migrate (dev)        | `make prisma-migrate`  |
+| Prisma deploy (prod)        | `make prisma-deploy`   |
+| Build all                   | `make build`           |
+
+> Run `make help` to see all available targets with descriptions.
+
+**Why**: `make dev` starts Postgres + Redis + API + web in the correct order with coordinated shutdown.
+Skipping it leads to broken states (missing migrations, no Redis, port conflicts).
+
+---
+
 ## Project Overview
 
 **FreakDays** es una aplicación de gestión de vida cotidiana para personas "frikis". Permite gestionar entrenamientos, colecciones de manga, animes, misiones diarias (quests), grupos (party system) y calendario de lanzamientos.
@@ -104,9 +132,10 @@ describe('ComponentName or FunctionName', () => {
 ### Running Tests
 
 ```bash
-pnpm test           # Run all tests once
-pnpm test:watch     # Watch mode
-pnpm test:coverage  # With coverage report
+make test           # Run all tests once (API + domain + web)
+make test-watch     # Watch mode (web)
+make coverage       # With coverage report
+make ci-local       # Full CI suite (lint + typecheck + test + coverage + build)
 ```
 
 ---

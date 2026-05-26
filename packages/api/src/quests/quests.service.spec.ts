@@ -2,6 +2,8 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 import { QuestsService } from './quests.service';
 
 const mockIdentity = {
@@ -52,8 +54,12 @@ describe('QuestsService', () => {
       findUnique: jest.Mock;
       update: jest.Mock;
     };
+    outboxEvent: {
+      create: jest.Mock;
+    };
     $transaction: jest.Mock;
   };
+  let mockEventBus: { emit: jest.Mock; buildEvent: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,15 +80,34 @@ describe('QuestsService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       profile: {
-        findUnique: jest.fn().mockResolvedValue({ id: 'p1' }),
+        findUnique: jest.fn().mockResolvedValue({ id: 'p1', totalExp: 0 }),
         update: jest.fn().mockResolvedValue({}),
+      },
+      outboxEvent: {
+        create: jest.fn().mockResolvedValue({}),
       },
       $transaction: jest.fn().mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
         return cb(mockPrisma);
       }),
     };
 
-    service = new QuestsService(mockPrisma as unknown as PrismaService, mockIdentity);
+    mockEventBus = {
+      emit: jest.fn().mockResolvedValue(undefined),
+      buildEvent: jest.fn().mockReturnValue({
+        eventId: 'mock-evt-id',
+        type: EVENT_TYPES.QUEST_COMPLETED,
+        aggregateId: 'q1',
+        orgId: null,
+        payload: {},
+        occurredAt: new Date(),
+      }),
+    };
+
+    service = new QuestsService(
+      mockPrisma as unknown as PrismaService,
+      mockIdentity,
+      mockEventBus as unknown as EventBusService,
+    );
   });
 
   describe('list', () => {
@@ -163,10 +188,9 @@ describe('QuestsService', () => {
       );
     });
 
-    it('creates QuestCompletion and increments Profile totalExp', async () => {
+    it('creates QuestCompletion and emits quest.completed event (EXP now eventually-consistent via ProgressionHandler)', async () => {
       const quest = makeQuest({ expReward: 75 });
       mockPrisma.quest.findFirst.mockResolvedValue(quest);
-      mockPrisma.profile.findUnique.mockResolvedValue({ id: 'p1' });
 
       const result = await service.complete('c1', 'o1', 'q1');
 
@@ -180,24 +204,45 @@ describe('QuestsService', () => {
           }),
         }),
       );
-      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: 'p1' },
-          data: { totalExp: { increment: 75 } },
-        }),
-      );
+      // ProgressionHandler is the sole writer — no inline profile.update
+      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
       expect(result.expEarned).toBe(75);
     });
 
-    it('skips profile update when profile does not exist', async () => {
-      const quest = makeQuest({ expReward: 30 });
+    it('emits quest.completed event via EventBusService.emit inside the tx', async () => {
+      const quest = makeQuest({ expReward: 10 });
       mockPrisma.quest.findFirst.mockResolvedValue(quest);
-      mockPrisma.profile.findUnique.mockResolvedValue(null);
+
+      await service.complete('c1', 'o1', 'q1');
+
+      expect(mockEventBus.buildEvent).toHaveBeenCalledWith(
+        EVENT_TYPES.QUEST_COMPLETED,
+        'q1',
+        expect.objectContaining({
+          questId: 'q1',
+          userId: 'u1',
+          expAwarded: 10,
+        }),
+        'o1',
+      );
+      expect(mockEventBus.emit).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns { expEarned } response shape unchanged (non-breaking guarantee)', async () => {
+      const quest = makeQuest({ expReward: 50 });
+      mockPrisma.quest.findFirst.mockResolvedValue(quest);
 
       const result = await service.complete('c1', 'o1', 'q1');
 
-      expect(mockPrisma.profile.update).not.toHaveBeenCalled();
-      expect(result.expEarned).toBe(30);
+      expect(result).toEqual({ expEarned: 50 });
+    });
+
+    it('throws on DB error', async () => {
+      mockPrisma.$transaction.mockRejectedValue(new Error('DB error'));
+      const quest = makeQuest({ expReward: 10 });
+      mockPrisma.quest.findFirst.mockResolvedValue(quest);
+
+      await expect(service.complete('c1', 'o1', 'q1')).rejects.toThrow('DB error');
     });
   });
 });

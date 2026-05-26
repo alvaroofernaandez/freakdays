@@ -2,109 +2,92 @@
 
 Documentación sobre las integraciones con APIs externas y servicios utilizados en FreakDays.
 
-## 📚 Índice
+> **Nota**: Las versiones anteriores del proyecto usaban Supabase como backend principal (base de datos + auth + storage). Eso ya no aplica. El backend actual es NestJS, la autenticación la gestiona Clerk y el storage es Cloudflare R2.
 
-- [Supabase](#supabase)
+## Índice
+
+- [API NestJS (interna)](#api-nestjs-interna)
+- [Clerk (Autenticación)](#clerk-autenticación)
 - [Jikan API (MyAnimeList)](#jikan-api-myanimelist)
-- [Autenticación](#autenticación)
-- [Storage](#storage)
+- [Cloudflare R2 (Storage)](#cloudflare-r2-storage)
+- [Resend (Email)](#resend-email)
+- [Socket.IO (Realtime)](#socketio-realtime)
 - [Manejo de Errores](#manejo-de-errores)
 
 ---
 
-## Supabase
+## API NestJS (interna)
 
-Supabase es el backend principal de FreakDays, proporcionando base de datos PostgreSQL, autenticación y almacenamiento.
+El frontend Nuxt llama exclusivamente a la API NestJS en `http://localhost:3001` (desarrollo) o en la URL configurada por `NUXT_PUBLIC_API_BASE_URL` (producción).
 
 ### Configuración
 
-**Variables de entorno:**
+```env
+# packages/web/.env
+NUXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
+```
+
+### Llamadas desde composables
+
+```typescript
+// packages/web/app/composables/useAnime.ts
+async function fetchAnimeList() {
+  return $fetch('/api/anime');
+  // expandido: NUXT_PUBLIC_API_BASE_URL + '/anime'
+}
+```
+
+El token JWT de Clerk se incluye automáticamente en las cabeceras de `$fetch` gracias al plugin de autenticación de Nuxt.
+
+### Estructura de rutas
+
+| Método   | Ruta                       | Descripción                                      |
+| -------- | -------------------------- | ------------------------------------------------ |
+| `GET`    | `/api/anime`               | Lista de anime del usuario                       |
+| `POST`   | `/api/anime`               | Añadir anime                                     |
+| `PATCH`  | `/api/anime/:id`           | Actualizar anime                                 |
+| `DELETE` | `/api/anime/:id`           | Eliminar anime                                   |
+| `GET`    | `/api/manga`               | Colección de manga                               |
+| `POST`   | `/api/manga`               | Añadir manga                                     |
+| `GET`    | `/api/quests`              | Quests activas                                   |
+| `POST`   | `/api/quests`              | Crear quest                                      |
+| `POST`   | `/api/quests/:id/complete` | Completar quest (dispara evento de gamificación) |
+| `GET`    | `/api/workouts`            | Entrenamientos                                   |
+| `POST`   | `/api/workouts`            | Crear entrenamiento                              |
+| `GET`    | `/api/party`               | Parties del usuario                              |
+| `POST`   | `/api/party`               | Crear party                                      |
+| `GET`    | `/api/profile`             | Perfil del usuario                               |
+| `PUT`    | `/api/profile`             | Actualizar perfil                                |
+| `GET`    | `/api/calendar`            | Eventos del calendario                           |
+
+---
+
+## Clerk (Autenticación)
+
+FreakDays usa **Clerk** para autenticación.
+
+### Flujo de autenticación
+
+1. El usuario se autentica en el frontend (Clerk Components o Clerk-hosted pages).
+2. Clerk emite un JWT firmado con el par de claves del proyecto.
+3. El frontend incluye el JWT en cada request a la API NestJS.
+4. El guard de NestJS valida el JWT contra el JWKS de Clerk.
+5. El Socket.IO gateway también valida el JWT en el handshake.
+
+### Configuración
 
 ```env
-SUPABASE_URL=tu_proyecto_url
-SUPABASE_ANON_KEY=tu_anon_key
+# packages/api/.env
+CLERK_JWKS_URL=https://your-clerk-domain.clerk.accounts.dev/.well-known/jwks.json
+CLERK_WEBHOOK_SECRET=whsec_...
+
+# packages/web/.env
+NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 ```
 
-**Composable:**
+### Webhooks
 
-```typescript
-// app/composables/useSupabase.ts
-const supabase = useSupabase();
-```
-
-### Base de Datos
-
-#### Conexión
-
-```typescript
-const supabase = useSupabase();
-const { data, error } = await supabase.from('anime_list').select('*').eq('user_id', userId);
-```
-
-#### Row Level Security (RLS)
-
-Todas las tablas tienen RLS habilitado. Las políticas garantizan que:
-
-- Los usuarios solo ven sus propios datos
-- Los usuarios solo modifican sus propios datos
-- Las relaciones respetan las políticas de las tablas padre
-
-**Ejemplo de política:**
-
-```sql
-CREATE POLICY "Users can manage own anime" ON public.anime_list
-    FOR ALL USING (auth.uid() = user_id);
-```
-
-#### Queries Comunes
-
-**Select con filtros:**
-
-```typescript
-const { data } = await supabase
-  .from('anime_list')
-  .select('*')
-  .eq('user_id', userId)
-  .eq('status', 'watching')
-  .order('updated_at', { ascending: false });
-```
-
-**Insert:**
-
-```typescript
-const { data, error } = await supabase
-  .from('anime_list')
-  .insert({
-    user_id: userId,
-    title: 'One Piece',
-    status: 'watching',
-  })
-  .select()
-  .single();
-```
-
-**Update:**
-
-```typescript
-const { error } = await supabase
-  .from('anime_list')
-  .update({ current_episode: 50 })
-  .eq('id', animeId);
-```
-
-**Delete:**
-
-```typescript
-const { error } = await supabase.from('anime_list').delete().eq('id', animeId);
-```
-
-### Autenticación
-
-Ver sección [Autenticación](#autenticación) para más detalles.
-
-### Storage
-
-Ver sección [Storage](#storage) para más detalles.
+Clerk envía webhooks para eventos de usuario (creación, actualización, eliminación). El endpoint `/api/clerk/webhook` en NestJS los recibe y sincroniza los perfiles en la base de datos.
 
 ---
 
@@ -129,7 +112,7 @@ GET /anime?q={query}&limit={limit}&page={page}
 **Implementación:**
 
 ```typescript
-// app/composables/useAnimeSearch.ts
+// packages/web/app/composables/useAnimeSearch.ts
 const response = await fetch(
   `${JIKAN_API_BASE}/anime?q=${encodeURIComponent(query)}&limit=20&page=${page}`,
   { signal: abortController.signal },
@@ -142,31 +125,12 @@ const response = await fetch(
 - `limit`: Resultados por página (máx 25)
 - `page`: Número de página
 
-**Respuesta:**
-
-```typescript
-interface AnimeSearchResponse {
-  data: AnimeSearchResult[];
-  pagination: {
-    last_visible_page: number;
-    has_next_page: boolean;
-  };
-}
-```
-
 ### Detalles de Anime
 
 **Endpoint:**
 
 ```
 GET /anime/{id}/full
-```
-
-**Implementación:**
-
-```typescript
-const response = await fetch(`${JIKAN_API_BASE}/anime/${malId}/full`);
-const data = await response.json();
 ```
 
 ### Optimizaciones
@@ -179,233 +143,133 @@ Las búsquedas tienen debounce de 500ms para reducir requests:
 const DEBOUNCE_DELAY = 500;
 
 function debouncedSearch(query: string) {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-  }
-  debounceTimer = setTimeout(() => {
-    searchAnime(query, 1);
-  }, DEBOUNCE_DELAY);
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => searchAnime(query, 1), DEBOUNCE_DELAY);
 }
 ```
 
 #### AbortController
 
-Cancela requests anteriores cuando se inicia una nueva búsqueda:
+Cancela requests anteriores cuando se inicia una nueva búsqueda.
 
-```typescript
-if (abortController) {
-  abortController.abort();
-}
-const currentAbortController = new AbortController();
-abortController = currentAbortController;
+#### Rate Limiting
 
-const response = await fetch(url, {
-  signal: currentAbortController.signal,
-});
-```
+Jikan API tiene límites de rate:
 
-#### Paginación
+- **3 requests por segundo**
+- **60 requests por minuto**
 
-Carga resultados adicionales bajo demanda:
-
-```typescript
-async function loadMoreResults() {
-  if (!hasMorePages.value || searching.value) return;
-  const nextPage = currentPage.value + 1;
-  await searchAnime(searchQuery.value, nextPage);
-}
-```
-
-### Parsing de Datos
-
-Los datos de Jikan se parsean a formato interno:
-
-```typescript
-// app/utils/anime-parser.ts
-export function parseJikanAnime(data: AnimeSearchResult): CreateAnimeDTO {
-  return {
-    title: data.title,
-    total_episodes: data.episodes,
-    cover_url: data.images.jpg.large_image_url,
-    notes: formatNotes(data.synopsis, data.genres, data.studios),
-    // ...
-  };
-}
-```
+El debouncing y el AbortController gestionan esto automáticamente.
 
 ---
 
-## Autenticación
+## Cloudflare R2 (Storage)
 
-### Supabase Auth
-
-FreakDays utiliza Supabase Auth para autenticación.
-
-#### Inicialización
-
-```typescript
-// app/composables/useAuth.ts
-async function initialize() {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  authStore.setSession(session);
-
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    authStore.setSession(session);
-    // Manejar cambios de estado
-  });
-}
-```
-
-#### Registro
-
-```typescript
-async function signUp(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-  });
-
-  if (data.user) {
-    await ensureProfileExists(data.user.id, email);
-  }
-}
-```
-
-#### Login
-
-```typescript
-async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-}
-```
-
-#### Logout
-
-```typescript
-async function signOut() {
-  await supabase.auth.signOut();
-  authStore.setSession(null);
-  navigateTo('/login');
-}
-```
-
-#### Sesión
-
-La sesión se gestiona en el store de Pinia:
-
-```typescript
-// stores/auth.ts
-const session = ref<Session | null>(null);
-
-const isAuthenticated = computed(() => !!session.value);
-const userId = computed(() => session.value?.user?.id ?? null);
-```
-
-### Middleware de Autenticación
-
-El middleware `auth.global.ts` protege todas las rutas:
-
-```typescript
-// app/middleware/auth.global.ts
-export default defineNuxtRouteMiddleware(async (to) => {
-  if (!authStore.isAuthenticated && !isPublicRoute) {
-    return navigateTo('/login');
-  }
-});
-```
-
----
-
-## Storage
-
-Supabase Storage se utiliza para almacenar avatares de usuario.
+R2 almacena avatares y banners de usuario. La API NestJS gestiona las subidas.
 
 ### Configuración
 
-**Bucket:** `avatars` (público)
+```env
+# packages/api/.env
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=...
+R2_PUBLIC_URL=https://pub-...r2.dev
+```
 
-**Ruta:** `public/avatars/{userId}/{filename}`
+### Flujo de subida de avatar
 
-### Subir Avatar
+```
+Frontend → POST /api/profile/avatar (multipart) → NestJS
+  → NestJS sube a R2
+  → NestJS actualiza avatarUrl en la BD
+  → Retorna la URL pública
+```
+
+Las URLs públicas de R2 siguen el patrón:
+
+```
+https://pub-{id}.r2.dev/{bucket}/{userId}/{filename}
+```
+
+---
+
+## Resend (Email)
+
+Resend gestiona los emails transaccionales (notificaciones, invitaciones de party, etc.).
+
+### Configuración
+
+```env
+# packages/api/.env
+RESEND_API_KEY=re_...
+```
+
+Los emails se envían desde NestJS a través del módulo de Resend.
+
+---
+
+## Socket.IO (Realtime)
+
+El gateway Socket.IO en NestJS proporciona actualizaciones en tiempo real.
+
+### Autenticación
+
+El cliente incluye el JWT de Clerk en el handshake:
 
 ```typescript
-// app/composables/useProfile.ts
-async function uploadAvatar(file: File): Promise<string | null> {
-  const fileName = `${userId}-${Date.now()}.${file.name.split('.').pop()}`;
-  const filePath = `public/avatars/${fileName}`;
-
-  const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, {
-    cacheControl: '3600',
-    upsert: true,
-  });
-
-  if (uploadError) throw uploadError;
-
-  const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-
-  return data.publicUrl;
-}
+// packages/web/app/composables/useRealtime.ts
+const socket = io(SOCKET_URL, {
+  auth: { token: clerkToken },
+});
 ```
 
-### Eliminar Avatar
+El gateway valida el token contra el JWKS de Clerk antes de aceptar la conexión.
 
-```typescript
-async function deleteAvatar() {
-  if (!profile.value?.avatarUrl) return;
+### Rooms
 
-  const fileName = profile.value.avatarUrl.split('/').pop();
-  const filePath = `public/avatars/${fileName}`;
+- `user:{userId}` — eventos personales (EXP, nivel, logros, stats)
+- `party:{partyId}` — eventos del grupo (feed, leaderboard)
 
-  await supabase.storage.from('avatars').remove([filePath]);
-}
-```
+La membresía a rooms de party se verifica contra la BD en el momento de la conexión.
 
-### Políticas RLS de Storage
+### Eventos emitidos por el servidor
 
-```sql
--- Permitir lectura pública
-CREATE POLICY "Avatar images are publicly accessible"
-ON storage.objects FOR SELECT
-USING (bucket_id = 'avatars');
+| Evento                 | Room         | Payload                                 |
+| ---------------------- | ------------ | --------------------------------------- |
+| `exp.updated`          | `user:{id}`  | `{ totalExp, level, expForNextLevel }`  |
+| `streak.updated`       | `user:{id}`  | `{ questId, streak }`                   |
+| `achievement.unlocked` | `user:{id}`  | `{ achievementId, title, description }` |
+| `stats.updated`        | `user:{id}`  | `UserStats`                             |
+| `feed.entry.created`   | `party:{id}` | `FeedEntry`                             |
+| `leaderboard.updated`  | `party:{id}` | `LeaderboardEntry[]`                    |
 
--- Permitir upload solo al propio usuario
-CREATE POLICY "Users can upload own avatar"
-ON storage.objects FOR INSERT
-WITH CHECK (
-  bucket_id = 'avatars' AND
-  auth.uid()::text = (storage.foldername(name))[1]
-);
+### Adaptador Redis
 
--- Permitir actualización solo al propio usuario
-CREATE POLICY "Users can update own avatar"
-ON storage.objects FOR UPDATE
-USING (
-  bucket_id = 'avatars' AND
-  auth.uid()::text = (storage.foldername(name))[1]
-);
-```
+El adaptador Redis permite múltiples instancias de la API. Sin Redis disponible, se usa el adaptador in-memory (solo válido en desarrollo con una única instancia).
 
 ---
 
 ## Manejo de Errores
 
-### Errores de Supabase
+### Errores de API interna
 
 ```typescript
-const { data, error } = await supabase.from('anime_list').select('*');
-
-if (error) {
-  console.error('Supabase error:', error);
-  throw new Error(error.message);
+try {
+  const data = await $fetch('/api/anime');
+  return data;
+} catch (error) {
+  if (error.statusCode === 401) {
+    // JWT expirado o inválido — Clerk renueva automáticamente
+    return;
+  }
+  toast.error('Error al cargar los datos');
+  throw error;
 }
 ```
 
-### Errores de API Externa
+### Errores de API externa (Jikan)
 
 ```typescript
 try {
@@ -416,10 +280,9 @@ try {
   const data = await response.json();
 } catch (error) {
   if (error.name === 'AbortError') {
-    // Request cancelado, ignorar
-    return;
+    return; // Request cancelado intencionalmente
   }
-  console.error('API error:', error);
+  console.error('Jikan API error:', error);
   throw error;
 }
 ```
@@ -427,7 +290,7 @@ try {
 ### Manejo Centralizado
 
 ```typescript
-// app/composables/useErrorHandler.ts
+// packages/web/app/composables/useErrorHandler.ts
 export function useErrorHandler() {
   const toast = useToast();
 
@@ -441,56 +304,6 @@ export function useErrorHandler() {
 }
 ```
 
-### Tipos de Error
-
-```typescript
-// app/utils/error-handling.ts
-export class AppError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public statusCode?: number,
-    public details?: unknown,
-  ) {
-    super(message);
-    this.name = 'AppError';
-  }
-}
-```
-
 ---
 
-## 🔄 Rate Limiting
-
-### Jikan API
-
-Jikan API tiene límites de rate:
-
-- **3 requests por segundo**
-- **60 requests por minuto**
-
-**Implementación:**
-
-- Debouncing en búsquedas (500ms)
-- AbortController para cancelar requests duplicados
-- Paginación para evitar cargar demasiados datos
-
-### Supabase
-
-Supabase tiene límites según el plan:
-
-- **Free tier**: 500MB de base de datos, 1GB de storage
-- **Pro tier**: Límites más altos
-
----
-
-## 📝 Notas
-
-- Todas las llamadas a Supabase respetan RLS
-- Las búsquedas de Jikan tienen debounce y cancelación
-- Los errores se manejan centralizadamente
-- El storage de avatares es público pero con políticas RLS
-
----
-
-**Última actualización**: Enero 2025
+**Última actualización**: Mayo 2026

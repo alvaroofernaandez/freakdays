@@ -2,9 +2,9 @@
 
 Guía completa para desplegar FreakDays en producción.
 
-## 📚 Índice
+## Índice
 
-- [Preparación](#preparación)
+- [Servicios requeridos](#servicios-requeridos)
 - [Variables de Entorno](#variables-de-entorno)
 - [Build](#build)
 - [Despliegue](#despliegue)
@@ -12,189 +12,162 @@ Guía completa para desplegar FreakDays en producción.
 
 ---
 
-## Preparación
+## Servicios Requeridos
 
-### Checklist Pre-Despliegue
+FreakDays en producción requiere los siguientes servicios:
 
-- [ ] Todas las migraciones de base de datos aplicadas
-- [ ] Variables de entorno configuradas
-- [ ] Políticas RLS configuradas correctamente
-- [ ] Storage buckets configurados
-- [ ] Tests pasando
-- [ ] Build sin errores
-- [ ] SEO configurado
-- [ ] Favicon y manifest configurados
+| Servicio          | Rol                                                    | Obligatorio |
+| ----------------- | ------------------------------------------------------ | ----------- |
+| **PostgreSQL**    | Base de datos principal                                | Sí          |
+| **Redis**         | BullMQ (relay/worker de eventos) + adaptador Socket.IO | **Sí**      |
+| **Clerk**         | Autenticación (JWT, JWKS, webhooks)                    | Sí          |
+| **Cloudflare R2** | Storage de avatares y banners (S3-compatible)          | Sí          |
+| **Resend**        | Emails transaccionales                                 | Recomendado |
+
+> **Redis es obligatorio en producción.** Sin Redis, el pipeline de gamificación (BullMQ) se detiene y los eventos de dominio no se procesan. EXP, niveles, streaks, logros, feed y leaderboards dejan de actualizarse. El adaptador Redis de Socket.IO también requiere Redis para escalar a más de una instancia de la API. La alternativa in-memory solo existe para desarrollo local con una única instancia.
 
 ---
 
 ## Variables de Entorno
 
-### Producción
-
-Crea un archivo `.env.production` o configura en tu plataforma de despliegue:
+### API (`packages/api`)
 
 ```env
-SUPABASE_URL=https://tu-proyecto.supabase.co
-SUPABASE_ANON_KEY=tu_anon_key_produccion
+# Base de datos (producción — el proveedor normalmente usa el puerto estándar 5432;
+# en desarrollo local el Docker corre en 5433)
+DATABASE_URL=postgresql://user:password@host:5432/freakdays
+
+# Redis (REQUERIDO)
+REDIS_URL=redis://user:password@host:6379
+
+# Clerk
+CLERK_JWKS_URL=https://your-clerk-domain.clerk.accounts.dev/.well-known/jwks.json
+CLERK_WEBHOOK_SECRET=whsec_...
+
+# Cloudflare R2
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=...
+R2_PUBLIC_URL=https://pub-...r2.dev
+
+# Resend
+RESEND_API_KEY=re_...
+
+# Entorno
+NODE_ENV=production
+PORT=3001
 ```
 
-### Verificación
+### Web (`packages/web`)
 
-Asegúrate de que:
-
-1. **Supabase URL** apunta al proyecto correcto
-2. **Anon Key** es la clave pública (no la service role key)
-3. Las variables están disponibles en el entorno de producción
+```env
+NUXT_PUBLIC_API_BASE_URL=https://api.tu-dominio.com/api
+NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+```
 
 ---
 
 ## Build
 
-### Build Local
-
 ```bash
-# Build para producción
-pnpm build
+# Build de todos los paquetes
+make build
 
-# Preview del build
-pnpm preview
+# Verificar que no hay errores antes del build
+make ci-local
 ```
 
-### Optimizaciones Automáticas
-
-Nuxt optimiza automáticamente:
-
-- **Code Splitting**: Divide el código en chunks
-- **Tree Shaking**: Elimina código no usado
-- **Minificación**: Minifica JS y CSS
-- **Compresión**: Gzip/Brotli
-
-### Verificar Bundle Size
-
-```bash
-pnpm build --analyze
-```
-
-Esto genera un reporte del tamaño del bundle.
+`make ci-local` ejecuta: lint + typecheck + tests + build.
 
 ---
 
 ## Despliegue
 
-### Vercel (Recomendado)
+### Arquitectura de referencia
 
-1. **Conectar repositorio**
+El monorepo tiene dos servicios desplegables independientes:
 
-- Ve a [Vercel](https://vercel.com)
-- Importa tu repositorio de GitHub
+- `packages/api` — API NestJS (puede desplegarse en cualquier runtime Node.js)
+- `packages/web` — Frontend Nuxt 4 (SSR; puede desplegarse en Vercel, Cloudflare Workers, o Node.js clásico)
 
-2. **Configurar proyecto**
-
-- **Framework Preset**: Nuxt.js
-- **Build Command**: `pnpm build`
-- **Output Directory**: `.output`
-- **Install Command**: `pnpm install`
-
-3. **Variables de entorno**
-
-Añade en la configuración del proyecto:
-
-```
-SUPABASE_URL=tu_url
-SUPABASE_ANON_KEY=tu_key
-```
-
-4. **Desplegar**
-
-Vercel despliega automáticamente en cada push a `main`.
-
-### Netlify
-
-1. **Configurar `netlify.toml`**
-
-```toml
-[build]
-  command = "pnpm build"
-  publish = ".output/public"
-
-[[plugins]]
-  package = "@netlify/plugin-nuxt"
-
-[build.environment]
-  NODE_VERSION = "18"
-```
-
-2. **Variables de entorno**
-
-Configura en Netlify Dashboard:
-
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-
-3. **Desplegar**
-
-Netlify despliega automáticamente desde Git.
-
-### Docker
-
-1. **Crear `Dockerfile`**
+### API NestJS — Docker / servidor propio
 
 ```dockerfile
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/api/package.json packages/api/
+COPY packages/domain/package.json packages/domain/
+
 RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
-COPY . .
-RUN pnpm build
+COPY packages/api packages/api
+COPY packages/domain packages/domain
 
-EXPOSE 3000
+RUN pnpm --filter freak-days-api build
 
-CMD ["node", ".output/server/index.mjs"]
+WORKDIR /app/packages/api
+
+# Aplica migraciones al arrancar
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+
+EXPOSE 3001
 ```
 
-2. **Build y Run**
-
 ```bash
-docker build -t freak-days .
-docker run -p 3000:3000 \
-  -e SUPABASE_URL=tu_url \
-  -e SUPABASE_ANON_KEY=tu_key \
-  freak-days
+docker build -t freak-days-api .
+docker run -p 3001:3001 \
+  -e DATABASE_URL=postgresql://... \
+  -e REDIS_URL=redis://... \
+  -e CLERK_JWKS_URL=... \
+  freak-days-api
 ```
 
-### Servidor Propio
-
-1. **Build**
+### API NestJS — PM2
 
 ```bash
+cd packages/api
 pnpm build
-```
-
-2. **Copiar archivos**
-
-```bash
-# Copiar .output a servidor
-scp -r .output user@server:/path/to/app
-```
-
-3. **Ejecutar**
-
-```bash
-# En el servidor
-cd /path/to/app
-node .output/server/index.mjs
-```
-
-4. **PM2 (Recomendado)**
-
-```bash
-pm2 start .output/server/index.mjs --name freak-days
+npx prisma migrate deploy
+pm2 start dist/main.js --name freak-days-api
 pm2 save
 pm2 startup
 ```
+
+### Frontend Nuxt — Vercel (recomendado)
+
+1. Conecta el repositorio en [Vercel](https://vercel.com).
+2. Configura el proyecto:
+   - **Framework Preset**: Nuxt.js
+   - **Root Directory**: `packages/web`
+   - **Build Command**: `pnpm build`
+   - **Install Command**: `pnpm install`
+3. Añade las variables de entorno (`NUXT_PUBLIC_API_BASE_URL`, `NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY`).
+4. Vercel despliega automáticamente en cada push a `main`.
+
+### Frontend Nuxt — Node.js clásico / Docker
+
+```bash
+cd packages/web
+pnpm build
+node .output/server/index.mjs
+```
+
+---
+
+## Migraciones en Producción
+
+Antes de arrancar la API, aplica las migraciones pendientes:
+
+```bash
+cd packages/api
+npx prisma migrate deploy
+```
+
+O en el Dockerfile/entrypoint, como se muestra arriba.
 
 ---
 
@@ -202,175 +175,93 @@ pm2 startup
 
 ### Verificaciones
 
-1. **Health Check**
+1. **Health check de la API**
 
 ```bash
-curl https://tu-dominio.com/api/health
+curl https://api.tu-dominio.com/health
 ```
 
-2. **Verificar Autenticación**
+2. **Verificar autenticación**
 
-- Probar login
-- Probar registro
-- Verificar redirecciones
+- Probar login con Clerk
+- Verificar que el JWT se valide correctamente
 
-3. **Verificar Módulos**
+3. **Verificar Redis**
 
-- Probar cada módulo
-- Verificar que los datos se carguen
-- Probar operaciones CRUD
+Comprueba que el relay BullMQ procesa eventos:
+
+- Completa una quest en la app
+- Verifica que EXP/nivel se actualicen
+- Verifica que el feed del party reciba la entrada
+
+4. **Verificar Socket.IO**
+
+- Abre la app en dos navegadores con el mismo party
+- Verifica que los eventos en tiempo real se propaguen
 
 ### Monitoreo
 
-#### Errores
-
-Configura un servicio de monitoreo de errores:
-
-- [Sentry](https://sentry.io)
-- [LogRocket](https://logrocket.com)
-- [Rollbar](https://rollbar.com)
-
-#### Performance
-
-- [Vercel Analytics](https://vercel.com/analytics)
-- [Google Analytics](https://analytics.google.com)
-- [Web Vitals](https://web.dev/vitals/)
-
-### Supabase
-
-#### Verificar RLS
-
-Asegúrate de que todas las políticas RLS estén activas:
-
-```sql
-SELECT tablename, policyname, cmd, qual
-FROM pg_policies
-WHERE schemaname = 'public';
-```
-
-#### Storage
-
-Verifica que los buckets estén configurados:
-
-- `avatars`: Público con políticas RLS
-
-#### Edge Functions
-
-Si usas Edge Functions, despliégalas:
-
-```bash
-supabase functions deploy quest-notifications
-```
-
----
-
-## Optimizaciones de Producción
-
-### CDN
-
-Configura un CDN para assets estáticos:
-
-- Cloudflare
-- AWS CloudFront
-- Vercel Edge Network (automático)
-
-### Caching
-
-Nuxt configura automáticamente:
-
-- **Static Assets**: Cache largo
-- **HTML**: Cache corto
-- **API Routes**: Sin cache
-
-### Imágenes
-
-Optimiza imágenes:
-
-- Usa formatos modernos (WebP, AVIF)
-- Lazy loading automático
-- Responsive images
-
----
-
-## Seguridad
-
-### Headers de Seguridad
-
-Nuxt configura automáticamente headers de seguridad.
-
-### Variables de Entorno
-
-- **Nunca** commitear `.env` files
-- Usar variables de entorno del proveedor
-- Rotar keys periódicamente
-
-### Supabase
-
-- Usar **Anon Key** en el cliente (no Service Role Key)
-- Configurar políticas RLS correctamente
-- Limitar acceso a Storage buckets
+- **Errores**: [Sentry](https://sentry.io), [Rollbar](https://rollbar.com)
+- **Logs de BullMQ**: usa Bull Board o logs estructurados de NestJS
+- **Performance**: [Vercel Analytics](https://vercel.com/analytics), [Web Vitals](https://web.dev/vitals/)
 
 ---
 
 ## Rollback
 
-### Vercel
+### Vercel (frontend)
 
 ```bash
-# Ver deployments
 vercel ls
-
-# Rollback a deployment anterior
 vercel rollback [deployment-url]
 ```
 
-### Netlify
-
-En Netlify Dashboard:
-
-- Ve a Deploys
-- Selecciona deployment anterior
-- Click en "Publish deploy"
-
-### Docker
+### API (Docker)
 
 ```bash
-# Tag version anterior
-docker tag freak-days:previous freak-days:latest
+docker tag freak-days-api:previous freak-days-api:latest
 docker-compose up -d
 ```
 
 ---
 
+## Seguridad
+
+- **Nunca** commitear archivos `.env`.
+- Usar variables de entorno del proveedor (Vercel, Railway, Fly.io, etc.).
+- Rotar las claves de Clerk y R2 periódicamente.
+- Verificar que `CLERK_WEBHOOK_SECRET` esté configurado para proteger los webhooks.
+
+---
+
 ## Troubleshooting
 
-### Error: "Cannot connect to Supabase"
+### Error: "Redis connection refused"
 
-- Verificar variables de entorno
-- Verificar que Supabase esté activo
-- Revisar CORS settings en Supabase
+Redis no está disponible. El pipeline de eventos se detiene. Verifica `REDIS_URL` y que el servicio Redis esté accesible desde la API.
+
+### Error: "Cannot connect to database"
+
+Verifica `DATABASE_URL`. Asegúrate de que la IP de la API esté en la allowlist de tu proveedor de PostgreSQL.
 
 ### Error: "Build failed"
 
-- Verificar Node.js version (18+)
-- Limpiar cache: `rm -rf .nuxt node_modules`
-- Reinstalar: `pnpm install`
+```bash
+make ci-local
+```
 
-### Error: "RLS policy violation"
-
-- Verificar políticas en Supabase
-- Revisar que el usuario esté autenticado
-- Verificar que `auth.uid()` coincida con `user_id`
+Esto muestra exactamente qué falla (lint, types, tests, build).
 
 ---
 
 ## Recursos
 
 - [Nuxt Deployment](https://nuxt.com/docs/getting-started/deployment)
-- [Vercel Documentation](https://vercel.com/docs)
-- [Netlify Documentation](https://docs.netlify.com/)
-- [Supabase Production Checklist](https://supabase.com/docs/guides/platform/going-into-prod)
+- [NestJS Deployment](https://docs.nestjs.com/deployment)
+- [Prisma Deployment Guide](https://www.prisma.io/docs/guides/deployment)
+- [Clerk Production Setup](https://clerk.com/docs/deployments/overview)
+- [BullMQ Documentation](https://docs.bullmq.io/)
 
 ---
 
-**Última actualización**: Enero 2025
+**Última actualización**: Mayo 2026

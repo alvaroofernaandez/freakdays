@@ -46,10 +46,15 @@ export function createApiClient(event: H3Event): ApiClient {
     });
   }
 
+  // Forward the active organization context too. Multi-tenant endpoints on the
+  // NestJS API (modules, quests, workouts, …) reject requests without it.
+  const orgId = getRequestHeader(event, 'x-org-id');
+
   return $fetch.create({
     baseURL,
     headers: {
       authorization,
+      ...(orgId ? { 'x-org-id': orgId } : {}),
     },
   });
 }

@@ -22,7 +22,8 @@ const emit = defineEmits<{
 <template>
   <Card
     :class="[
-      'transition-all active:scale-[0.98]',
+      'rounded-none border-2 transition-[transform,filter,box-shadow,border-color] duration-100 cursor-default',
+      'shadow-[0_5px_0_0_oklch(0.42_0.16_290)] hover:shadow-[0_5px_0_0_oklch(0.52_0.2_290)] hover:brightness-105 active:translate-y-[4px] active:shadow-[0_1px_0_0_oklch(0.42_0.16_290)] motion-reduce:active:translate-y-0',
       quest.isOverdue ? 'border-destructive/50 bg-destructive/5' : '',
       quest.isDueSoon && !quest.isOverdue ? 'border-exp-hard/50 bg-exp-hard/5' : '',
       isCompleted ? 'opacity-70 hover:opacity-100' : '',
@@ -32,14 +33,14 @@ const emit = defineEmits<{
       <div class="flex items-start gap-3">
         <button
           v-if="!isCompleted"
-          class="mt-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 border-muted-foreground/30 hover:border-primary transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          class="mt-1 w-6 h-6 sm:w-7 sm:h-7 rounded-none border-2 border-muted-foreground/30 hover:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors shrink-0 flex items-center justify-center cursor-pointer"
+          :aria-label="`Completar quest: ${quest.title}`"
           @click="emit('complete', quest.id)"
-        >
-          <CheckCircle2 v-if="isCompleted" class="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-        </button>
+        />
         <div
           v-else
-          class="mt-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-exp-easy flex items-center justify-center shrink-0"
+          class="mt-1 w-6 h-6 sm:w-7 sm:h-7 rounded-none bg-exp-easy flex items-center justify-center shrink-0"
+          aria-hidden="true"
         >
           <CheckCircle2 class="h-4 w-4 sm:h-5 sm:w-5 text-background" />
         </div>
@@ -51,35 +52,36 @@ const emit = defineEmits<{
             >
               {{ quest.title }}
             </CardTitle>
-            <Badge :class="DIFFICULTY_COLORS[quest.difficulty]" class="text-[10px] px-1.5 py-0">
+            <Badge
+              :class="DIFFICULTY_COLORS[quest.difficulty]"
+              class="font-pixel text-[8px] px-1.5 py-0 rounded-none"
+            >
               {{ DIFFICULTY_LABELS[quest.difficulty] }}
             </Badge>
             <Badge
               v-if="quest.isOverdue && !isCompleted"
               variant="destructive"
-              class="text-[10px] px-1.5 py-0"
+              class="font-pixel text-[8px] px-1.5 py-0 rounded-none"
             >
-              Atrasada
+              ATRASADA
             </Badge>
             <Badge
               v-else-if="quest.isDueSoon && !isCompleted"
-              class="text-[10px] px-1.5 py-0 bg-exp-hard/20 text-exp-hard border-exp-hard/30"
+              class="font-pixel text-[8px] px-1.5 py-0 rounded-none bg-exp-hard/20 text-exp-hard border-exp-hard/30"
             >
-              Próxima
+              PRÓXIMA
             </Badge>
           </div>
           <CardDescription v-if="quest.description" class="text-xs sm:text-sm mt-0.5 line-clamp-2">
             {{ quest.description }}
           </CardDescription>
           <div class="flex items-center gap-3 mt-2 flex-wrap">
-            <span class="text-xs sm:text-sm text-exp-legendary font-medium"
-              >+{{ quest.exp }} EXP</span
-            >
+            <span class="font-pixel text-[9px] text-exp-legendary">+{{ quest.exp }} EXP</span>
             <div
               v-if="quest.dueDate"
               class="flex items-center gap-1.5 text-xs text-muted-foreground"
             >
-              <Calendar class="h-3 w-3" />
+              <Calendar class="h-3 w-3" aria-hidden="true" />
               <span>{{ formatDueDate(quest) }}</span>
               <span v-if="quest.dueTime">{{ formatDueTime(quest) }}</span>
               <span v-if="!quest.isOverdue && !isCompleted" class="text-exp-hard"
@@ -91,10 +93,11 @@ const emit = defineEmits<{
         <Button
           variant="ghost"
           size="icon"
-          class="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
+          class="h-8 w-8 sm:h-9 sm:w-9 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-ring"
+          :aria-label="`Eliminar quest: ${quest.title}`"
           @click="emit('delete', quest.id)"
         >
-          <Trash2 class="h-4 w-4" />
+          <Trash2 class="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </CardHeader>

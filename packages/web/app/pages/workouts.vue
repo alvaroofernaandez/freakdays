@@ -55,39 +55,42 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4 sm:space-y-6">
+    <!-- Arcade page header -->
     <header
       class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0"
     >
       <div>
+        <p
+          class="flex items-center gap-1.5 font-pixel text-[8px] text-primary/80 uppercase tracking-wider mb-1"
+        >
+          <span class="text-primary">▸</span> GYM
+        </p>
         <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
-          <Dumbbell class="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <Dumbbell class="h-5 w-5 sm:h-6 sm:w-6 text-primary" aria-hidden="true" />
           Entrenamientos
         </h1>
-        <p class="text-muted-foreground text-xs sm:text-sm mt-0.5">
-          Registra tu progreso en el gym
-        </p>
       </div>
       <div class="flex items-center gap-2 w-full sm:w-auto">
         <Button
           v-if="!currentWorkout"
           size="lg"
-          class="flex-1 sm:flex-none sm:h-10 sm:w-auto rounded-full glow-primary"
+          class="btn-game flex-1 sm:flex-none sm:h-10 sm:w-auto rounded-none font-pixel text-[10px] cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
           @click="modal.open()"
         >
-          <Plus class="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-          <span class="sm:hidden">Nuevo</span>
-          <span class="hidden sm:inline">Nuevo Entrenamiento</span>
+          <Plus class="h-4 w-4 sm:h-5 sm:w-5 mr-2" aria-hidden="true" />
+          <span class="sm:hidden">NUEVO</span>
+          <span class="hidden sm:inline">NUEVO ENTRENAMIENTO</span>
         </Button>
         <Button
           v-else
           variant="outline"
           size="lg"
-          class="flex-1 sm:flex-none gap-2"
+          class="btn-game flex-1 sm:flex-none rounded-none font-pixel text-[10px] gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
           @click="workoutModal.open()"
         >
-          <Play class="h-4 w-4" />
-          <span class="sm:hidden">En curso</span>
-          <span class="hidden sm:inline">Entrenamiento en curso</span>
+          <Play class="h-4 w-4" aria-hidden="true" />
+          <span class="sm:hidden">EN CURSO</span>
+          <span class="hidden sm:inline">ENTRENAMIENTO EN CURSO</span>
         </Button>
       </div>
     </header>
@@ -96,21 +99,20 @@ onMounted(() => {
     <div v-else class="space-y-4 sm:space-y-6">
       <div v-if="currentWorkout && currentWorkoutStats">
         <div class="flex items-center gap-2 mb-3 sm:mb-4">
-          <div class="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <h2
-            class="text-sm sm:text-base font-semibold text-muted-foreground uppercase tracking-wide"
-          >
-            Entrenamiento en curso
-          </h2>
+          <span class="w-2 h-2 bg-primary motion-safe:animate-pulse" aria-hidden="true" />
+          <p class="font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider">
+            ENTRENAMIENTO EN CURSO
+          </p>
         </div>
         <WorkoutDetailStats :stats="currentWorkoutStats" />
       </div>
       <div>
-        <h2
-          class="text-sm sm:text-base font-semibold text-muted-foreground uppercase tracking-wide mb-3 sm:mb-4"
+        <p
+          class="flex items-center gap-1.5 font-pixel text-[8px] text-muted-foreground/80 uppercase tracking-wider mb-3 sm:mb-4 px-1"
         >
-          Estadísticas generales
-        </h2>
+          <span class="inline-block w-1.5 h-1.5 bg-primary/60" aria-hidden="true" />
+          ESTADÍSTICAS GENERALES
+        </p>
         <WorkoutStats
           :weekly-count="stats.count"
           :total-count="workouts.length"

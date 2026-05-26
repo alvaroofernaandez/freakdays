@@ -4,10 +4,12 @@ Project documentation, organised by domain. Start here.
 
 ## Quick links
 
-- **Just getting started?** → [`development/getting-started.md`](development/getting-started.md)
-- **Need to set up the database?** → [`development/database-setup.md`](development/database-setup.md) and [`development/prisma-setup.md`](development/prisma-setup.md)
-- **Looking for the system shape?** → [`architecture/overview.md`](architecture/overview.md)
+- **Just getting started?** → [`development/getting-started.md`](development/getting-started.md) — `make dev` is the single command to run everything
+- **Database or Prisma setup?** → [`development/database-setup.md`](development/database-setup.md) and [`development/prisma-setup.md`](development/prisma-setup.md) — Postgres on port **5433**, Redis required
+- **System architecture (F0–F4)?** → [`architecture/overview.md`](architecture/overview.md) — event-driven backbone, gamification engine, realtime gateway, immersive UI, social layer
 - **Tracking a design decision?** → [`architecture/decisions/`](architecture/decisions/)
+- **Deploying to production?** → [`deployment/overview.md`](deployment/overview.md) — Redis is a required production dependency
+- **Quick command reference?** → [`guides/quick-reference.md`](guides/quick-reference.md)
 
 ## Directory layout
 
@@ -33,13 +35,25 @@ Project documentation, organised by domain. Start here.
 
 FreakDays is organised in these top-level modules:
 
-- 🎮 **Gamification** — levels, EXP, rewards
-- 📺 **Anime** — list management via the Jikan (MyAnimeList) API
-- 📚 **Manga** — physical collection, wishlist, volume tracking
-- 💪 **Workouts** — sessions, exercises, sets
-- ✅ **Quests** — daily missions with difficulty tiers
-- 👥 **Party** — group system, invite codes, member roles
-- 📅 **Calendar** — monthly grid with drag-and-drop event scheduling
+- **Gamification** — event-driven engine: EXP/levels (F1), streaks (F1), achievements (F1), real-time updates via Socket.IO (F2), GSAP celebrations (F3)
+- **Anime** — list management via the Jikan (MyAnimeList) API
+- **Manga** — physical collection, wishlist, volume tracking
+- **Workouts** — sessions, exercises, sets
+- **Quests** — daily missions with difficulty tiers
+- **Party** — group system, invite codes, member roles, leaderboards (F4), activity feed (F4)
+- **Calendar** — monthly grid with drag-and-drop event scheduling
+
+## Architecture layers (F0–F4)
+
+All five layers are shipped and active:
+
+| Layer  | Name                | Description                                                                                 |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------- |
+| **F0** | Outbox + Event Bus  | Crash-safe BullMQ relay; domain events written in the same DB transaction as business state |
+| **F1** | Gamification Engine | Idempotent handlers: EXP/level, streaks, achievements, stats projection                     |
+| **F2** | Realtime Gateway    | Socket.IO authenticated via Clerk JWKS; `user:{id}` and `party:{id}` rooms; Redis adapter   |
+| **F3** | Immersive UI        | Pixel/arcade layer: GSAP celebrations, WebAudio, menu transitions                           |
+| **F4** | Social Layer        | Party leaderboards + activity feed                                                          |
 
 ## See also
 

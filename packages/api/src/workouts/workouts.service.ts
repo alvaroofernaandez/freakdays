@@ -9,6 +9,8 @@ import {
 
 import { IdentityContextService } from '../common/identity/identity-context.service';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { EventBusService } from '../events/event-bus.service';
+import { EVENT_TYPES } from '../events/event-types';
 
 type NumberInput = number | string | null | undefined;
 type DateInput = string | Date | null | undefined;
@@ -117,6 +119,7 @@ export class WorkoutsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly identityContext: IdentityContextService,
+    private readonly eventBus: EventBusService,
   ) {}
 
   async list(
@@ -279,36 +282,52 @@ export class WorkoutsService {
     const status = this.normalizeWorkoutStatus(input.status, 'in_progress');
     const now = new Date();
 
-    const created = await this.prisma.workoutSession.create({
-      data: {
-        userId: currentUser.id,
-        organizationId: organization.id,
-        name: this.normalizeTitle(input.name),
-        description: this.normalizeNullableText(input.description),
-        workoutDate: this.normalizeWorkoutDate(input.workoutDate ?? input.workout_date),
-        durationMinutes: this.normalizeOptionalInteger(
-          input.durationMinutes ?? input.duration_minutes,
-          'durationMinutes',
-        ),
-        notes: this.normalizeNullableText(input.notes),
-        status,
-        startedAt: status === 'in_progress' ? now : null,
-        completedAt: status === 'completed' ? now : null,
-      },
-      include: {
-        exercises: {
-          include: {
-            sets: {
-              orderBy: {
-                setNumber: 'asc',
-              },
-            },
-          },
-          orderBy: {
-            orderIndex: 'asc',
-          },
+    const exerciseInclude = {
+      exercises: {
+        include: {
+          sets: { orderBy: { setNumber: 'asc' as const } },
         },
+        orderBy: { orderIndex: 'asc' as const },
       },
+    };
+
+    const created = await this.prisma.$transaction(async (tx) => {
+      const session = await tx.workoutSession.create({
+        data: {
+          userId: currentUser.id,
+          organizationId: organization.id,
+          name: this.normalizeTitle(input.name),
+          description: this.normalizeNullableText(input.description),
+          workoutDate: this.normalizeWorkoutDate(input.workoutDate ?? input.workout_date),
+          durationMinutes: this.normalizeOptionalInteger(
+            input.durationMinutes ?? input.duration_minutes,
+            'durationMinutes',
+          ),
+          notes: this.normalizeNullableText(input.notes),
+          status,
+          startedAt: status === 'in_progress' ? now : null,
+          completedAt: status === 'completed' ? now : null,
+        },
+        include: exerciseInclude,
+      });
+
+      // Emit workout.logged when created directly as completed
+      if (status === 'completed') {
+        const event = this.eventBus.buildEvent(
+          EVENT_TYPES.WORKOUT_LOGGED,
+          session.id,
+          {
+            userId: currentUser.id,
+            orgId: organization.id,
+            workoutId: session.id,
+            loggedAt: now,
+          },
+          organization.id,
+        );
+        await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
+      }
+
+      return session;
     });
 
     return this.toWorkoutSessionView(created);
@@ -423,25 +442,41 @@ export class WorkoutsService {
       return this.toWorkoutSessionView(existing);
     }
 
-    const updated = await this.prisma.workoutSession.update({
-      where: {
-        id: existing.id,
-      },
-      data,
-      include: {
-        exercises: {
-          include: {
-            sets: {
-              orderBy: {
-                setNumber: 'asc',
-              },
-            },
-          },
-          orderBy: {
-            orderIndex: 'asc',
-          },
+    const exerciseInclude = {
+      exercises: {
+        include: {
+          sets: { orderBy: { setNumber: 'asc' as const } },
         },
+        orderBy: { orderIndex: 'asc' as const },
       },
+    };
+
+    // Detect if this update transitions status from non-completed to completed
+    const isCompletingNow = data.status === 'completed' && existing.status !== 'completed';
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const session = await tx.workoutSession.update({
+        where: { id: existing.id },
+        data,
+        include: exerciseInclude,
+      });
+
+      if (isCompletingNow) {
+        const event = this.eventBus.buildEvent(
+          EVENT_TYPES.WORKOUT_LOGGED,
+          session.id,
+          {
+            userId: currentUser.id,
+            orgId: organization.id,
+            workoutId: session.id,
+            loggedAt: session.completedAt ?? new Date(),
+          },
+          organization.id,
+        );
+        await this.eventBus.emit(tx as unknown as Prisma.TransactionClient, event);
+      }
+
+      return session;
     });
 
     return this.toWorkoutSessionView(updated);

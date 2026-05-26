@@ -2,9 +2,11 @@
 
 Guía completa para desarrolladores que quieren contribuir o trabajar en FreakDays.
 
-## 📚 Índice
+## Índice
 
-- [Configuración del Entorno](#configuración-del-entorno)
+- [Prerrequisitos](#prerrequisitos)
+- [Instalación](#instalación)
+- [Levantar el entorno](#levantar-el-entorno)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Convenciones de Código](#convenciones-de-código)
 - [Testing](#testing)
@@ -13,16 +15,15 @@ Guía completa para desarrolladores que quieren contribuir o trabajar en FreakDa
 
 ---
 
-## Configuración del Entorno
+## Prerrequisitos
 
-### Prerrequisitos
+- **Node.js**: 22 o superior
+- **pnpm**: 9 o superior
+- **Docker** (Docker Desktop o equivalente): para Postgres y Redis en desarrollo
 
-- **Node.js**: 18 o superior
-- **pnpm**: Recomendado (o npm/yarn/bun)
-- **Cuenta de Supabase**: Para backend
-- **Git**: Para control de versiones
+---
 
-### Instalación
+## Instalación
 
 1. **Clonar el repositorio**
 
@@ -34,73 +35,136 @@ cd freak-days
 2. **Instalar dependencias**
 
 ```bash
-pnpm install
+make install
+# equivalente a: pnpm install
 ```
 
 3. **Configurar variables de entorno**
 
-Crea un archivo `.env` en la raíz:
+Copia los archivos de ejemplo y rellena los valores:
+
+```bash
+cp packages/api/.env.example packages/api/.env
+cp packages/web/.env.example packages/web/.env
+```
+
+Variables principales de `packages/api/.env`:
 
 ```env
-SUPABASE_URL=tu_proyecto_url
-SUPABASE_ANON_KEY=tu_anon_key
-DATABASE_URL=postgres://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
+# Base de datos local (Postgres en Docker, puerto 5433)
+DATABASE_URL=postgresql://postgres:postgres@localhost:5433/freakdays
+
+# Clerk (autenticación)
+CLERK_JWKS_URL=https://...
+CLERK_WEBHOOK_SECRET=...
+
+# Cloudflare R2 (storage)
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=...
+
+# Resend (email)
+RESEND_API_KEY=...
 ```
 
-Para obtener `DATABASE_URL`:
+Variables principales de `packages/web/.env`:
 
-- Ve a Supabase Dashboard → Settings → Database
-- Copia la "Connection string" bajo "Connection pooling" (modo Transaction)
-- Añade `&pgbouncer=true&connection_limit=1` al final
+```env
+NUXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
+NUXT_PUBLIC_CLERK_PUBLISHABLE_KEY=...
+```
 
-4. **Generar cliente de Prisma**
+---
+
+## Levantar el entorno
+
+### Forma principal: `make dev`
 
 ```bash
-pnpm prisma:generate
+make dev
 ```
 
-5. **Configurar Supabase**
+Este comando hace todo en orden:
 
-- Crea un proyecto en [Supabase](https://supabase.com)
-- Ejecuta las migraciones desde `database/migrations/`
-- Configura las políticas RLS según `database/schema.sql`
+1. Levanta Postgres (:5433) y Redis (:6379) con Docker Compose.
+2. Ejecuta `prisma generate` + `prisma migrate deploy` y verifica las migraciones.
+3. Inicia la API NestJS en `http://localhost:3001`.
+4. Inicia el frontend Nuxt en `http://localhost:3000`.
 
-5. **Iniciar servidor de desarrollo**
+Cuando interrumpes el proceso (Ctrl-C), ambos servidores se detienen.
+
+### Primeros pasos con una base de datos limpia
+
+Si es la primera vez (o necesitas reiniciar la BD):
 
 ```bash
-pnpm dev
+make dev-setup   # solo arranca Docker + Prisma, sin servidores
+make dev         # luego el entorno completo
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
+### Otros targets útiles
+
+| Target                 | Qué hace                                         |
+| ---------------------- | ------------------------------------------------ |
+| `make install`         | Instala todas las dependencias (pnpm install)    |
+| `make dev`             | **Stack completo** (servicios + API + web)       |
+| `make dev-setup`       | Solo servicios Docker + Prisma (sin servidores)  |
+| `make dev-down`        | Para Postgres y Redis                            |
+| `make services-up`     | Solo levanta los contenedores Docker             |
+| `make services-down`   | Solo detiene los contenedores Docker             |
+| `make services-logs`   | Logs de los contenedores                         |
+| `make services-ps`     | Estado de los contenedores                       |
+| `make test`            | Todos los tests                                  |
+| `make test-api`        | Tests de la API (jest, 160 tests)                |
+| `make test-web`        | Tests del frontend (vitest, 656 tests)           |
+| `make coverage`        | Cobertura de tests                               |
+| `make e2e`             | Tests end-to-end                                 |
+| `make lint`            | Linting                                          |
+| `make typecheck`       | Verificación de tipos (0 errores)                |
+| `make format`          | Formatea el código                               |
+| `make build`           | Build de producción                              |
+| `make ci-local`        | Suite completa (lint + typecheck + test + build) |
+| `make prisma-generate` | Genera el cliente Prisma                         |
+| `make prisma-migrate`  | Crea una nueva migración                         |
+| `make prisma-studio`   | Abre Prisma Studio                               |
+| `make prisma-deploy`   | Aplica migraciones pendientes                    |
+| `make changeset`       | Crea un changeset                                |
+| `make release`         | Publica un release                               |
+| `make help`            | Lista todos los targets con descripción          |
 
 ---
 
 ## Estructura del Proyecto
 
-Ver [Arquitectura](./architecture.md) para detalles completos.
-
-### Directorios Principales
+FreakDays es un monorepo pnpm con tres paquetes:
 
 ```
-freak-days/
-├── app/                    # Código de la aplicación Nuxt
-│   ├── components/         # Componentes Vue
-│   ├── pages/              # Páginas/rutas
-│   ├── composables/        # Lógica reutilizable
-│   ├── layouts/            # Layouts de página
-│   ├── middleware/         # Middleware de rutas
-│   └── utils/              # Utilidades
-├── server/                 # Código del servidor (Nuxt)
-│   ├── api/                # API Routes
-│   └── utils/              # Utilidades del servidor
-├── prisma/                 # Prisma ORM
-│   └── schema.prisma      # Schema de Prisma
-├── domain/                 # Lógica de negocio
-│   ├── types/              # Tipos TypeScript
-│   └── constants/          # Constantes
-├── stores/                 # Stores de Pinia
-├── database/               # Migraciones SQL
-└── tests/                  # Tests
+freakdays/
+├── packages/
+│   ├── api/                    # Backend NestJS (freak-days-api, :3001)
+│   │   ├── src/
+│   │   │   ├── modules/        # Módulos de NestJS
+│   │   │   ├── domain/         # Lógica de dominio (eventos, handlers)
+│   │   │   └── infra/          # Infraestructura (Prisma, BullMQ, Socket.IO)
+│   │   ├── prisma/             # Schema y migraciones de Prisma
+│   │   ├── docker-compose.yml  # Postgres :5433 + Redis :6379
+│   │   └── .env.example
+│   ├── web/                    # Frontend Nuxt 4 (freak-days, :3000)
+│   │   ├── app/
+│   │   │   ├── components/     # Componentes Vue
+│   │   │   ├── pages/          # Páginas/rutas
+│   │   │   ├── composables/    # Lógica reutilizable
+│   │   │   ├── stores/         # Stores de Pinia
+│   │   │   └── assets/
+│   │   └── .env.example
+│   └── domain/                 # Lógica de dominio compartida (@freakdays/domain, puro TS)
+│       └── src/
+│           ├── gamification/   # Curvas de EXP, niveles, streaks
+│           └── types/          # Tipos TypeScript compartidos
+├── Makefile                    # Entrypoint principal
+├── pnpm-workspace.yaml
+└── docs/
 ```
 
 ---
@@ -174,7 +238,7 @@ onMounted(() => {
 - **Types**: Para uniones y tipos más complejos
 
 ```typescript
-// ✅ Bueno
+// ✅ Correcto
 interface User {
   id: string;
   name: string;
@@ -182,7 +246,7 @@ interface User {
 
 type Status = 'active' | 'inactive';
 
-// ❌ Malo
+// ❌ Incorrecto
 const user: any = {};
 ```
 
@@ -193,75 +257,42 @@ const user: any = {};
 - Usar `computed` para valores derivados
 - Usar `watch` para efectos secundarios
 
-```typescript
-// ✅ Bueno
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
-
-// ❌ Malo
-const state = reactive({ count: 0 });
-```
-
 ---
 
 ## Testing
 
-### Configuración
+### Contadores de tests actuales
 
-FreakDays utiliza **Vitest** para testing.
-
-**Archivo de configuración**: `vitest.config.ts`
+| Paquete           | Runner | Tests |
+| ----------------- | ------ | ----- |
+| `packages/api`    | Jest   | 160   |
+| `packages/domain` | Vitest | 38    |
+| `packages/web`    | Vitest | 656   |
 
 ### Ejecutar Tests
 
 ```bash
 # Todos los tests
-pnpm test
+make test
 
-# Modo watch
-pnpm test:watch
+# Solo API
+make test-api
+
+# Solo web
+make test-web
 
 # Con cobertura
-pnpm test:coverage
+make coverage
+
+# Tests end-to-end
+make e2e
 ```
 
-### Estructura de Tests
-
-```
-tests/
-├── unit/
-│   ├── domain/
-│   │   └── quests.test.ts
-│   └── stores/
-│       └── modules.test.ts
-└── setup.ts
-```
-
-### Ejemplo de Test
-
-```typescript
-import { describe, it, expect } from 'vitest';
-import { calculateTotalExp } from '~~/domain/types/quests';
-
-describe('calculateTotalExp', () => {
-  it('should calculate base exp for easy quest', () => {
-    const exp = calculateTotalExp('easy', 0);
-    expect(exp).toBe(10);
-  });
-
-  it('should add streak bonus', () => {
-    const exp = calculateTotalExp('medium', 7);
-    expect(exp).toBe(30); // 25 base + 5 bonus
-  });
-});
-```
-
-### Cobertura Objetivo
-
-- `domain/`: 90%+
-- `composables/`: 80%+
-- `stores/`: 80%+
-- `components/`: Críticos solamente
+> Para ejecutar un test individual en el frontend:
+>
+> ```bash
+> cd packages/web && pnpm vitest run path/to/test.spec.ts
+> ```
 
 ---
 
@@ -269,16 +300,7 @@ describe('calculateTotalExp', () => {
 
 ### DevTools
 
-Nuxt DevTools está habilitado en desarrollo:
-
-```typescript
-// nuxt.config.ts
-devtools: {
-  enabled: true;
-}
-```
-
-Accede en: `http://localhost:3000/_nuxt/dev`
+Nuxt DevTools está habilitado en desarrollo. Accede en: `http://localhost:3000/_nuxt/dev`
 
 ### Vue DevTools
 
@@ -299,14 +321,19 @@ if (import.meta.dev) {
 console.error('Error:', error); // Solo errores críticos
 ```
 
-### Supabase Debugging
+### Prisma Studio (interfaz para la BD)
 
-Usa el dashboard de Supabase para:
+```bash
+make prisma-studio
+```
 
-- Ver queries en tiempo real
-- Inspeccionar datos
-- Ver logs de autenticación
-- Revisar políticas RLS
+Abre en `http://localhost:5555`.
+
+### Logs de servicios Docker
+
+```bash
+make services-logs
+```
 
 ---
 
@@ -334,142 +361,56 @@ function handleClick() {
 
 3. **v-show vs v-if**
 
-```typescript
-// ✅ v-show para elementos que se muestran/ocultan frecuentemente
+```vue
+<!-- ✅ v-show para elementos que se muestran/ocultan frecuentemente -->
 <div v-show="isVisible">Contenido</div>
 
-// ✅ v-if para elementos que raramente se renderizan
+<!-- ✅ v-if para elementos que raramente se renderizan -->
 <Modal v-if="showModal" />
 ```
 
 ### Accesibilidad
 
-1. **Semantic HTML**
-
-```vue
-<!-- ✅ Bueno -->
-<button @click="handleClick">Aceptar</button>
-<nav aria-label="Navegación principal">
-  <ul>
-    <li><a href="/">Inicio</a></li>
-  </ul>
-</nav>
-
-<!-- ❌ Malo -->
-<div @click="handleClick">Aceptar</div>
-```
-
-2. **ARIA Labels**
-
-```vue
-<button aria-label="Cerrar modal">
-  <X class="h-4 w-4" />
-</button>
-```
-
-3. **Contraste**
-
-- Mínimo 4.5:1 para texto normal
-- Mínimo 3:1 para texto grande
-
-### Seguridad
-
-1. **Validación de Inputs**
-
-```typescript
-function validateEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-```
-
-2. **Sanitización**
-
-Supabase maneja la sanitización automáticamente, pero siempre validar en el cliente.
-
-3. **RLS**
-
-Nunca confiar solo en validación del cliente. Las políticas RLS en Supabase son la última línea de defensa.
+1. **Semantic HTML**: usar `<button>`, `<nav>`, `<main>` en lugar de `<div>` con onClick.
+2. **ARIA Labels**: en iconos sin texto visible.
+3. **Contraste**: mínimo 4.5:1 para texto normal, 3:1 para texto grande.
 
 ### Código Limpio
 
-1. **Sin Comentarios**
-
-El código debe ser auto-documentado:
-
-```typescript
-// ❌ Malo
-// Calcula el total de EXP
-const total = baseExp + bonus;
-
-// ✅ Bueno
-const totalExp = calculateTotalExp(baseExp, streakBonus);
-```
-
-2. **Funciones Pequeñas**
-
-```typescript
-// ❌ Malo
-function processData(data) {
-  // 100 líneas de código
-}
-
-// ✅ Bueno
-function processData(data) {
-  const validated = validateData(data);
-  const transformed = transformData(validated);
-  return saveData(transformed);
-}
-```
-
-3. **Nombres Descriptivos**
-
-```typescript
-// ❌ Malo
-const d = new Date();
-const x = calculate();
-
-// ✅ Bueno
-const currentDate = new Date();
-const totalExp = calculateTotalExp();
-```
+- Funciones pequeñas y con nombres descriptivos.
+- El código debe ser auto-documentado (preferir nombres claros a comentarios).
+- Sin comentarios que expliquen el "qué" — solo el "por qué" cuando no es obvio.
 
 ---
 
 ## Workflow de Desarrollo
 
-### 1. Crear una Rama
+### 1. Crear una rama
 
 ```bash
-git checkout -b feature/nueva-funcionalidad
+git checkout -b feat/nueva-funcionalidad
 ```
 
 ### 2. Desarrollar
 
-- Escribir tests primero (TDD)
-- Implementar funcionalidad
-- Asegurar que los tests pasen
+- Escribir tests primero (TDD donde sea práctico).
+- Implementar funcionalidad.
+- Asegurar que los tests pasen: `make test`.
 
 ### 3. Commit
 
+Conventional commits obligatorios:
+
 ```bash
-git add .
 git commit -m "feat: añade nueva funcionalidad"
 ```
 
-**Convenciones de commits:**
-
-- `feat:` Nueva funcionalidad
-- `fix:` Corrección de bug
-- `docs:` Documentación
-- `style:` Formato
-- `refactor:` Refactorización
-- `test:` Tests
-- `chore:` Tareas de mantenimiento
+Tipos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`.
 
 ### 4. Push y PR
 
 ```bash
-git push origin feature/nueva-funcionalidad
+git push origin feat/nueva-funcionalidad
 ```
 
 Crear Pull Request en GitHub.
@@ -481,22 +422,42 @@ Crear Pull Request en GitHub.
 ### Error: "Cannot find module"
 
 ```bash
-# Limpiar y reinstalar
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
+make install
 ```
 
-### Error: "Supabase connection failed"
+### Error: "Can't reach database server" / "ECONNREFUSED :5433"
 
-- Verificar variables de entorno
-- Verificar que Supabase esté activo
-- Revisar políticas RLS
+Los servicios Docker no están levantados:
+
+```bash
+make services-up
+# o el stack completo:
+make dev
+```
+
+### Error: "Redis connection refused"
+
+Redis es obligatorio para el pipeline de eventos (BullMQ) y Socket.IO. Sin Redis, EXP/niveles/streaks/logros/feed/leaderboard dejan de actualizarse. Asegúrate de que los servicios Docker estén corriendo:
+
+```bash
+make services-ps
+make services-up
+```
 
 ### Error: "Type error"
 
-- Verificar que TypeScript esté en strict mode
-- Revisar tipos en `domain/types/`
-- Asegurar que todos los tipos estén importados
+```bash
+make typecheck
+```
+
+Verifica que TypeScript esté en strict mode y que todos los tipos estén importados.
+
+### Prisma: "Migration failed"
+
+```bash
+make prisma-generate
+make prisma-deploy
+```
 
 ---
 
@@ -504,10 +465,13 @@ pnpm install
 
 - [Nuxt Documentation](https://nuxt.com/)
 - [Vue 3 Documentation](https://vuejs.org/)
+- [NestJS Documentation](https://docs.nestjs.com/)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [BullMQ Documentation](https://docs.bullmq.io/)
+- [Clerk Documentation](https://clerk.com/docs)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Supabase Documentation](https://supabase.com/docs)
 - [Vitest Documentation](https://vitest.dev/)
 
 ---
 
-**Última actualización**: Enero 2025
+**Última actualización**: Mayo 2026

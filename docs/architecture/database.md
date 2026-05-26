@@ -1,20 +1,22 @@
 # Base de Datos - FreakDays
 
-Documentación completa del esquema de base de datos, relaciones, políticas de seguridad y migraciones.
+Documentación completa del esquema de base de datos, relaciones y migraciones.
 
-## 📊 Esquema General
+> **Migración histórica**: Las versiones anteriores usaban Supabase como backend directo con RLS. Hoy la base de datos es PostgreSQL gestionado por **Prisma ORM** desde **NestJS**. En desarrollo corre en Docker en el puerto **5433**. La seguridad de acceso la garantizan los guards de autenticación de NestJS (Clerk JWT), no RLS de Supabase.
 
-La base de datos utiliza **PostgreSQL** a través de **Supabase** con **Row Level Security (RLS)** habilitado en todas las tablas.
+## Esquema General
+
+La base de datos utiliza **PostgreSQL** accedida exclusivamente a través de **Prisma** desde `packages/api`.
 
 ## 🗂️ Tablas Principales
 
 ### 1. `profiles`
 
-Extiende la tabla `auth.users` de Supabase con información adicional del usuario.
+Información adicional del usuario (vinculada al userId de Clerk).
 
 ```sql
 CREATE TABLE public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY,  -- corresponde al userId de Clerk
     username TEXT UNIQUE,
     display_name TEXT,
     avatar_url TEXT,
@@ -333,19 +335,23 @@ CREATE TABLE public.release_calendar (
 - `idx_releases_user` en `user_id` WHERE `user_id IS NOT NULL`
 - `idx_releases_global` en `is_global` WHERE `is_global = true`
 
-## 🔐 Row Level Security (RLS)
+## Seguridad de Acceso
 
-Todas las tablas tienen RLS habilitado. Las políticas garantizan que:
+El acceso a los datos está protegido a nivel de aplicación por los guards de NestJS:
 
-1. **Usuarios solo ven sus propios datos**: Todas las queries filtran por `user_id = auth.uid()`
-2. **Usuarios solo modifican sus propios datos**: Las políticas de UPDATE/INSERT verifican ownership
-3. **Parties tienen políticas especiales**: Los miembros pueden ver el party, pero solo el owner puede modificarlo
+1. Todos los endpoints requieren un JWT válido de Clerk.
+2. Los services filtran siempre por `userId` extraído del token.
+3. No existe RLS de Supabase — la seguridad la impone la capa de aplicación.
 
-### Ejemplo de Política
+### Patrón de filtrado en servicios
 
-```sql
-CREATE POLICY "Users can manage own anime" ON public.anime_list
-    FOR ALL USING (auth.uid() = user_id);
+```typescript
+// packages/api/src/modules/anime/anime.service.ts
+async findAll(userId: string) {
+  return this.prisma.animeEntry.findMany({
+    where: { userId },  // siempre filtra por el usuario autenticado
+  });
+}
 ```
 
 ## 🔄 Triggers
@@ -373,71 +379,76 @@ Aplicado a:
 - `quests`
 - `parties`
 
-## 📦 Migraciones
+## Tablas del Motor de Gamificación (F0–F1)
 
-### Migración 001: Workouts con Series
+Tablas añadidas por el motor de gamificación event-driven:
 
-**Archivo**: `database/migrations/001_workouts_sets_migration.sql`
+### `domain_events`
 
-**Cambios:**
-
-- Agrega campo `status` a `workouts` (in_progress/completed)
-- Agrega campos `started_at` y `completed_at`
-- Crea tabla `workout_sets` para series individuales
-- Migra datos existentes del formato antiguo
-
-### Migración 002: Manga Pricing
-
-**Archivo**: `database/migrations/002_manga_pricing_migration.sql`
-
-**Cambios:**
-
-- Agrega `price_per_volume` a `manga_collection`
-- Agrega `total_cost` con cálculo automático
-- Actualiza costos existentes
-
-### Migración 003: Profile Enhancement
-
-**Archivo**: `database/migrations/003_profile_enhancement.sql`
-
-**Cambios:**
-
-- Agrega `bio` a `profiles`
-- Agrega `favorite_anime_id` y `favorite_manga_id` (foreign keys)
-- Agrega `location` y `website`
-- Agrega `social_links` (JSONB)
-
-## 🔍 Queries Útiles
-
-### Obtener estadísticas de usuario
+Outbox de eventos de dominio. Registra los eventos pendientes de procesar.
 
 ```sql
-SELECT
-    (SELECT COUNT(*) FROM anime_list WHERE user_id = $1) as anime_count,
-    (SELECT COUNT(*) FROM manga_collection WHERE user_id = $1) as manga_count,
-    (SELECT COUNT(*) FROM workouts WHERE user_id = $1) as workout_count,
-    (SELECT COUNT(*) FROM quests WHERE user_id = $1 AND active = true) as active_quests;
+id, type, payload (jsonb), processedAt (nullable), createdAt
 ```
 
-### Obtener quests completadas hoy
+El relay BullMQ hace polling sobre registros con `processedAt IS NULL`.
+
+### `event_handler_log`
+
+Registro de idempotencia. Garantiza que cada (eventId, handlerName) se procese exactamente una vez.
 
 ```sql
-SELECT q.*, qc.completed_at, qc.exp_earned
-FROM quests q
-JOIN quest_completions qc ON q.id = qc.quest_id
-WHERE qc.user_id = $1
-  AND DATE(qc.completed_at) = CURRENT_DATE;
+id, eventId, handlerName, processedAt
+UNIQUE(eventId, handlerName)
 ```
 
-### Obtener mangas completadas con costo total
+### `user_stats`
+
+Estadísticas proyectadas del usuario (escritura única desde `StatsProjector`).
 
 ```sql
-SELECT
-    COUNT(*) as total_completed,
-    SUM(total_cost) as total_investment
-FROM manga_collection
-WHERE user_id = $1
-  AND status = 'completed';
+userId, totalQuests, totalWorkouts, totalAnime, totalManga, updatedAt
+```
+
+### `feed_entries`
+
+Activity feed por party (escritura única desde `FeedProjectorHandler`).
+
+```sql
+id, partyId, userId, type, payload (jsonb), createdAt
+```
+
+---
+
+## Migraciones
+
+Las migraciones están gestionadas por Prisma en `packages/api/prisma/migrations/`. Para crear una nueva:
+
+```bash
+make prisma-migrate
+```
+
+Para aplicar migraciones pendientes (CI/producción):
+
+```bash
+make prisma-deploy
+```
+
+Las migraciones históricas anteriores a la arquitectura NestJS+Prisma están documentadas en [`docs/migrations/`](../migrations/).
+
+## Queries de Diagnóstico
+
+Para inspeccionar datos en desarrollo, usa Prisma Studio:
+
+```bash
+make prisma-studio
+# abre http://localhost:5555
+```
+
+O conéctate directamente (puerto 5433):
+
+```bash
+psql postgresql://postgres:postgres@localhost:5433/freakdays
 ```
 
 ## 🚀 Optimizaciones
@@ -461,40 +472,33 @@ WHERE user_id = $1
 3. **UUIDs**: Todas las IDs primarias son UUIDs generados por `uuid_generate_v4()`
 4. **Constraints**: Validaciones a nivel de base de datos (CHECK constraints)
 
-## 🔗 Referencias
+## Storage (Cloudflare R2)
 
-- [Supabase Documentation](https://supabase.com/docs/guides/database)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)
+Los archivos estáticos (avatares, banners) se almacenan en **Cloudflare R2** (API compatible con S3). La subida se gestiona desde el backend NestJS, que firma las URLs o recibe el archivo y lo retransmite.
+
+### Buckets
+
+| Bucket    | Contenido           | Visibilidad           |
+| --------- | ------------------- | --------------------- |
+| `avatars` | Avatares de usuario | Público (URL pública) |
+| `banners` | Banners de perfil   | Público (URL pública) |
+
+Configuración en `packages/api/.env`:
+
+```env
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=...
+```
 
 ---
 
-## Storage Buckets
+## Referencias
 
-### avatars
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 
-Bucket para almacenar avatares de usuarios.
+---
 
-**Políticas RLS:**
-
-- Lectura pública
-- Escritura solo para el propietario
-- Path: `{userId}/{filename}`
-
-### banners
-
-Bucket para almacenar banners de perfil de usuarios.
-
-**Políticas RLS:**
-
-- Lectura pública
-- Escritura solo para el propietario
-- Path: `{userId}/{filename}`
-
-**Configuración:**
-
-- Tamaño máximo: 10MB
-- Tipos permitidos: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
-- Aspect ratio recomendado: 16:9
-
-**Última actualización**: Enero 2025
+**Última actualización**: Mayo 2026

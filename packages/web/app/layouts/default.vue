@@ -10,11 +10,13 @@ import { getAllNavItems } from '@/utils/nav-items';
 import type { ModuleId } from '~~/domain/types/modules';
 import { useAuthStore } from '~~/stores/auth';
 import { useModulesStore } from '~~/stores/modules';
+import { useStatsStore } from '~~/stores/useStatsStore';
 
 const route = useRoute();
 const modulesStore = useModulesStore();
 const authStore = useAuthStore();
 const profileApi = useProfile();
+const statsStore = useStatsStore();
 const auth = useAuth();
 
 const profile = ref<UserProfile | null>(null);
@@ -53,7 +55,10 @@ watch(
   { immediate: true },
 );
 
+// EXP progress is now driven by statsStore for realtime reactivity.
+// Falls back to local profile on first mount before stats are loaded.
 const expProgress = computed(() => {
+  if (statsStore.expProgress) return statsStore.expProgress;
   if (!profile.value) return { current: 0, needed: 100, progress: 0 };
   return profileApi.expForNextLevel(profile.value.totalExp);
 });
@@ -79,6 +84,10 @@ onMounted(async () => {
     loadingProfile.value = true;
     try {
       profile.value = await profileApi.fetchProfile();
+      // Seed stats store client-side (delta = 0 on first load → no spurious float)
+      statsStore.refresh().catch(() => {
+        // best-effort
+      });
 
       // Ensure modules are loaded if authenticated
       if (authStore.isAuthenticated && authStore.userId) {
@@ -117,46 +126,30 @@ onBeforeUnmount(() => {
     class="relative font-sans antialiased overflow-hidden"
   >
     <div class="fixed inset-0 -z-10">
-      <div
-        class="absolute inset-0 bg-linear-to-br from-background via-background to-background/95"
-      />
-      <div
-        class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent"
-      />
-      <div
-        class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,var(--tw-gradient-stops))] from-accent/5 via-transparent to-transparent"
-      />
-      <div
-        class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-secondary/3 via-transparent to-transparent"
-      />
+      <!-- Base dark background -->
+      <div class="absolute inset-0 animated-gradient-bg" />
 
+      <!-- Blurred ambient orbs -->
       <div
-        class="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"
+        class="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl motion-safe:animate-pulse"
         style="animation-duration: 8s"
+        aria-hidden="true"
       />
       <div
-        class="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse"
+        class="absolute bottom-24 right-10 w-80 h-80 bg-accent/10 rounded-full blur-3xl motion-safe:animate-pulse"
         style="animation-duration: 10s; animation-delay: 2s"
+        aria-hidden="true"
       />
       <div
-        class="absolute top-1/2 left-0 w-80 h-80 bg-secondary/3 rounded-full blur-3xl animate-pulse"
+        class="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[28rem] h-[28rem] bg-secondary/5 rounded-full blur-3xl motion-safe:animate-pulse"
         style="animation-duration: 12s; animation-delay: 4s"
-      />
-      <div
-        class="absolute bottom-1/3 right-0 w-72 h-72 bg-primary/3 rounded-full blur-3xl animate-pulse"
-        style="animation-duration: 9s; animation-delay: 1s"
+        aria-hidden="true"
       />
 
+      <!-- HUD scanline grid overlay -->
       <div
-        class="absolute inset-0"
-        style="
-          background-image: radial-gradient(
-            circle at 1px 1px,
-            oklch(0.28 0.04 270 / 0.15) 1px,
-            transparent 0
-          );
-          background-size: 40px 40px;
-        "
+        class="absolute inset-0 opacity-[0.05] bg-[linear-gradient(to_right,var(--color-primary)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-primary)_1px,transparent_1px)] bg-[size:44px_44px]"
+        aria-hidden="true"
       />
     </div>
 
@@ -165,6 +158,7 @@ onBeforeUnmount(() => {
         :profile="profile"
         :loading="loadingProfile"
         :exp-progress="expProgress"
+        :level="statsStore.level > 1 ? statsStore.level : undefined"
         :is-active="isActive"
         :menu-open="mobileMenuOpen"
         @logout="handleLogout"
