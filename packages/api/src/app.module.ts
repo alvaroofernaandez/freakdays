@@ -30,6 +30,7 @@ import { FeedModule } from './feed/feed.module';
 import { GamificationModule } from './gamification/gamification.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { SocialModule } from './social/social.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 
 @Module({
@@ -67,6 +68,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
     GamificationModule,
     LeaderboardModule,
     RealtimeModule,
+    SocialModule,
     AuthModule,
     CalendarModule,
     AnimeModule,
