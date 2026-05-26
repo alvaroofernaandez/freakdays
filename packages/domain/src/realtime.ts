@@ -9,6 +9,7 @@ export const WIRE_EVENTS = {
   ACHIEVEMENT_UNLOCKED: 'achievement_unlocked',
   STATS_UPDATED: 'stats_updated',
   FEED_ENTRY_ADDED: 'feed_entry_added',
+  PRESENCE_CHANGED: 'presence_changed',
 } as const;
 
 export type WireEventName = (typeof WIRE_EVENTS)[keyof typeof WIRE_EVENTS];
@@ -39,9 +40,16 @@ export interface FeedEntryAddedPayload {
   readonly createdAt: string;
 }
 
+export interface PresenceChangedPayload {
+  readonly userId: string;
+  readonly online: boolean;
+  readonly at: string; // ISO 8601
+}
+
 export interface WireEventPayloadMap {
   readonly level_up: LevelUpPayload;
   readonly achievement_unlocked: AchievementUnlockedPayload;
   readonly stats_updated: StatsUpdatedPayload;
   readonly feed_entry_added: FeedEntryAddedPayload;
+  readonly presence_changed: PresenceChangedPayload;
 }

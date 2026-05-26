@@ -20,12 +20,12 @@ describe('WIRE_EVENTS', () => {
     expect(WIRE_EVENTS.FEED_ENTRY_ADDED).toBe('feed_entry_added');
   });
 
-  it('has exactly four keys', () => {
-    expect(Object.keys(WIRE_EVENTS)).toHaveLength(4);
+  it('has exactly five keys (four original + PRESENCE_CHANGED added in PR2)', () => {
+    expect(Object.keys(WIRE_EVENTS)).toHaveLength(5);
   });
 
   it('values are string literals (const-as-const)', () => {
-    const keys: (keyof typeof WIRE_EVENTS)[] = ['LEVEL_UP', 'ACHIEVEMENT_UNLOCKED', 'STATS_UPDATED', 'FEED_ENTRY_ADDED'];
+    const keys: (keyof typeof WIRE_EVENTS)[] = ['LEVEL_UP', 'ACHIEVEMENT_UNLOCKED', 'STATS_UPDATED', 'FEED_ENTRY_ADDED', 'PRESENCE_CHANGED'];
     for (const key of keys) {
       expect(typeof WIRE_EVENTS[key]).toBe('string');
     }
@@ -110,5 +110,62 @@ describe('FeedEntryAddedPayload (compile-time contract)', () => {
 
     expect(payload.id).toBe('fe-1');
     expect(payload.actorName).toBeNull();
+  });
+});
+
+describe('PRESENCE_CHANGED wire event (PR2)', () => {
+  it('WIRE_EVENTS.PRESENCE_CHANGED === "presence_changed"', () => {
+    expect(WIRE_EVENTS.PRESENCE_CHANGED).toBe('presence_changed');
+  });
+
+  it('has exactly five keys after PR2 addition', () => {
+    expect(Object.keys(WIRE_EVENTS)).toHaveLength(5);
+  });
+
+  it('PresenceChangedPayload satisfies required shape (online)', () => {
+    const payload = {
+      userId: 'user-abc',
+      online: true,
+      at: '2026-05-26T10:00:00.000Z',
+    } satisfies import('./realtime').PresenceChangedPayload;
+
+    expect(payload.userId).toBe('user-abc');
+    expect(payload.online).toBe(true);
+    expect(typeof payload.at).toBe('string');
+  });
+
+  it('PresenceChangedPayload satisfies required shape (offline)', () => {
+    const payload = {
+      userId: 'user-xyz',
+      online: false,
+      at: '2026-05-26T10:01:00.000Z',
+    } satisfies import('./realtime').PresenceChangedPayload;
+
+    expect(payload.online).toBe(false);
+  });
+
+  it('WireEventPayloadMap includes presence_changed key with correct shape', () => {
+    const map: import('./realtime').WireEventPayloadMap = {
+      level_up: { previousLevel: 1, newLevel: 2, totalExp: 100 },
+      achievement_unlocked: { code: 'X', name: 'Y', description: 'Z' },
+      stats_updated: {},
+      feed_entry_added: {
+        id: 'fe-1',
+        partyId: 'p-1',
+        type: 'level.up',
+        actorUserId: 'u-1',
+        actorName: 'Alice',
+        payload: {},
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+      presence_changed: {
+        userId: 'u-1',
+        online: true,
+        at: '2026-01-01T00:00:00.000Z',
+      },
+    };
+
+    expect(map[WIRE_EVENTS.PRESENCE_CHANGED].userId).toBe('u-1');
+    expect(map[WIRE_EVENTS.PRESENCE_CHANGED].online).toBe(true);
   });
 });

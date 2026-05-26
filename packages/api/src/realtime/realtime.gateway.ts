@@ -7,8 +7,14 @@ import {
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
 
+import { WIRE_EVENTS } from '@freakdays/domain';
+import type { PresenceChangedPayload } from '@freakdays/domain';
+
 import { ClerkJwtStrategy } from '../auth/strategies/clerk-jwt.strategy';
 import { PrismaService } from '../common/prisma/prisma.service';
+import { FriendshipService } from '../social/friendship.service';
+import { PresenceService } from './presence.service';
+import type { PresenceTransitionResult } from './presence.service';
 
 @WebSocketGateway({
   cors: {
@@ -28,6 +34,8 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   constructor(
     private readonly strategy: ClerkJwtStrategy,
     private readonly prisma: PrismaService,
+    private readonly presenceService: PresenceService,
+    private readonly friendshipService: FriendshipService,
   ) {}
 
   async handleConnection(client: Socket): Promise<void> {
@@ -64,6 +72,12 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       this.logger.debug(
         `RealtimeGateway: socket=${client.id} authenticated userId=${userId} orgId=${orgId} parties=${memberships.length}`,
       );
+
+      // Presence: mark socket online, emit PRESENCE_CHANGED on real transition
+      const result = await this.presenceService.onConnect(userId, client.id);
+      if (result.transition) {
+        await this.emitPresenceChanged(userId, true);
+      }
     } catch {
       this.logger.debug(
         `RealtimeGateway: connection rejected — token validation failed (socket=${client.id})`,
@@ -72,8 +86,27 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     }
   }
 
-  handleDisconnect(client: Socket): void {
+  async handleDisconnect(client: Socket): Promise<void> {
     this.logger.debug(`RealtimeGateway: socket=${client.id} disconnected`);
+
+    const userId = client.data?.userId as string | undefined;
+    if (!userId) {
+      // Socket was never authenticated — nothing to clean up
+      return;
+    }
+
+    try {
+      const result: PresenceTransitionResult = await this.presenceService.onDisconnect(
+        userId,
+        client.id,
+      );
+      if (result.transition) {
+        await this.emitPresenceChanged(userId, false);
+      }
+    } catch {
+      // Presence cleanup failure must never surface to the disconnect lifecycle
+      this.logger.debug(`RealtimeGateway: presence cleanup error for userId=${userId}`);
+    }
   }
 
   emitToUser(userId: string, event: string, payload: unknown): void {
@@ -82,6 +115,31 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   emitToParty(partyId: string, event: string, payload: unknown): void {
     this.server.to(`party:${partyId}`).emit(event, payload);
+  }
+
+  // ─── Private helpers ──────────────────────────────────────────────────────
+
+  /**
+   * Emits PRESENCE_CHANGED to all accepted friends of userId.
+   * Best-effort: errors are logged and swallowed.
+   */
+  private async emitPresenceChanged(userId: string, online: boolean): Promise<void> {
+    try {
+      const friendIds = await this.friendshipService.listFriends(userId);
+      if (friendIds.length === 0) return;
+
+      const presencePayload: PresenceChangedPayload = {
+        userId,
+        online,
+        at: new Date().toISOString(),
+      };
+
+      for (const friendId of friendIds) {
+        this.server.to(`user:${friendId}`).emit(WIRE_EVENTS.PRESENCE_CHANGED, presencePayload);
+      }
+    } catch {
+      this.logger.debug(`RealtimeGateway: emitPresenceChanged error for userId=${userId}`);
+    }
   }
 
   private extractToken(client: Socket): string | null {

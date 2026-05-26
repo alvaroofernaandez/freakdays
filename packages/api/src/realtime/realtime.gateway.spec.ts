@@ -39,6 +39,17 @@ const makePrisma = (partyMemberships: Array<{ partyId: string }> = []) => ({
   },
 });
 
+// Minimal PresenceService mock — always returns no-transition so existing tests are unaffected
+const makePresence = () => ({
+  onConnect: jest.fn().mockResolvedValue({ isOnline: true, transition: false }),
+  onDisconnect: jest.fn().mockResolvedValue({ isOnline: false, transition: false }),
+});
+
+// Minimal FriendshipService mock
+const makeFriendship = () => ({
+  listFriends: jest.fn().mockResolvedValue([]),
+});
+
 describe('RealtimeGateway — handshake auth + room isolation', () => {
   let gateway: RealtimeGateway;
   let strategy: MockStrategy;
@@ -48,7 +59,12 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
     strategy = makeStrategy({ sub: 'user-abc', org_id: undefined });
     prisma = makePrisma();
 
-    gateway = new RealtimeGateway(strategy as any, prisma as any);
+    gateway = new RealtimeGateway(
+      strategy as any,
+      prisma as any,
+      makePresence() as any,
+      makeFriendship() as any,
+    );
     // Assign mock server
 
     (gateway as any).server = mockServer;
@@ -138,10 +154,10 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
     expect(callsToUserB).toHaveLength(0);
   });
 
-  it('handleDisconnect does not throw', () => {
+  it('handleDisconnect does not throw', async () => {
     const socket = makeSocket('valid.jwt.token');
 
-    expect(() => gateway.handleDisconnect(socket as any)).not.toThrow();
+    await expect(gateway.handleDisconnect(socket as any)).resolves.toBeUndefined();
   });
 
   // ─── S6 — Party room tests ──────────────────────────────────────────────────
