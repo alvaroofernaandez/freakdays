@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AppSelect } from '@/components/ui/select';
 import { Globe, Instagram, MapPin, MessageSquare, Twitter } from 'lucide-vue-next';
 import type { AnimeEntry } from '@/composables/useAnime';
 import type { MangaEntry } from '@/composables/useManga';
+import { computed } from 'vue';
 
 interface EditForm {
   username: string;
@@ -37,8 +39,17 @@ function updateField<K extends keyof EditForm>(field: K, value: EditForm[K] | nu
 const inputClass =
   'w-full rounded-none border-2 border-input bg-background px-3 py-2 text-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 placeholder:text-muted-foreground/50';
 
-const selectClass =
-  'w-full h-10 rounded-none border-2 border-input bg-background px-3 py-2 text-sm outline-none cursor-pointer transition-[border-color,box-shadow] duration-150 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40';
+const NONE_OPTION = { value: '', label: 'Ninguno' };
+
+const animeOptions = computed(() => [
+  NONE_OPTION,
+  ...props.animeList.map((anime) => ({ value: anime.id, label: anime.title })),
+]);
+
+const mangaOptions = computed(() => [
+  NONE_OPTION,
+  ...props.mangaList.map((manga) => ({ value: manga.id, label: manga.title })),
+]);
 </script>
 
 <template>
@@ -135,17 +146,14 @@ const selectClass =
           >
             Anime favorito
           </Label>
-          <select
+          <AppSelect
             id="favoriteAnime"
-            :value="form.favorite_anime_id"
-            :class="selectClass"
-            @change="updateField('favorite_anime_id', ($event.target as HTMLSelectElement).value)"
-          >
-            <option value="">Ninguno</option>
-            <option v-for="anime in animeList" :key="anime.id" :value="anime.id">
-              {{ anime.title }}
-            </option>
-          </select>
+            :model-value="form.favorite_anime_id"
+            :options="animeOptions"
+            placeholder="Ninguno"
+            aria-label="Anime favorito"
+            @update:model-value="updateField('favorite_anime_id', $event)"
+          />
         </div>
         <div class="space-y-1.5">
           <Label
@@ -154,17 +162,14 @@ const selectClass =
           >
             Manga favorito
           </Label>
-          <select
+          <AppSelect
             id="favoriteManga"
-            :value="form.favorite_manga_id"
-            :class="selectClass"
-            @change="updateField('favorite_manga_id', ($event.target as HTMLSelectElement).value)"
-          >
-            <option value="">Ninguno</option>
-            <option v-for="manga in mangaList" :key="manga.id" :value="manga.id">
-              {{ manga.title }}
-            </option>
-          </select>
+            :model-value="form.favorite_manga_id"
+            :options="mangaOptions"
+            placeholder="Ninguno"
+            aria-label="Manga favorito"
+            @update:model-value="updateField('favorite_manga_id', $event)"
+          />
         </div>
       </div>
     </section>
