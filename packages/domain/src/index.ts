@@ -8,5 +8,6 @@ export type {
   LevelUpPayload,
   AchievementUnlockedPayload,
   StatsUpdatedPayload,
+  FeedEntryAddedPayload,
   WireEventPayloadMap,
 } from './realtime';

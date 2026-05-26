@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Post,
   Put,
   Req,
@@ -35,6 +36,13 @@ export class ProfileController {
 
   @Put('me')
   updateMyProfile(@Req() request: Request, @Body() body: UpdateProfileInput) {
+    const user = this.getRequestUser(request);
+
+    return this.profileService.updateMyProfile(user.sub, body);
+  }
+
+  @Patch('me')
+  patchMyProfile(@Req() request: Request, @Body() body: UpdateProfileInput) {
     const user = this.getRequestUser(request);
 
     return this.profileService.updateMyProfile(user.sub, body);

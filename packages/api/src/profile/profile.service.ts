@@ -29,6 +29,7 @@ export interface ProfileView {
   location: string | null;
   website: string | null;
   socialLinks: Record<string, string>;
+  leaderboardOptIn: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +47,7 @@ export interface UpdateProfileInput {
   website?: string | null;
   socialLinks?: Record<string, string>;
   social_links?: Record<string, string>;
+  leaderboardOptIn?: boolean;
 }
 
 export interface AddProfileExpInput {
@@ -357,6 +359,14 @@ export class ProfileService {
       updateData.website = raw !== null ? normalizeUrl(raw, 'website') : null;
     }
 
+    if (Object.prototype.hasOwnProperty.call(input, 'leaderboardOptIn')) {
+      if (typeof input.leaderboardOptIn !== 'boolean') {
+        throw new BadRequestException('leaderboardOptIn debe ser boolean');
+      }
+
+      updateData.leaderboardOptIn = input.leaderboardOptIn;
+    }
+
     if (socialLinks !== undefined) {
       if (typeof socialLinks !== 'object' || socialLinks === null || Array.isArray(socialLinks)) {
         throw new BadRequestException('social_links debe ser un objeto { [key]: string }');
@@ -422,6 +432,7 @@ export class ProfileService {
       location: profile.location,
       website: profile.website,
       socialLinks: this.normalizeSocialLinks(profile.socialLinks),
+      leaderboardOptIn: profile.leaderboardOptIn,
       createdAt: profile.createdAt,
       updatedAt: profile.updatedAt,
     };

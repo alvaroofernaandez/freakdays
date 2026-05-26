@@ -6,9 +6,11 @@ import { PrismaService } from '../common/prisma/prisma.service';
 import { EventsModule } from '../events/events.module';
 import { DOMAIN_EVENT_HANDLERS } from '../events/events.constants';
 import { RealtimeModule } from '../realtime/realtime.module';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { RealtimePushHandler } from '../realtime/realtime-push.handler';
 import { AchievementEvaluationHandler } from './achievements/achievement-evaluation.handler';
 import { ACHIEVEMENT_CATALOG } from './achievements/catalog';
+import { FeedProjectorHandler } from './feed/feed-projector.handler';
 import { ProgressionHandler } from './handlers/progression.handler';
 import { StreakHandler } from './handlers/streak.handler';
 import { StatsController } from './stats/stats.controller';
@@ -34,6 +36,7 @@ import { StatsService } from './stats/stats.service';
     StatsService,
     StatsProjectorHandler,
     StatsRolloverService,
+    FeedProjectorHandler,
     {
       provide: DOMAIN_EVENT_HANDLERS,
       // Handler order matters:
@@ -41,19 +44,22 @@ import { StatsService } from './stats/stats.service';
       // 2. ProgressionHandler — reads streak for bonus calculation
       // 3. AchievementEvaluationHandler — evaluates achievements after progression
       // 4. StatsProjectorHandler — rebuilds stats read model
-      // 5. RealtimePushHandler (LAST) — emits post-commit; stats are already up to date
+      // 5. FeedProjectorHandler — fan-out feed entries after progression data is settled
+      // 6. RealtimePushHandler (LAST) — emits post-commit; stats are already up to date
       useFactory: (
         streak: StreakHandler,
         progression: ProgressionHandler,
         achievement: AchievementEvaluationHandler,
         statsProjector: StatsProjectorHandler,
+        feedProjector: FeedProjectorHandler,
         realtimePush: RealtimePushHandler,
-      ) => [streak, progression, achievement, statsProjector, realtimePush],
+      ) => [streak, progression, achievement, statsProjector, feedProjector, realtimePush],
       inject: [
         StreakHandler,
         ProgressionHandler,
         AchievementEvaluationHandler,
         StatsProjectorHandler,
+        FeedProjectorHandler,
         RealtimePushHandler,
       ],
     },

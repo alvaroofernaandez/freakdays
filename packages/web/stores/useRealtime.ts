@@ -1,10 +1,15 @@
 import { defineStore } from 'pinia';
 import type { Socket } from 'socket.io-client';
 import { WIRE_EVENTS } from '@freakdays/domain';
-import type { LevelUpPayload, AchievementUnlockedPayload } from '@freakdays/domain';
+import type {
+  LevelUpPayload,
+  AchievementUnlockedPayload,
+  FeedEntryAddedPayload,
+} from '@freakdays/domain';
 
 import { useAuthStore } from './auth';
 import { useCelebrationsStore } from './useCelebrations';
+import { useFeedStore } from './useFeed';
 import { useSoundStore } from './useSound';
 import { useStatsStore } from './useStatsStore';
 
@@ -77,6 +82,12 @@ export const useRealtimeStore = defineStore('realtime', {
           });
       };
 
+      const onFeedEntryAdded = (payload: unknown) => {
+        const p = payload as FeedEntryAddedPayload;
+        if (typeof p?.id !== 'string') return;
+        useFeedStore().prepend(p);
+      };
+
       // Store listener refs for cleanup
       const listeners: Record<string, Listener> = {
         connect: onConnect as Listener,
@@ -84,6 +95,7 @@ export const useRealtimeStore = defineStore('realtime', {
         [WIRE_EVENTS.LEVEL_UP]: onLevelUp as Listener,
         [WIRE_EVENTS.ACHIEVEMENT_UNLOCKED]: onAchievementUnlocked as Listener,
         [WIRE_EVENTS.STATS_UPDATED]: onStatsUpdated as Listener,
+        [WIRE_EVENTS.FEED_ENTRY_ADDED]: onFeedEntryAdded as Listener,
       };
 
       (socket as unknown as { _realtimeListeners?: Record<string, Listener> })._realtimeListeners =

@@ -16,6 +16,7 @@ export interface UserProfile {
   location: string | null;
   website: string | null;
   socialLinks: Record<string, string>;
+  leaderboardOptIn?: boolean;
 }
 
 interface SignedUploadUrlResponse {

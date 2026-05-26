@@ -26,7 +26,9 @@ import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { AnimeModule } from './anime/anime.module';
+import { FeedModule } from './feed/feed.module';
 import { GamificationModule } from './gamification/gamification.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 
@@ -61,7 +63,9 @@ import { WorkoutsModule } from './workouts/workouts.module';
     }),
     CommonModule,
     EventsModule,
+    FeedModule,
     GamificationModule,
+    LeaderboardModule,
     RealtimeModule,
     AuthModule,
     CalendarModule,

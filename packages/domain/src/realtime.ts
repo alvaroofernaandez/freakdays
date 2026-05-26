@@ -8,6 +8,7 @@ export const WIRE_EVENTS = {
   LEVEL_UP: 'level_up',
   ACHIEVEMENT_UNLOCKED: 'achievement_unlocked',
   STATS_UPDATED: 'stats_updated',
+  FEED_ENTRY_ADDED: 'feed_entry_added',
 } as const;
 
 export type WireEventName = (typeof WIRE_EVENTS)[keyof typeof WIRE_EVENTS];
@@ -28,8 +29,19 @@ export interface AchievementUnlockedPayload {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface StatsUpdatedPayload {}
 
+export interface FeedEntryAddedPayload {
+  readonly id: string;
+  readonly partyId: string;
+  readonly type: string;
+  readonly actorUserId: string;
+  readonly actorName: string | null;
+  readonly payload: Record<string, unknown>;
+  readonly createdAt: string;
+}
+
 export interface WireEventPayloadMap {
   readonly level_up: LevelUpPayload;
   readonly achievement_unlocked: AchievementUnlockedPayload;
   readonly stats_updated: StatsUpdatedPayload;
+  readonly feed_entry_added: FeedEntryAddedPayload;
 }

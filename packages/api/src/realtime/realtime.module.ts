@@ -11,7 +11,10 @@ import { RealtimePushHandler } from './realtime-push.handler';
  * It does NOT provide DOMAIN_EVENT_HANDLERS to avoid last-wins clobbering
  * with GamificationModule's authoritative provider. Instead, it exports
  * RealtimePushHandler so GamificationModule can inject it into its existing
- * useFactory array as the 5th (last) handler.
+ * useFactory array as the last handler.
+ *
+ * CommonModule provides PrismaService, which the RealtimeGateway uses to
+ * join party rooms on socket connect (server-side membership verification).
  */
 @Module({
   imports: [AuthModule, EventsModule, CommonModule],

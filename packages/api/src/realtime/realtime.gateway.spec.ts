@@ -32,16 +32,25 @@ const mockServer = {
   emit: jest.fn(),
 };
 
+// Mock PrismaService for party room membership
+const makePrisma = (partyMemberships: Array<{ partyId: string }> = []) => ({
+  partyMember: {
+    findMany: jest.fn().mockResolvedValue(partyMemberships),
+  },
+});
+
 describe('RealtimeGateway — handshake auth + room isolation', () => {
   let gateway: RealtimeGateway;
   let strategy: MockStrategy;
+  let prisma: ReturnType<typeof makePrisma>;
 
   beforeEach(() => {
     strategy = makeStrategy({ sub: 'user-abc', org_id: undefined });
-     
-    gateway = new RealtimeGateway(strategy as any);
+    prisma = makePrisma();
+
+    gateway = new RealtimeGateway(strategy as any, prisma as any);
     // Assign mock server
-     
+
     (gateway as any).server = mockServer;
     jest.clearAllMocks();
   });
@@ -50,10 +59,10 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
     const socket = makeSocket('valid.jwt.token');
     strategy.validateToken.mockResolvedValue({ sub: 'user-abc' });
     // Reassign strategy after clearAllMocks
-     
-    (gateway as any).strategy = strategy;
 
-     
+    (gateway as any).strategy = strategy;
+    (gateway as any).prisma = makePrisma();
+
     await gateway.handleConnection(socket as any);
 
     expect(socket.disconnect).not.toHaveBeenCalled();
@@ -64,10 +73,10 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
   it('valid token with org_id → joins user:{sub} AND org:{orgId}', async () => {
     const socket = makeSocket('valid.jwt.token');
     strategy.validateToken.mockResolvedValue({ sub: 'user-abc', org_id: 'org-123' });
-     
-    (gateway as any).strategy = strategy;
 
-     
+    (gateway as any).strategy = strategy;
+    (gateway as any).prisma = makePrisma();
+
     await gateway.handleConnection(socket as any);
 
     expect(socket.join).toHaveBeenCalledWith('user:user-abc');
@@ -79,10 +88,10 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
   it('invalid token → disconnect called, no room joined', async () => {
     const socket = makeSocket('bad.token');
     strategy.validateToken.mockRejectedValue(new Error('Invalid token'));
-     
-    (gateway as any).strategy = strategy;
 
-     
+    (gateway as any).strategy = strategy;
+    (gateway as any).prisma = makePrisma();
+
     await gateway.handleConnection(socket as any);
 
     expect(socket.disconnect).toHaveBeenCalledWith(true);
@@ -91,10 +100,10 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
 
   it('missing token → disconnect called immediately, no room joined', async () => {
     const socket = makeSocket(undefined, undefined);
-     
-    (gateway as any).strategy = strategy;
 
-     
+    (gateway as any).strategy = strategy;
+    (gateway as any).prisma = makePrisma();
+
     await gateway.handleConnection(socket as any);
 
     expect(socket.disconnect).toHaveBeenCalledWith(true);
@@ -105,10 +114,10 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
   it('token in Authorization header (Bearer prefix) is accepted', async () => {
     const socket = makeSocket(undefined, 'Bearer header.jwt.token');
     strategy.validateToken.mockResolvedValue({ sub: 'user-xyz' });
-     
-    (gateway as any).strategy = strategy;
 
-     
+    (gateway as any).strategy = strategy;
+    (gateway as any).prisma = makePrisma();
+
     await gateway.handleConnection(socket as any);
 
     expect(strategy.validateToken).toHaveBeenCalledWith('header.jwt.token');
@@ -116,7 +125,6 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
   });
 
   it('room isolation: emitToUser for userA does NOT emit to userB room', () => {
-     
     (gateway as any).server = mockServer;
     jest.clearAllMocks();
     // Reset the to mock to return the server for chaining
@@ -132,7 +140,37 @@ describe('RealtimeGateway — handshake auth + room isolation', () => {
 
   it('handleDisconnect does not throw', () => {
     const socket = makeSocket('valid.jwt.token');
-     
+
     expect(() => gateway.handleDisconnect(socket as any)).not.toThrow();
+  });
+
+  // ─── S6 — Party room tests ──────────────────────────────────────────────────
+
+  it('user in parties P1+P3 → socket joins party:P1 and party:P3, NOT party:P2', async () => {
+    const socket = makeSocket('valid.jwt.token');
+    strategy.validateToken.mockResolvedValue({ sub: 'user-u1' });
+
+    (gateway as any).strategy = strategy;
+    (gateway as any).prisma = makePrisma([{ partyId: 'P1' }, { partyId: 'P3' }]);
+
+    await gateway.handleConnection(socket as any);
+
+    expect(socket.join).toHaveBeenCalledWith('party:P1');
+    expect(socket.join).toHaveBeenCalledWith('party:P3');
+    const calls = (socket.join as jest.Mock).mock.calls as string[][];
+    const partyP2Calls = calls.filter((args) => args[0] === 'party:P2');
+    expect(partyP2Calls).toHaveLength(0);
+  });
+
+  it('emitToParty(P1, FEED_ENTRY_ADDED, payload) → server.to called with party:P1', () => {
+    (gateway as any).server = mockServer;
+    mockServer.to.mockReturnThis();
+    jest.clearAllMocks();
+    mockServer.to.mockReturnThis();
+
+    gateway.emitToParty('P1', 'feed_entry_added', { id: 'fe-1' });
+
+    expect(mockServer.to).toHaveBeenCalledWith('party:P1');
+    expect(mockServer.emit).toHaveBeenCalledWith('feed_entry_added', { id: 'fe-1' });
   });
 });

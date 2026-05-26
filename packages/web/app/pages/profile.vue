@@ -17,7 +17,8 @@ import { useProfile } from '@/composables/useProfile';
 import { useProfilePage } from '@/composables/useProfilePage';
 import { useToast } from '@/composables/useToast';
 import { Check, LogOut, Power, RefreshCw, Settings, Trash2, Upload, User } from 'lucide-vue-next';
-import { toRef } from 'vue';
+import { ref, toRef, watch } from 'vue';
+import { useApiClient } from '@/composables/useApiClient';
 import { useModulesStore } from '~~/stores/modules';
 
 const modulesStore = useModulesStore();
@@ -63,6 +64,40 @@ useSeoMeta({
   title: 'Tu perfil',
   description: 'Gestiona tu perfil y configuración en FreakDays',
 });
+
+// ─── Leaderboard opt-in ───────────────────────────────────────────────────────
+const leaderboardOptIn = ref<boolean>(false);
+const leaderboardOptInSaving = ref(false);
+
+// Sync from profile when it loads
+watch(
+  () => profile.value,
+  (p) => {
+    if (p) {
+      leaderboardOptIn.value = Boolean(p.leaderboardOptIn);
+    }
+  },
+  { immediate: true },
+);
+
+async function handleLeaderboardOptInToggle() {
+  leaderboardOptInSaving.value = true;
+  try {
+    const { patch } = useApiClient();
+    await patch('/v1/profile/me', { leaderboardOptIn: leaderboardOptIn.value });
+    toast.success(
+      leaderboardOptIn.value
+        ? 'Tu perfil aparece en el leaderboard global.'
+        : 'Tu perfil ya no aparece en el leaderboard global.',
+    );
+  } catch {
+    // Revert on error
+    leaderboardOptIn.value = !leaderboardOptIn.value;
+    toast.error('No se pudo actualizar la preferencia. Intenta de nuevo.');
+  } finally {
+    leaderboardOptInSaving.value = false;
+  }
+}
 
 const uploadingBanner = toRef(profilePage, 'uploadingBanner');
 const bannerPreview = toRef(profilePage, 'bannerPreview');
@@ -336,6 +371,72 @@ onMounted(() => {
         :current-exp="expProgress.current"
         :needed-exp="expProgress.needed"
       />
+
+      <!-- Leaderboard opt-in card -->
+      <Card class="relative overflow-hidden rounded-none border-2 border-secondary/25 bg-card/60">
+        <span
+          class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-secondary/35 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-secondary/35 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-secondary/35 z-10"
+          aria-hidden="true"
+        />
+        <span
+          class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-secondary/35 z-10"
+          aria-hidden="true"
+        />
+        <CardHeader>
+          <CardTitle class="flex items-center gap-2 text-base">
+            <span class="font-pixel text-[9px] text-secondary uppercase tracking-wider"
+              >▸ LEADERBOARD GLOBAL</span
+            >
+          </CardTitle>
+          <CardDescription>
+            Elige si tu perfil aparece en el ranking global de todos los jugadores.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <label
+            class="flex items-center justify-between gap-4 cursor-pointer group"
+            :class="leaderboardOptInSaving ? 'opacity-60 pointer-events-none' : ''"
+          >
+            <div class="space-y-0.5">
+              <p class="text-sm font-medium leading-none">Mostrar en el leaderboard global</p>
+              <p class="text-xs text-muted-foreground">
+                <template v-if="leaderboardOptIn">
+                  Tu perfil aparece en el leaderboard global.
+                </template>
+                <template v-else> Tu perfil no aparece en el leaderboard global. </template>
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="leaderboardOptIn"
+              :aria-label="
+                leaderboardOptIn ? 'Desactivar leaderboard global' : 'Activar leaderboard global'
+              "
+              :disabled="leaderboardOptInSaving"
+              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed"
+              :class="leaderboardOptIn ? 'bg-secondary' : 'bg-input'"
+              @click="
+                leaderboardOptIn = !leaderboardOptIn;
+                handleLeaderboardOptInToggle();
+              "
+            >
+              <span
+                class="pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform"
+                :class="leaderboardOptIn ? 'translate-x-5' : 'translate-x-0'"
+              />
+            </button>
+          </label>
+        </CardContent>
+      </Card>
 
       <Card class="relative overflow-hidden rounded-none border-2 border-primary/20 bg-card/60">
         <span

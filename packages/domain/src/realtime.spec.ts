@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { WIRE_EVENTS } from './realtime';
-import type { LevelUpPayload, AchievementUnlockedPayload, StatsUpdatedPayload, WireEventPayloadMap } from './realtime';
+import type { LevelUpPayload, AchievementUnlockedPayload, StatsUpdatedPayload, FeedEntryAddedPayload, WireEventPayloadMap } from './realtime';
 
 describe('WIRE_EVENTS', () => {
   it('has level_up key with value "level_up"', () => {
@@ -16,12 +16,16 @@ describe('WIRE_EVENTS', () => {
     expect(WIRE_EVENTS.STATS_UPDATED).toBe('stats_updated');
   });
 
-  it('has exactly three keys', () => {
-    expect(Object.keys(WIRE_EVENTS)).toHaveLength(3);
+  it('has FEED_ENTRY_ADDED key with value "feed_entry_added"', () => {
+    expect(WIRE_EVENTS.FEED_ENTRY_ADDED).toBe('feed_entry_added');
+  });
+
+  it('has exactly four keys', () => {
+    expect(Object.keys(WIRE_EVENTS)).toHaveLength(4);
   });
 
   it('values are string literals (const-as-const)', () => {
-    const keys: (keyof typeof WIRE_EVENTS)[] = ['LEVEL_UP', 'ACHIEVEMENT_UNLOCKED', 'STATS_UPDATED'];
+    const keys: (keyof typeof WIRE_EVENTS)[] = ['LEVEL_UP', 'ACHIEVEMENT_UNLOCKED', 'STATS_UPDATED', 'FEED_ENTRY_ADDED'];
     for (const key of keys) {
       expect(typeof WIRE_EVENTS[key]).toBe('string');
     }
@@ -74,10 +78,37 @@ describe('Payload interfaces (compile-time contracts)', () => {
       level_up: { previousLevel: 1, newLevel: 2, totalExp: 100 },
       achievement_unlocked: { code: 'X', name: 'Y', description: 'Z' },
       stats_updated: {},
+      feed_entry_added: {
+        id: 'fe-1',
+        partyId: 'p-1',
+        type: 'level.up',
+        actorUserId: 'u-1',
+        actorName: 'Alice',
+        payload: {},
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
     };
 
     expect(map[WIRE_EVENTS.LEVEL_UP].newLevel).toBe(2);
     expect(map[WIRE_EVENTS.ACHIEVEMENT_UNLOCKED].code).toBe('X');
     expect(map[WIRE_EVENTS.STATS_UPDATED]).toStrictEqual({});
+    expect(map[WIRE_EVENTS.FEED_ENTRY_ADDED].type).toBe('level.up');
+  });
+});
+
+describe('FeedEntryAddedPayload (compile-time contract)', () => {
+  it('FeedEntryAddedPayload satisfies required shape', () => {
+    const payload = {
+      id: 'fe-1',
+      partyId: 'p-1',
+      type: 'level.up',
+      actorUserId: 'u-1',
+      actorName: null,
+      payload: { newLevel: 2 },
+      createdAt: '2026-01-01T00:00:00.000Z',
+    } satisfies FeedEntryAddedPayload;
+
+    expect(payload.id).toBe('fe-1');
+    expect(payload.actorName).toBeNull();
   });
 });

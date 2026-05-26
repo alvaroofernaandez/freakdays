@@ -27,6 +27,7 @@ const mockProfile = {
   location: null,
   website: null,
   socialLinks: {},
+  leaderboardOptIn: false,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -128,6 +129,70 @@ describe('ProfileService', () => {
           data: expect.objectContaining({ totalExp: expectedTotal, level: expectedLevel }),
         }),
       );
+    });
+  });
+
+  describe('updateMyProfile — leaderboardOptIn', () => {
+    it('PATCH: persists leaderboardOptIn=true and returns it in the view', async () => {
+      const updated = { ...mockProfile, leaderboardOptIn: true };
+      mockPrisma.profile.update.mockResolvedValue(updated);
+
+      const result = await service.updateMyProfile('clerk-u1', { leaderboardOptIn: true });
+
+      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ leaderboardOptIn: true }),
+        }),
+      );
+      expect(result.leaderboardOptIn).toBe(true);
+    });
+
+    it('PATCH: persists leaderboardOptIn=false and returns it in the view', async () => {
+      const updated = { ...mockProfile, leaderboardOptIn: false };
+      mockPrisma.profile.update.mockResolvedValue(updated);
+
+      const result = await service.updateMyProfile('clerk-u1', { leaderboardOptIn: false });
+
+      expect(mockPrisma.profile.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ leaderboardOptIn: false }),
+        }),
+      );
+      expect(result.leaderboardOptIn).toBe(false);
+    });
+
+    it('partial update does not clobber other fields when only leaderboardOptIn is sent', async () => {
+      const updated = { ...mockProfile, username: 'testuser', leaderboardOptIn: true };
+      mockPrisma.profile.update.mockResolvedValue(updated);
+
+      const result = await service.updateMyProfile('clerk-u1', { leaderboardOptIn: true });
+
+      // Only leaderboardOptIn in data — no username override
+      const updateCall = mockPrisma.profile.update.mock.calls[0] as [
+        { data: Record<string, unknown> },
+      ];
+      expect(updateCall[0].data).not.toHaveProperty('username');
+      expect(result.username).toBe('testuser');
+    });
+
+    it('omitting leaderboardOptIn from input does not set it in updateData', async () => {
+      mockPrisma.profile.update.mockResolvedValue(mockProfile);
+
+      await service.updateMyProfile('clerk-u1', { username: 'newname' });
+
+      const updateCall = mockPrisma.profile.update.mock.calls[0] as [
+        { data: Record<string, unknown> },
+      ];
+      expect(updateCall[0].data).not.toHaveProperty('leaderboardOptIn');
+    });
+
+    it('ProfileView from getMyProfile includes leaderboardOptIn field', async () => {
+      mockPrisma.profile.findUnique
+        .mockResolvedValueOnce({ ...mockProfile, lastLoginDate: null }) // touchDailyLogin
+        .mockResolvedValueOnce({ ...mockProfile, leaderboardOptIn: true }); // ensureProfile (findUnique)
+
+      const result = await service.getMyProfile('clerk-u1');
+      expect(Object.prototype.hasOwnProperty.call(result, 'leaderboardOptIn')).toBe(true);
     });
   });
 

@@ -8,6 +8,7 @@ import {
 import type { Server, Socket } from 'socket.io';
 
 import { ClerkJwtStrategy } from '../auth/strategies/clerk-jwt.strategy';
+import { PrismaService } from '../common/prisma/prisma.service';
 
 @WebSocketGateway({
   cors: {
@@ -24,7 +25,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   private readonly logger = new Logger(RealtimeGateway.name);
 
-  constructor(private readonly strategy: ClerkJwtStrategy) {}
+  constructor(
+    private readonly strategy: ClerkJwtStrategy,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async handleConnection(client: Socket): Promise<void> {
     const token = this.extractToken(client);
@@ -47,8 +51,18 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
         await client.join(`org:${orgId}`);
       }
 
+      // Join verified party rooms for this user
+      const memberships = await this.prisma.partyMember.findMany({
+        where: { userId },
+        select: { partyId: true },
+      });
+
+      for (const { partyId } of memberships) {
+        await client.join(`party:${partyId}`);
+      }
+
       this.logger.debug(
-        `RealtimeGateway: socket=${client.id} authenticated userId=${userId} orgId=${orgId}`,
+        `RealtimeGateway: socket=${client.id} authenticated userId=${userId} orgId=${orgId} parties=${memberships.length}`,
       );
     } catch {
       this.logger.debug(
@@ -64,6 +78,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   emitToUser(userId: string, event: string, payload: unknown): void {
     this.server.to(`user:${userId}`).emit(event, payload);
+  }
+
+  emitToParty(partyId: string, event: string, payload: unknown): void {
+    this.server.to(`party:${partyId}`).emit(event, payload);
   }
 
   private extractToken(client: Socket): string | null {

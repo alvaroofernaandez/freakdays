@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import ArcadeFeed from '@/components/party/ArcadeFeed.vue';
+import ArcadeScoreboard from '@/components/party/ArcadeScoreboard.vue';
 import CreateListModal from '@/components/party/lists/CreateListModal.vue'; // To create
 import PartyAnimeList from '@/components/party/lists/PartyAnimeList.vue'; // To create
 import SharedListsOverview from '@/components/party/lists/SharedListsOverview.vue'; // To create
@@ -14,6 +16,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useFeedStore } from '~~/stores/useFeed';
+import { useLeaderboardStore } from '~~/stores/useLeaderboard';
 import { useParties } from '@/composables/useParties';
 import { usePartyLists } from '@/composables/usePartyLists';
 import { ArrowLeft, Layers, Plus, Users } from 'lucide-vue-next';
@@ -27,6 +31,8 @@ const partyId = route.params.id as string;
 
 const { fetchPartyById } = useParties();
 const { lists, fetchLists, createList } = usePartyLists(partyId);
+const feedStore = useFeedStore();
+const leaderboardStore = useLeaderboardStore();
 
 const party = ref<Party | null>(null);
 const loading = ref(true);
@@ -43,7 +49,15 @@ onMounted(async () => {
       return;
     }
     party.value = p;
-    await fetchLists();
+    await Promise.all([
+      fetchLists(),
+      feedStore.fetchFeed(partyId).catch(() => {
+        /* best-effort */
+      }),
+      leaderboardStore.fetchPartyLeaderboard(partyId).catch(() => {
+        /* best-effort */
+      }),
+    ]);
   } finally {
     loading.value = false;
   }
@@ -343,5 +357,22 @@ async function handleCreateList(data: { name: string; type: SharedListType }) {
       @close="isCreateListOpen = false"
       @submit="handleCreateList"
     />
+
+    <!-- Leaderboard + Feed -->
+    <div v-if="party" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+      <div>
+        <h2 class="text-lg font-bold mb-3">Clasificación</h2>
+        <ArcadeScoreboard
+          :rows="leaderboardStore.partyRows"
+          :your-rank="leaderboardStore.yourRank"
+          :total="leaderboardStore.total"
+          :page="leaderboardStore.page"
+          :loading="leaderboardStore.loading"
+          @prev-page="leaderboardStore.prevPage('party', partyId)"
+          @next-page="leaderboardStore.nextPage('party', partyId)"
+        />
+      </div>
+      <ArcadeFeed :party-id="partyId" />
+    </div>
   </div>
 </template>
