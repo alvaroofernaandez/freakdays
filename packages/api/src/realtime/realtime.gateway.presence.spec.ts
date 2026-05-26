@@ -45,9 +45,10 @@ const makePrisma = (parties: Array<{ partyId: string }> = []) => ({
 const makePresence = (
   connectResult = { isOnline: true, transition: true },
   disconnectResult = { isOnline: false, transition: true },
-): jest.Mocked<Pick<PresenceService, 'onConnect' | 'onDisconnect'>> => ({
+): jest.Mocked<Pick<PresenceService, 'onConnect' | 'onDisconnect' | 'touch'>> => ({
   onConnect: jest.fn().mockResolvedValue(connectResult),
   onDisconnect: jest.fn().mockResolvedValue(disconnectResult),
+  touch: jest.fn().mockResolvedValue(undefined),
 });
 
 const makeFriendship = (
@@ -246,6 +247,71 @@ describe('RealtimeGateway — presence hooks', () => {
       );
 
       expect(presence.onDisconnect).not.toHaveBeenCalled();
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // TTL heartbeat (Finding 2)
+  // ──────────────────────────────────────────────────────────────────────────
+
+  describe('TTL heartbeat', () => {
+    it('handleConnection schedules a heartbeat interval that calls presence.touch', async () => {
+      jest.useFakeTimers();
+
+      const socket = makeSocket('valid.token', 'socket-hb');
+      strategy.validateToken.mockResolvedValue({ sub: 'user-hb' });
+      presence.onConnect.mockResolvedValue({ isOnline: true, transition: false });
+      (gateway as unknown as { strategy: typeof strategy }).strategy = strategy;
+      (gateway as unknown as { prisma: typeof prisma }).prisma = makePrisma();
+      (gateway as unknown as { presenceService: typeof presence }).presenceService = presence;
+      (gateway as unknown as { friendshipService: typeof friendship }).friendshipService =
+        friendship;
+
+      await gateway.handleConnection(
+        socket as unknown as Parameters<typeof gateway.handleConnection>[0],
+      );
+
+      // Advance time enough to trigger the first heartbeat tick (≤45s = TTL/2 for default 90s)
+      jest.advanceTimersByTime(50_000);
+
+      expect(presence.touch).toHaveBeenCalledWith('user-hb', 'socket-hb');
+
+      jest.useRealTimers();
+    });
+
+    it('handleDisconnect clears the heartbeat interval so touch stops after disconnect', async () => {
+      jest.useFakeTimers();
+
+      const socket = makeSocket('valid.token', 'socket-hb2');
+      socket.data['userId'] = 'user-hb2';
+      strategy.validateToken.mockResolvedValue({ sub: 'user-hb2' });
+      presence.onConnect.mockResolvedValue({ isOnline: true, transition: false });
+      presence.onDisconnect.mockResolvedValue({ isOnline: false, transition: true });
+      friendship.listFriends.mockResolvedValue([]);
+      (gateway as unknown as { strategy: typeof strategy }).strategy = strategy;
+      (gateway as unknown as { prisma: typeof prisma }).prisma = makePrisma();
+      (gateway as unknown as { presenceService: typeof presence }).presenceService = presence;
+      (gateway as unknown as { friendshipService: typeof friendship }).friendshipService =
+        friendship;
+      (gateway as unknown as { server: typeof mockServer }).server = mockServer;
+      mockServer.to.mockReturnThis();
+
+      await gateway.handleConnection(
+        socket as unknown as Parameters<typeof gateway.handleConnection>[0],
+      );
+
+      await gateway.handleDisconnect(
+        socket as unknown as Parameters<typeof gateway.handleDisconnect>[0],
+      );
+
+      presence.touch.mockClear();
+
+      // Advance well past heartbeat interval — touch must NOT fire after disconnect
+      jest.advanceTimersByTime(120_000);
+
+      expect(presence.touch).not.toHaveBeenCalled();
+
+      jest.useRealTimers();
     });
   });
 });

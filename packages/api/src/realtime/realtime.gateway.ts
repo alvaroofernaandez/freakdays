@@ -16,6 +16,17 @@ import { FriendshipService } from '../social/friendship.service';
 import { PresenceService } from './presence.service';
 import type { PresenceTransitionResult } from './presence.service';
 
+/**
+ * Interval at which a connected socket refreshes the presence TTL.
+ * Set to TTL/2 so a live session never expires, but a crashed pod lets the
+ * key lapse within one full TTL period.
+ * Defaults to 45s (half of the default PRESENCE_TTL=90s).
+ */
+const PRESENCE_HEARTBEAT_INTERVAL_MS = parseInt(
+  process.env.PRESENCE_HEARTBEAT_INTERVAL_MS ?? '45000',
+  10,
+);
+
 @WebSocketGateway({
   cors: {
     origin: process.env.CORS_ORIGINS
@@ -30,6 +41,9 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   server!: Server;
 
   private readonly logger = new Logger(RealtimeGateway.name);
+
+  /** Per-socket heartbeat timer handles, keyed by socketId. */
+  private readonly heartbeatTimers = new Map<string, ReturnType<typeof setInterval>>();
 
   constructor(
     private readonly strategy: ClerkJwtStrategy,
@@ -78,6 +92,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       if (result.transition) {
         await this.emitPresenceChanged(userId, true);
       }
+
+      // TTL heartbeat: periodically refresh the conn-key TTL so a live session
+      // never auto-expires. The interval is cleared in handleDisconnect.
+      const socketId = client.id;
+      const timer = setInterval(() => {
+        void this.presenceService.touch(userId, socketId);
+      }, PRESENCE_HEARTBEAT_INTERVAL_MS);
+      this.heartbeatTimers.set(socketId, timer);
     } catch {
       this.logger.debug(
         `RealtimeGateway: connection rejected — token validation failed (socket=${client.id})`,
@@ -88,6 +110,13 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   async handleDisconnect(client: Socket): Promise<void> {
     this.logger.debug(`RealtimeGateway: socket=${client.id} disconnected`);
+
+    // Clear the per-socket heartbeat timer first so touch() stops immediately.
+    const timer = this.heartbeatTimers.get(client.id);
+    if (timer !== undefined) {
+      clearInterval(timer);
+      this.heartbeatTimers.delete(client.id);
+    }
 
     const userId = client.data?.userId as string | undefined;
     if (!userId) {
